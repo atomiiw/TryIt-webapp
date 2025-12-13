@@ -7,7 +7,6 @@ import type { SizeGuide } from '../utils/sizeCollector'
 import { analyzePersonPhoto } from '../utils/personAnalyzer'
 import { identifySize } from '../utils/sizeIdentifier'
 import { generateTryOnImage, type FitType as TryOnFitType } from '../utils/tryOnService'
-import { chooseWatermark, getWatermarkLogoPath } from '../utils/chooseWatermark'
 import './ResultsSection.css'
 
 interface ResultsSectionProps {
@@ -460,61 +459,17 @@ function ResultsSection({ userData, isVisible }: ResultsSectionProps) {
     }
   }
 
-  // Add watermark to image and return as blob
-  // Automatically chooses white or black logo based on background brightness
-  const addWatermarkToImage = async (imageSrc: string): Promise<Blob> => {
-    // Determine which watermark color to use based on the TryIt logo region
-    const watermarkColor = await chooseWatermark(imageSrc)
-    const logoPath = getWatermarkLogoPath(watermarkColor)
-
-    return new Promise((resolve, reject) => {
-      const img = new Image()
-      img.crossOrigin = 'anonymous'
-      img.onload = () => {
-        // Load logo image
-        const logo = new Image()
-        logo.crossOrigin = 'anonymous'
-        logo.onload = () => {
-          const canvas = document.createElement('canvas')
-          const ctx = canvas.getContext('2d')
-          if (!ctx) {
-            reject(new Error('Could not get canvas context'))
-            return
-          }
-
-          canvas.width = img.width
-          canvas.height = img.height
-
-          // Draw the original image
-          ctx.drawImage(img, 0, 0)
-
-          // Fixed logo size in pixels
-          const logoHeight = 100
-          const logoWidth = (logo.width / logo.height) * logoHeight
-
-          // Position: bottom right with 40px margin
-          const logoX = canvas.width - logoWidth - 40
-          const logoY = canvas.height - logoHeight - 40
-
-          // Draw logo with 60% opacity
-          ctx.globalAlpha = 0.6
-          ctx.drawImage(logo, logoX, logoY, logoWidth, logoHeight)
-          ctx.globalAlpha = 1
-
-          canvas.toBlob((blob) => {
-            if (blob) {
-              resolve(blob)
-            } else {
-              reject(new Error('Could not create blob'))
-            }
-          }, 'image/png')
-        }
-        logo.onerror = () => reject(new Error('Could not load logo'))
-        logo.src = logoPath
-      }
-      img.onerror = () => reject(new Error('Could not load image'))
-      img.src = imageSrc
-    })
+  // Convert data URL to blob
+  const dataUrlToBlob = (dataUrl: string): Blob => {
+    const arr = dataUrl.split(',')
+    const mime = arr[0].match(/:(.*?);/)?.[1] || 'image/png'
+    const bstr = atob(arr[1])
+    let n = bstr.length
+    const u8arr = new Uint8Array(n)
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n)
+    }
+    return new Blob([u8arr], { type: mime })
   }
 
   // Share image with native share API
@@ -524,8 +479,9 @@ function ResultsSection({ userData, isVisible }: ResultsSectionProps) {
 
     setSharingFit(fit)
     try {
-      const watermarkedBlob = await addWatermarkToImage(imageSrc)
-      const file = new File([watermarkedBlob], `tryit-${fit}-fit.png`, { type: 'image/png' })
+      // Image already has watermark from tryOnService, just convert to blob
+      const imageBlob = dataUrlToBlob(imageSrc)
+      const file = new File([imageBlob], `tryit-${fit}-fit.png`, { type: 'image/png' })
 
       if (navigator.share && navigator.canShare({ files: [file] })) {
         await navigator.share({
@@ -535,7 +491,7 @@ function ResultsSection({ userData, isVisible }: ResultsSectionProps) {
         })
       } else {
         // Fallback: download the image
-        const url = URL.createObjectURL(watermarkedBlob)
+        const url = URL.createObjectURL(imageBlob)
         const a = document.createElement('a')
         a.href = url
         a.download = `tryit-${fit}-fit.png`
