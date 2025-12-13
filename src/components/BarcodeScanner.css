@@ -1,0 +1,363 @@
+.barcode-scanner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 85%;
+  max-width: 300px;
+  margin: 0 auto;
+  min-height: 120px; /* Prevent layout shift between scanner and card */
+}
+
+/* Scanner window */
+.scanner-window {
+  width: 100%;
+  height: 85px;
+  background: #1a1a1a;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+
+.scanner-window.inactive {
+  cursor: pointer;
+}
+
+.scanner-window.camera-active {
+  height: 85px;
+  cursor: pointer;
+}
+
+/* Blurred barcode background */
+.scanner-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-size: cover;
+  background-position: center;
+  filter: blur(5px);
+  transform: scale(1.1); /* Hide blur edges */
+}
+
+.scanner-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #fff;
+  position: relative;
+  z-index: 1;
+}
+
+.barcode-icon {
+  width: 32px;
+  height: 32px;
+  opacity: 0.5;
+}
+
+.scanner-placeholder span {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Scanner video feed */
+.scanner-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Scan line animation */
+.scanner-line {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  height: 2px;
+  background: #ff3b30;
+  box-shadow: 0 0 8px rgba(255, 59, 48, 0.8);
+  animation: scan 1.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes scan {
+  0%, 100% {
+    top: 15%;
+  }
+  50% {
+    top: 85%;
+  }
+}
+
+/* Error state */
+.scanner-error {
+  color: #ff6b6b;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 300;
+}
+
+/* Barcode display in product card */
+.product-barcode {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  color: #999;
+  margin-bottom: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.scan-hint {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Barcode bars animation (fallback) */
+.scanner-bars {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 100%;
+  padding: 12px 20px;
+}
+
+.bar {
+  width: 3px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 1px;
+}
+
+/* Product card */
+.product-card {
+  width: 100%;
+  background: #f8f9fa;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.product-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #003087;
+}
+
+.product-badge {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+}
+
+.remove-btn {
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.7);
+  transition: color 0.2s;
+}
+
+.remove-btn:hover {
+  color: #fff;
+}
+
+.remove-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.product-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+}
+
+.product-thumbnail {
+  width: 56px;
+  height: 56px;
+  background: #e5e5e5;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.product-thumbnail svg {
+  width: 28px;
+  height: 28px;
+  color: #999;
+}
+
+.product-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.product-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.product-name {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: #222;
+  margin-bottom: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.product-sizes {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 400;
+  color: #444;
+}
+
+.product-logo {
+  width: 32px;
+  height: auto;
+  align-self: flex-end;
+  flex-shrink: 0;
+  margin-right: -4px;
+}
+
+.product-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.product-price {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 500;
+  color: #222;
+}
+
+.product-type {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 300;
+  color: #777;
+  text-transform: capitalize;
+}
+
+.product-sku {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 300;
+  color: #999;
+  font-variant-numeric: tabular-nums;
+}
+
+.scanner-hint {
+  position: absolute;
+  bottom: 8px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.8);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Analyzing state */
+.scanner-window.analyzing {
+  background: #001A57;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.analyzing-spinner {
+  width: 24px;
+  height: 24px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.analyzing-text {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  color: #fff;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Scan status display */
+.scan-status {
+  width: 100%;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.scan-status.scanning {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.scan-status.detected {
+  background: #e8f5e9;
+  color: #388e3c;
+}
+
+.scan-status.not_found {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.scan-status.error {
+  background: #ffebee;
+  color: #d32f2f;
+}

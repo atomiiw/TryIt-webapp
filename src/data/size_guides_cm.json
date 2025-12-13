@@ -1,0 +1,2297 @@
+{
+  "brands": [
+    {
+      "brand": "Duke",
+      "clothing_type": "shirt",
+      "gender": "unisex",
+      "sizes": [
+        {
+          "label": "XXS",
+          "measurements": {
+            "chest": {
+              "min": 73.7,
+              "max": 78.7
+            },
+            "waist": {
+              "min": 68.6,
+              "max": 73.7
+            }
+          }
+        },
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "min": 76.2,
+              "max": 81.3
+            },
+            "waist": {
+              "min": 71.1,
+              "max": 76.2
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 86.4,
+              "max": 91.4
+            },
+            "waist": {
+              "min": 76.2,
+              "max": 81.3
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 96.5,
+              "max": 101.6
+            },
+            "waist": {
+              "min": 81.3,
+              "max": 83.8
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 106.7,
+              "max": 111.8
+            },
+            "waist": {
+              "min": 83.8,
+              "max": 86.4
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 116.8,
+              "max": 121.9
+            },
+            "waist": {
+              "min": 91.4,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "min": 121.9,
+              "max": 127.0
+            },
+            "waist": {
+              "min": 101.6,
+              "max": 106.7
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "chest": {
+              "min": 127.0,
+              "max": 132.1
+            },
+            "waist": {
+              "min": 111.8,
+              "max": 121.9
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Duke",
+      "clothing_type": "pants",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "value": 73.7
+            },
+            "hips": {
+              "value": 99.1
+            },
+            "length": {
+              "value": 106.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "value": 81.3
+            },
+            "hips": {
+              "value": 104.1
+            },
+            "length": {
+              "value": 110.0
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "value": 88.9
+            },
+            "hips": {
+              "value": 111.8
+            },
+            "length": {
+              "value": 114.0
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "value": 96.5
+            },
+            "hips": {
+              "value": 119.4
+            },
+            "length": {
+              "value": 115.1
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "waist": {
+              "value": 104.1
+            },
+            "hips": {
+              "value": 127.0
+            },
+            "length": {
+              "value": 118.9
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "waist": {
+              "value": 111.8
+            },
+            "hips": {
+              "value": 132.1
+            },
+            "length": {
+              "value": 119.9
+            }
+          }
+        },
+        {
+          "label": "4XL",
+          "measurements": {
+            "waist": {
+              "value": 119.4
+            },
+            "hips": {
+              "value": 139.7
+            },
+            "length": {
+              "value": 126.5
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Duke",
+      "clothing_type": "pants",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "value": 68.1
+            },
+            "hips": {
+              "value": 84.1
+            },
+            "length": {
+              "value": 91.9
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "value": 70.1
+            },
+            "hips": {
+              "value": 87.9
+            },
+            "length": {
+              "value": 95.0
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "value": 71.9
+            },
+            "hips": {
+              "value": 91.9
+            },
+            "length": {
+              "value": 98.0
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "value": 73.9
+            },
+            "hips": {
+              "value": 96.0
+            },
+            "length": {
+              "value": 98.0
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "value": 80.0
+            },
+            "hips": {
+              "value": 108.0
+            },
+            "length": {
+              "value": 100.1
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "waist": {
+              "value": 81.0
+            },
+            "hips": {
+              "value": 116.1
+            },
+            "length": {
+              "value": 100.1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Duke",
+      "clothing_type": "jacket",
+      "gender": "unisex",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "width": {
+              "value": 50.8
+            },
+            "height": {
+              "value": 66.0
+            },
+            "sleeve": {
+              "value": 83.8
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "width": {
+              "value": 55.9
+            },
+            "height": {
+              "value": 68.6
+            },
+            "sleeve": {
+              "value": 86.4
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "width": {
+              "value": 61.0
+            },
+            "height": {
+              "value": 71.1
+            },
+            "sleeve": {
+              "value": 88.9
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "width": {
+              "value": 66.0
+            },
+            "height": {
+              "value": 73.7
+            },
+            "sleeve": {
+              "value": 91.4
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "width": {
+              "value": 71.1
+            },
+            "height": {
+              "value": 76.2
+            },
+            "sleeve": {
+              "value": 94.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "'47",
+      "clothing_type": "shirt",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "shoulder": {
+              "value": 41.9
+            },
+            "chest": {
+              "min": 88.9,
+              "max": 94.0
+            },
+            "waist": {
+              "min": 76.2,
+              "max": 78.7
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "shoulder": {
+              "value": 43.8
+            },
+            "chest": {
+              "min": 96.5,
+              "max": 101.6
+            },
+            "waist": {
+              "min": 81.3,
+              "max": 83.8
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "shoulder": {
+              "value": 45.7
+            },
+            "chest": {
+              "min": 104.1,
+              "max": 109.2
+            },
+            "waist": {
+              "min": 86.4,
+              "max": 88.9
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "shoulder": {
+              "value": 48.3
+            },
+            "chest": {
+              "min": 111.8,
+              "max": 116.8
+            },
+            "waist": {
+              "min": 91.4,
+              "max": 94.0
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "shoulder": {
+              "value": 50.8
+            },
+            "chest": {
+              "min": 119.4,
+              "max": 124.5
+            },
+            "waist": {
+              "min": 96.5,
+              "max": 101.6
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "'47",
+      "clothing_type": "pants",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 76.2,
+              "max": 78.7
+            },
+            "hips": {
+              "min": 86.4,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 81.3,
+              "max": 83.8
+            },
+            "hips": {
+              "min": 94.0,
+              "max": 99.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 86.4,
+              "max": 88.9
+            },
+            "hips": {
+              "min": 101.6,
+              "max": 106.0
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 91.4,
+              "max": 94.0
+            },
+            "hips": {
+              "min": 108.0,
+              "max": 111.8
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "waist": {
+              "min": 96.5,
+              "max": 101.6
+            },
+            "hips": {
+              "min": 114.3,
+              "max": 116.8
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "'47",
+      "clothing_type": "shirt",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "shoulder": {
+              "value": 36.8
+            },
+            "chest": {
+              "min": 87.6,
+              "max": 90.2
+            },
+            "waist": {
+              "min": 68.6,
+              "max": 72.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "shoulder": {
+              "value": 38.7
+            },
+            "chest": {
+              "min": 92.7,
+              "max": 95.2
+            },
+            "waist": {
+              "min": 73.7,
+              "max": 77.5
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "shoulder": {
+              "value": 41.3
+            },
+            "chest": {
+              "min": 99.1,
+              "max": 102.9
+            },
+            "waist": {
+              "min": 80.0,
+              "max": 83.8
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "shoulder": {
+              "value": 43.8
+            },
+            "chest": {
+              "min": 106.7,
+              "max": 111.8
+            },
+            "waist": {
+              "min": 87.6,
+              "max": 91.4
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "'47",
+      "clothing_type": "pants",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 68.6,
+              "max": 71.1
+            },
+            "hips": {
+              "min": 91.4,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 73.7,
+              "max": 76.2
+            },
+            "hips": {
+              "min": 99.1,
+              "max": 102.9
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 80.0,
+              "max": 83.8
+            },
+            "hips": {
+              "min": 106.0,
+              "max": 109.9
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 87.6,
+              "max": 91.4
+            },
+            "hips": {
+              "min": 113.0,
+              "max": 116.8
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "lululemon",
+      "clothing_type": "pants",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 76.2,
+              "max": 78.7
+            },
+            "hips": {
+              "min": 92.7,
+              "max": 95.2
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 81.3,
+              "max": 83.8
+            },
+            "hips": {
+              "min": 97.8,
+              "max": 100.3
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 86.4,
+              "max": 88.9
+            },
+            "hips": {
+              "min": 102.9,
+              "max": 105.4
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 91.4,
+              "max": 96.5
+            },
+            "hips": {
+              "min": 108.0,
+              "max": 113.0
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "waist": {
+              "min": 99.1,
+              "max": 101.6
+            },
+            "hips": {
+              "min": 115.6,
+              "max": 118.1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "lululemon",
+      "clothing_type": "shirt",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 94.0,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 99.1,
+              "max": 101.6
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 104.1,
+              "max": 106.7
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 109.2,
+              "max": 114.3
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "chest": {
+              "min": 116.8,
+              "max": 121.9
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Lululemon",
+      "clothing_type": "pants",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XXXS",
+          "measurements": {
+            "waist": 54.6,
+            "hip": 80.0
+          }
+        },
+        {
+          "label": "XXS",
+          "measurements": {
+            "waist": 58.4,
+            "hip": 83.8
+          }
+        },
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "min": 61.0,
+              "max": 63.5
+            },
+            "hip": {
+              "min": 86.4,
+              "max": 88.9
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 66.0,
+              "max": 68.6
+            },
+            "hip": {
+              "min": 91.4,
+              "max": 94.0
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 71.1,
+              "max": 73.7
+            },
+            "hip": {
+              "min": 96.5,
+              "max": 99.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 76.2,
+              "max": 80.0
+            },
+            "hip": {
+              "min": 101.6,
+              "max": 105.4
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": 83.8,
+            "hip": 109.2
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": 88.9,
+            "hip": 114.3
+          }
+        }
+      ]
+    },
+    {
+      "brand": "lululemon",
+      "clothing_type": "shirt",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "min": 78.7,
+              "max": 81.3
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 83.8,
+              "max": 86.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 94.0,
+              "max": 97.8
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 101.6,
+              "max": 106.7
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Lululemon",
+      "clothing_type": "dress",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XXXS",
+          "measurements": {
+            "chest": 72.4,
+            "waist": 54.6,
+            "hip": 80.0
+          }
+        },
+        {
+          "label": "XXS",
+          "measurements": {
+            "chest": 76.2,
+            "waist": 58.4,
+            "hip": 83.8
+          }
+        },
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "min": 78.7,
+              "max": 81.3
+            },
+            "waist": {
+              "min": 61.0,
+              "max": 63.5
+            },
+            "hip": {
+              "min": 86.4,
+              "max": 88.9
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 83.8,
+              "max": 86.4
+            },
+            "waist": {
+              "min": 66.0,
+              "max": 68.6
+            },
+            "hip": {
+              "min": 91.4,
+              "max": 94.0
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 91.4
+            },
+            "waist": {
+              "min": 71.1,
+              "max": 73.7
+            },
+            "hip": {
+              "min": 96.5,
+              "max": 99.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 94.0,
+              "max": 97.8
+            },
+            "waist": {
+              "min": 76.2,
+              "max": 80.0
+            },
+            "hip": {
+              "min": 101.6,
+              "max": 105.4
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": 101.6,
+            "waist": 83.8,
+            "hip": 109.2
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": 106.7,
+            "waist": 88.9,
+            "hip": 114.3
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Champion",
+      "clothing_type": "shirt",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": 81.3,
+            "waist": 66.0,
+            "hip": {
+              "min": 86.4,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 86.4,
+              "max": 91.4
+            },
+            "waist": {
+              "min": 71.1,
+              "max": 76.2
+            },
+            "hip": {
+              "min": 94.0,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 96.5,
+              "max": 101.6
+            },
+            "waist": {
+              "min": 81.3,
+              "max": 86.4
+            },
+            "hip": {
+              "min": 99.1,
+              "max": 104.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 106.7,
+              "max": 111.8
+            },
+            "waist": {
+              "min": 91.4,
+              "max": 96.5
+            },
+            "hip": {
+              "min": 106.7,
+              "max": 109.2
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 116.8,
+              "max": 121.9
+            },
+            "waist": {
+              "min": 101.6,
+              "max": 106.7
+            },
+            "hip": {
+              "min": 111.8,
+              "max": 116.8
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "min": 127.0,
+              "max": 132.1
+            },
+            "waist": {
+              "min": 111.8,
+              "max": 116.8
+            },
+            "hip": {
+              "min": 119.4,
+              "max": 124.5
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "chest": {
+              "min": 137.2,
+              "max": 142.2
+            },
+            "waist": {
+              "min": 121.9,
+              "max": 127.0
+            },
+            "hip": {
+              "min": 127.0,
+              "max": 132.1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Champion",
+      "clothing_type": "pants",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "min": 71.1,
+              "max": 76.2
+            },
+            "hip": {
+              "min": 86.4,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 76.2,
+              "max": 81.3
+            },
+            "hip": {
+              "min": 91.4,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 81.3,
+              "max": 88.9
+            },
+            "hip": {
+              "min": 96.5,
+              "max": 104.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 88.9,
+              "max": 99.1
+            },
+            "hip": {
+              "min": 104.1,
+              "max": 114.3
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 99.1,
+              "max": 111.8
+            },
+            "hip": {
+              "min": 114.3,
+              "max": 121.9
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "min": 111.8,
+              "max": 121.9
+            },
+            "hip": {
+              "min": 121.9,
+              "max": 132.1
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "waist": {
+              "min": 121.9,
+              "max": 134.6
+            },
+            "hip": {
+              "min": 132.1,
+              "max": 139.7
+            }
+          }
+        },
+        {
+          "label": "4XL",
+          "measurements": {
+            "waist": {
+              "min": 134.6,
+              "max": 144.8
+            },
+            "hip": {
+              "min": 139.7,
+              "max": 149.9
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Champion",
+      "clothing_type": "shirt",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "bust": {
+              "min": 81.3,
+              "max": 86.4
+            },
+            "waist": {
+              "min": 63.5,
+              "max": 68.6
+            },
+            "hip": {
+              "min": 88.9,
+              "max": 94.0
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "bust": {
+              "min": 86.4,
+              "max": 91.4
+            },
+            "waist": {
+              "min": 68.6,
+              "max": 73.7
+            },
+            "hip": {
+              "min": 94.0,
+              "max": 99.1
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "bust": {
+              "min": 91.4,
+              "max": 96.5
+            },
+            "waist": {
+              "min": 73.7,
+              "max": 78.7
+            },
+            "hip": {
+              "min": 99.1,
+              "max": 104.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "bust": {
+              "min": 96.5,
+              "max": 101.6
+            },
+            "waist": {
+              "min": 78.7,
+              "max": 83.8
+            },
+            "hip": {
+              "min": 104.1,
+              "max": 109.2
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "bust": {
+              "min": 101.6,
+              "max": 106.7
+            },
+            "waist": {
+              "min": 83.8,
+              "max": 88.9
+            },
+            "hip": {
+              "min": 109.2,
+              "max": 114.3
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "bust": {
+              "min": 106.7,
+              "max": 114.3
+            },
+            "waist": {
+              "min": 88.9,
+              "max": 96.5
+            },
+            "hip": {
+              "min": 114.3,
+              "max": 121.9
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Champion",
+      "clothing_type": "pants",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "min": 63.5,
+              "max": 68.6
+            },
+            "hip": {
+              "min": 88.9,
+              "max": 94.0
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 68.6,
+              "max": 73.7
+            },
+            "hip": {
+              "min": 94.0,
+              "max": 99.1
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 73.7,
+              "max": 78.7
+            },
+            "hip": {
+              "min": 99.1,
+              "max": 104.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 78.7,
+              "max": 83.8
+            },
+            "hip": {
+              "min": 104.1,
+              "max": 109.2
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 83.8,
+              "max": 88.9
+            },
+            "hip": {
+              "min": 109.2,
+              "max": 114.3
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "min": 88.9,
+              "max": 96.5
+            },
+            "hip": {
+              "min": 114.3,
+              "max": 121.9
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "League",
+      "clothing_type": "shirt",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 94.0
+            },
+            "waist": {
+              "min": 71.1,
+              "max": 76.2
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 96.5,
+              "max": 101.6
+            },
+            "waist": {
+              "min": 78.7,
+              "max": 83.8
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 104.1,
+              "max": 109.2
+            },
+            "waist": {
+              "min": 86.4,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 111.8,
+              "max": 116.8
+            },
+            "waist": {
+              "min": 94.0,
+              "max": 99.1
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "min": 119.4,
+              "max": 124.5
+            },
+            "waist": {
+              "min": 101.6,
+              "max": 106.7
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "League",
+      "clothing_type": "shirt",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 83.8,
+              "max": 86.4
+            },
+            "waist": {
+              "min": 67.3,
+              "max": 69.8
+            },
+            "hips": {
+              "min": 94.0,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 91.4
+            },
+            "waist": {
+              "min": 72.4,
+              "max": 74.9
+            },
+            "hips": {
+              "min": 99.1,
+              "max": 101.6
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 94.0,
+              "max": 96.5
+            },
+            "waist": {
+              "min": 77.5,
+              "max": 80.0
+            },
+            "hips": {
+              "min": 104.1,
+              "max": 106.7
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 99.1,
+              "max": 104.1
+            },
+            "waist": {
+              "min": 82.5,
+              "max": 87.6
+            },
+            "hips": {
+              "min": 109.2,
+              "max": 114.3
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "min": 109.2,
+              "max": 114.3
+            },
+            "waist": {
+              "min": 91.4,
+              "max": 96.5
+            },
+            "hips": {
+              "min": 116.8,
+              "max": 121.9
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "League",
+      "clothing_type": "pants",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "value": 73.7
+            },
+            "hips": {
+              "value": 99.1
+            },
+            "length": {
+              "value": 106.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "value": 81.3
+            },
+            "hips": {
+              "value": 104.1
+            },
+            "length": {
+              "value": 110.0
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "value": 88.9
+            },
+            "hips": {
+              "value": 111.8
+            },
+            "length": {
+              "value": 114.0
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "value": 96.5
+            },
+            "hips": {
+              "value": 119.4
+            },
+            "length": {
+              "value": 115.1
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "waist": {
+              "value": 104.1
+            },
+            "hips": {
+              "value": 127.0
+            },
+            "length": {
+              "value": 118.9
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "waist": {
+              "value": 111.8
+            },
+            "hips": {
+              "value": 132.1
+            },
+            "length": {
+              "value": 119.9
+            }
+          }
+        },
+        {
+          "label": "4XL",
+          "measurements": {
+            "waist": {
+              "value": 119.4
+            },
+            "hips": {
+              "value": 139.7
+            },
+            "length": {
+              "value": 126.5
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "League",
+      "clothing_type": "pants",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "value": 68.1
+            },
+            "hips": {
+              "value": 84.1
+            },
+            "length": {
+              "value": 91.9
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "value": 70.1
+            },
+            "hips": {
+              "value": 87.9
+            },
+            "length": {
+              "value": 95.0
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "value": 71.9
+            },
+            "hips": {
+              "value": 91.9
+            },
+            "length": {
+              "value": 98.0
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "value": 73.9
+            },
+            "hips": {
+              "value": 96.0
+            },
+            "length": {
+              "value": 98.0
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "value": 80.0
+            },
+            "hips": {
+              "value": 108.0
+            },
+            "length": {
+              "value": 100.1
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "waist": {
+              "value": 81.0
+            },
+            "hips": {
+              "value": 116.1
+            },
+            "length": {
+              "value": 100.1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Nike",
+      "clothing_type": "shirt",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XXS",
+          "measurements": {
+            "bust": {
+              "min": 69.8,
+              "max": 74.9
+            },
+            "waist": {
+              "min": 54.0,
+              "max": 59.7
+            },
+            "hip": {
+              "min": 77.5,
+              "max": 83.8
+            }
+          }
+        },
+        {
+          "label": "XS",
+          "measurements": {
+            "bust": {
+              "min": 74.9,
+              "max": 82.5
+            },
+            "waist": {
+              "min": 59.7,
+              "max": 66.0
+            },
+            "hip": {
+              "min": 83.8,
+              "max": 90.2
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "bust": {
+              "min": 82.5,
+              "max": 90.2
+            },
+            "waist": {
+              "min": 66.0,
+              "max": 73.7
+            },
+            "hip": {
+              "min": 90.2,
+              "max": 97.8
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "bust": {
+              "min": 90.2,
+              "max": 96.5
+            },
+            "waist": {
+              "min": 73.7,
+              "max": 80.0
+            },
+            "hip": {
+              "min": 97.8,
+              "max": 104.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "bust": {
+              "min": 96.5,
+              "max": 104.1
+            },
+            "waist": {
+              "min": 80.0,
+              "max": 87.6
+            },
+            "hip": {
+              "min": 104.1,
+              "max": 111.8
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "bust": {
+              "min": 104.1,
+              "max": 113.0
+            },
+            "waist": {
+              "min": 87.6,
+              "max": 97.8
+            },
+            "hip": {
+              "min": 111.8,
+              "max": 119.4
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "bust": {
+              "min": 113.0,
+              "max": 123.2
+            },
+            "waist": {
+              "min": 97.8,
+              "max": 108.0
+            },
+            "hip": {
+              "min": 119.4,
+              "max": 127.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Nike",
+      "clothing_type": "pants",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XXS",
+          "measurements": {
+            "waist": {
+              "min": 54.0,
+              "max": 59.7
+            },
+            "hip": {
+              "min": 77.5,
+              "max": 83.8
+            }
+          }
+        },
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "min": 59.7,
+              "max": 66.0
+            },
+            "hip": {
+              "min": 83.8,
+              "max": 90.2
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 66.0,
+              "max": 73.7
+            },
+            "hip": {
+              "min": 90.2,
+              "max": 97.8
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 73.7,
+              "max": 80.0
+            },
+            "hip": {
+              "min": 97.8,
+              "max": 104.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 80.0,
+              "max": 87.6
+            },
+            "hip": {
+              "min": 104.1,
+              "max": 111.8
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 87.6,
+              "max": 97.8
+            },
+            "hip": {
+              "min": 111.8,
+              "max": 119.4
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "min": 97.8,
+              "max": 108.0
+            },
+            "hip": {
+              "min": 119.4,
+              "max": 127.0
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Nike",
+      "clothing_type": "shirt",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XXS",
+          "measurements": {
+            "chest": {
+              "min": 71.4,
+              "max": 80.0
+            },
+            "waist": {
+              "min": 57.1,
+              "max": 64.8
+            },
+            "hip": {
+              "min": 72.4,
+              "max": 80.0
+            }
+          }
+        },
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "min": 80.0,
+              "max": 88.9
+            },
+            "waist": {
+              "min": 64.8,
+              "max": 73.7
+            },
+            "hip": {
+              "min": 80.0,
+              "max": 88.9
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 95.2
+            },
+            "waist": {
+              "min": 73.7,
+              "max": 81.3
+            },
+            "hip": {
+              "min": 88.9,
+              "max": 95.2
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 95.2,
+              "max": 104.1
+            },
+            "waist": {
+              "min": 81.3,
+              "max": 88.9
+            },
+            "hip": {
+              "min": 95.2,
+              "max": 104.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 104.1,
+              "max": 111.8
+            },
+            "waist": {
+              "min": 88.9,
+              "max": 96.5
+            },
+            "hip": {
+              "min": 104.1,
+              "max": 111.8
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 111.8,
+              "max": 123.2
+            },
+            "waist": {
+              "min": 96.5,
+              "max": 109.2
+            },
+            "hip": {
+              "min": 111.8,
+              "max": 119.4
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "min": 123.2,
+              "max": 135.9
+            },
+            "waist": {
+              "min": 109.2,
+              "max": 120.7
+            },
+            "hip": {
+              "min": 119.4,
+              "max": 128.3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Nike",
+      "clothing_type": "pants",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XXS",
+          "measurements": {
+            "waist": {
+              "min": 57.1,
+              "max": 64.8
+            },
+            "hip": {
+              "min": 72.4,
+              "max": 80.0
+            },
+            "legLength": 80.6
+          }
+        },
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "min": 64.8,
+              "max": 73.7
+            },
+            "hip": {
+              "min": 80.0,
+              "max": 88.9
+            },
+            "legLength": 81.3
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 73.7,
+              "max": 81.3
+            },
+            "hip": {
+              "min": 88.9,
+              "max": 95.2
+            },
+            "legLength": 81.9
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 81.3,
+              "max": 88.9
+            },
+            "hip": {
+              "min": 95.2,
+              "max": 104.1
+            },
+            "legLength": 82.5
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 88.9,
+              "max": 96.5
+            },
+            "hip": {
+              "min": 104.1,
+              "max": 111.8
+            },
+            "legLength": 83.2
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 96.5,
+              "max": 109.2
+            },
+            "hip": {
+              "min": 111.8,
+              "max": 119.4
+            },
+            "legLength": 83.8
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "min": 109.2,
+              "max": 120.7
+            },
+            "hip": {
+              "min": 119.4,
+              "max": 128.3
+            },
+            "legLength": 84.5
+          }
+        }
+      ]
+    }
+  ],
+  "last_updated": "2025-12-12T02:59:46.761770"
+}

@@ -1,0 +1,193 @@
+.measurement-pickers {
+  display: flex;
+  gap: 12px;
+  width: 85%;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.picker-column {
+  flex: 1;
+  position: relative;
+}
+
+/* Unit toggle - no background */
+.unit-toggle {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 8px;
+}
+
+.unit-toggle button {
+  flex: 1;
+  padding: 4px 8px;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 300;
+  color: #777;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.unit-toggle button.active {
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.unit-toggle span {
+  color: #ccc;
+  font-weight: 200;
+  font-size: 14px;
+}
+
+/* Picker display */
+.picker-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  background: var(--color-bg-light);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 300;
+  color: #222;
+}
+
+.picker-display span {
+  flex: 1;
+  text-align: center;
+}
+
+.chevron {
+  width: 14px;
+  height: 14px;
+  color: #bbb;
+  margin-left: 6px;
+}
+
+/* iOS Date Picker Style Wheel */
+.picker-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 4px;
+  background: #F2F2F7;
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.picker-wheel {
+  position: relative;
+  height: 140px; /* 5 rows × 28px = 140px */
+  overflow: hidden;
+}
+
+.picker-scroll {
+  height: 100%;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.picker-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.picker-scroll.dual {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  height: 100%;
+}
+
+.picker-sub-column {
+  flex: 0 0 45%;
+  height: 100%;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.picker-sub-column::-webkit-scrollbar {
+  display: none;
+}
+
+/* Selection band - grey rectangle with rounded corners, no outline */
+.picker-wheel::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  right: 4px;
+  height: 28px;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.06);
+  border: none;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Fade overlays for cylindrical depth effect */
+.picker-wheel::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 2;
+  background: linear-gradient(
+    to bottom,
+    rgba(242, 242, 247, 1) 0%,
+    rgba(242, 242, 247, 0.7) 12%,
+    rgba(242, 242, 247, 0.3) 25%,
+    transparent 38%,
+    transparent 62%,
+    rgba(242, 242, 247, 0.3) 75%,
+    rgba(242, 242, 247, 0.7) 88%,
+    rgba(242, 242, 247, 1) 100%
+  );
+}
+
+/* Spacer for centering first/last items */
+.picker-spacer {
+  height: 56px; /* (140px - 28px) / 2 to center the selection band */
+  flex-shrink: 0;
+}
+
+.picker-option {
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 300;
+  color: rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  scroll-snap-align: center;
+  transition: color 0.1s, font-weight 0.1s;
+  flex-shrink: 0;
+}
+
+.picker-option.centered {
+  font-weight: 500;
+  color: #000;
+}

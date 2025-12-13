@@ -1,0 +1,79 @@
+.summary-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-top: 1px solid #e5e5e5;
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 100;
+}
+
+.summary-content {
+  max-width: 430px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.selected-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.selected-item.empty {
+  opacity: 0.5;
+}
+
+.item-thumbnail {
+  width: 40px;
+  height: 40px;
+  background: #f5f5f5;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.item-thumbnail svg {
+  width: 20px;
+  height: 20px;
+  color: #999;
+}
+
+.item-label {
+  font-size: 13px;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.submit-btn {
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: #ccc;
+  border: none;
+  border-radius: 10px;
+  cursor: not-allowed;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.submit-btn.ready {
+  background: #001A57;
+  cursor: pointer;
+}
+
+.submit-btn.ready:active {
+  background: #002878;
+}
