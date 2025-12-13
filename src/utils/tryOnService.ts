@@ -9,6 +9,8 @@
  *   - fitType: 'tight', 'regular', or 'comfortable'
  */
 
+import { chooseWatermark, getWatermarkLogoPath } from './chooseWatermark'
+
 // Backend API endpoint
 const BACKEND_URL = 'https://closai-backend.vercel.app'
 
@@ -197,6 +199,53 @@ async function imageUrlToBase64(imageUrl: string): Promise<string> {
 }
 
 /**
+ * Add watermark to image and return as data URL
+ * Automatically chooses white or black logo based on background brightness
+ */
+async function addWatermark(imageSrc: string): Promise<string> {
+  // Determine which watermark color to use based on the TryIt logo region
+  const watermarkColor = await chooseWatermark(imageSrc)
+  const logoPath = getWatermarkLogoPath(watermarkColor)
+
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      const logo = new Image()
+      logo.crossOrigin = 'anonymous'
+      logo.onload = () => {
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+          reject(new Error('Could not get canvas context'))
+          return
+        }
+
+        canvas.width = img.width
+        canvas.height = img.height
+        ctx.drawImage(img, 0, 0)
+
+        // Watermark settings: 100px height, 40px from right, 20px from bottom
+        const logoHeight = 100
+        const logoWidth = (logo.width / logo.height) * logoHeight
+        const logoX = canvas.width - logoWidth - 40
+        const logoY = canvas.height - logoHeight - 20
+
+        ctx.globalAlpha = 0.6
+        ctx.drawImage(logo, logoX, logoY, logoWidth, logoHeight)
+        ctx.globalAlpha = 1
+
+        resolve(canvas.toDataURL('image/png'))
+      }
+      logo.onerror = () => reject(new Error('Could not load logo'))
+      logo.src = logoPath
+    }
+    img.onerror = () => reject(new Error('Could not load image'))
+    img.src = imageSrc
+  })
+}
+
+/**
  * Generate fit-specific prompt for try-on
  */
 function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType): string {
@@ -347,8 +396,14 @@ export async function generateTryOnImage(
 
       if (imageDataUrl) {
         console.log(`✅ Generated try-on image for: ${clothingInfo.name}${fitLabel}`)
+
+        // Add watermark before returning
+        console.log('🎨 Adding watermark...')
+        const watermarkedImage = await addWatermark(imageDataUrl)
+        console.log('✅ Watermark added')
+
         return {
-          imageDataUrl,
+          imageDataUrl: watermarkedImage,
           analysisText,
           success: true
         }
