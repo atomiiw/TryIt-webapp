@@ -10,13 +10,6 @@ import { BODY_COMPOSITION_FACTOR } from './personAnalyzer'
 // Size order for standard sizing (smallest to largest)
 const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL']
 
-// Gender conversion factors (relative to unisex baseline) - kept for future use
-const _GENDER_SIZE_OFFSET: Record<string, number> = {
-  'women': -1,    // Women's L ≈ Unisex M
-  'unisex': 0,    // Baseline
-  'men': 1        // Men's S ≈ Unisex M
-}
-
 // Size recommendation result
 export interface SizeRecommendation {
   regular: string           // Best fit size (empty if too small/large for all sizes)
@@ -260,48 +253,6 @@ function calculateFemaleDimension(H: number, W: number, key: string, F: number):
   return result
 }
 
-
-/**
- * Check how well a user's value matches a size guide measurement
- * Returns 0 if within range, otherwise the distance outside the range
- *
- * @param userValue - The user's body measurement
- * @param measurement - The garment measurement from size guide
- * @param measurementKey - The measurement type (e.g., 'chest', 'body_length')
- */
-function _getDistanceFromMeasurement(userValue: number, measurement: Measurement, measurementKey?: string): number {
-  const normalizedKey = measurementKey?.toLowerCase().replace(/\s+/g, '_')
-
-  // Special handling for body_length:
-  // - Shirt LONGER than person = OK (no penalty)
-  // - Shirt SHORTER than person = bad (penalize)
-  if (normalizedKey === 'body_length') {
-    if (measurement.min !== undefined && measurement.max !== undefined) {
-      // If shirt length (min) is shorter than person's body length, penalize
-      if (measurement.min < userValue) return userValue - measurement.min
-      // Shirt is long enough, no penalty
-      return 0
-    } else if (measurement.value !== undefined) {
-      // If shirt length is shorter than person's body length, penalize
-      if (measurement.value < userValue) return userValue - measurement.value
-      // Shirt is long enough, no penalty
-      return 0
-    }
-    return 0
-  }
-
-  // Standard handling for other measurements (chest, waist, etc.)
-  if (measurement.min !== undefined && measurement.max !== undefined) {
-    // Range: 0 if inside, distance to edge if outside
-    if (userValue < measurement.min) return measurement.min - userValue
-    if (userValue > measurement.max) return userValue - measurement.max
-    return 0
-  } else if (measurement.value !== undefined) {
-    // Single value: absolute distance
-    return Math.abs(userValue - measurement.value)
-  }
-  return 0
-}
 
 /**
  * Check if user measurement is within, smaller than, or larger than size range
