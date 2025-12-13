@@ -7,7 +7,8 @@
 import { chooseWatermark, getWatermarkLogoPath } from './chooseWatermark'
 
 // Backend API endpoint
-const GEMINI_TRYON_API = 'https://closai-backend.vercel.app/api/gemini-tryon'
+const BACKEND_URL = 'https://closai-backend.vercel.app'
+const GEMINI_TRYON_API = `${BACKEND_URL}/api/gemini-tryon`
 
 // Fit type for try-on generation
 export type FitType = 'tight' | 'regular' | 'comfortable'
@@ -128,15 +129,24 @@ async function processImageForGemini(imageData: string): Promise<string> {
 
 /**
  * Convert image URL to base64
+ * Uses backend proxy for Duke store images to avoid CORS issues
  */
 async function imageUrlToBase64(imageUrl: string): Promise<string> {
-  let fetchUrl = imageUrl
+  // Use backend proxy for Duke store images to avoid CORS
   if (imageUrl.includes('shop.duke.edu/site/img/')) {
     const imagePath = imageUrl.split('shop.duke.edu/site/img/')[1]
-    fetchUrl = `/duke-img/${imagePath}`
+    const proxyUrl = `${BACKEND_URL}/api/duke/image-proxy?path=${encodeURIComponent(imagePath)}`
+
+    const response = await fetch(proxyUrl)
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image via proxy: ${response.status}`)
+    }
+    const data = await response.json()
+    return data.base64
   }
 
-  const response = await fetch(fetchUrl)
+  // For non-Duke images, fetch directly
+  const response = await fetch(imageUrl)
   if (!response.ok) {
     throw new Error(`Failed to fetch image: ${response.status}`)
   }
