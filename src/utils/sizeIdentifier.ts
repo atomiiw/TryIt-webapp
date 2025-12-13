@@ -215,10 +215,10 @@ function calculateFemaleDimension(H: number, W: number, key: string, F: number):
 
   switch (key) {
     case 'chest':
-      // C_f = 0.40*H + 0.40*W + 6 + Δ(F) where Δ: lean=-5, normal=0, soft=+1
+      // C_f = 0.40*H + 0.40*W + 2 + Δ(F) where Δ: lean=-5, normal=0, soft=+1
       const femaleChestDelta = F === 0.85 ? -5 : F === 1.25 ? 1 : 0
-      result = 0.40 * H + 0.40 * W + 6 + femaleChestDelta
-      formula = `0.40×${H} + 0.40×${W} + 6 + ${femaleChestDelta} = ${result.toFixed(1)}`
+      result = 0.40 * H + 0.40 * W + 2 + femaleChestDelta
+      formula = `0.40×${H} + 0.40×${W} + 2 + ${femaleChestDelta} = ${result.toFixed(1)}`
       break
     case 'waist':
       // Waist = (0.45*H + 2) × (BMI/22) - scales ideal waist by BMI ratio to reference BMI (22)
