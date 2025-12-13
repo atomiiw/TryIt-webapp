@@ -251,7 +251,7 @@ RULES:
 
     comfortable: `VIRTUAL TRY-ON: Replace the person's current clothing with the ${colorDesc}${itemType} "${itemName}".${removeJacketInstruction}
 
-FIT: The ${itemType} should fit SLIGHTLY OVERSIZED - slightly loose around the body AND slightly long (hem sits a bit lower than usual, covering more of the hips/waist). NOT dramatically oversized or drowning in fabric - still looks like it belongs to this person, just a touch roomier and longer. Wear in the most BASIC way - NO rolling hem, NO tucking, no rolling sleeves, no knots, just plain and simple.
+FIT: The ${itemType} should fit MEDIUMLY OVERSIZED - loose around the body with a longer length (show the full length of the garment, hem sits lower covering more of the hips). NOT drowning in fabric but noticeably roomier and longer than a regular fit. Wear in the most BASIC way - NO rolling hem, NO tucking, no rolling sleeves, no knots, just plain and simple.
 
 RULES:
 - Don't tuck shirt into pants - show full style and hem
