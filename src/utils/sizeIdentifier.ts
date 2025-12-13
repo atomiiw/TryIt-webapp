@@ -3,15 +3,15 @@
  * Determines recommended clothing sizes based on user measurements and body analysis
  */
 
-import type { SizeGuide, SizeEntry, Measurement } from './sizeCollector'
-import type { PersonAnalysis, BodyComposition } from './personAnalyzer'
+import type { SizeGuide, Measurement } from './sizeCollector'
+import type { BodyComposition } from './personAnalyzer'
 import { BODY_COMPOSITION_FACTOR } from './personAnalyzer'
 
 // Size order for standard sizing (smallest to largest)
 const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL']
 
-// Gender conversion factors (relative to unisex baseline)
-const GENDER_SIZE_OFFSET: Record<string, number> = {
+// Gender conversion factors (relative to unisex baseline) - kept for future use
+const _GENDER_SIZE_OFFSET: Record<string, number> = {
   'women': -1,    // Women's L ≈ Unisex M
   'unisex': 0,    // Baseline
   'men': 1        // Men's S ≈ Unisex M
@@ -269,7 +269,7 @@ function calculateFemaleDimension(H: number, W: number, key: string, F: number):
  * @param measurement - The garment measurement from size guide
  * @param measurementKey - The measurement type (e.g., 'chest', 'body_length')
  */
-function getDistanceFromMeasurement(userValue: number, measurement: Measurement, measurementKey?: string): number {
+function _getDistanceFromMeasurement(userValue: number, measurement: Measurement, measurementKey?: string): number {
   const normalizedKey = measurementKey?.toLowerCase().replace(/\s+/g, '_')
 
   // Special handling for body_length:

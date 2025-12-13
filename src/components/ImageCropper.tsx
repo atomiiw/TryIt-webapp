@@ -14,7 +14,7 @@ function ImageCropper({ imageSrc, onCropComplete, onBack }: ImageCropperProps) {
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  const [imageSize, setImageSize] = useState({ width: 0, height: 0 })
+  const [, setImageSize] = useState({ width: 0, height: 0 })
   const [fillMode, setFillMode] = useState<'cover' | 'contain'>('cover')
 
   const FRAME_RATIO = 4 / 3 // 4:3 aspect ratio (width:height -> but displayed as portrait so 3:4)
@@ -93,8 +93,7 @@ function ImageCropper({ imageSrc, onCropComplete, onBack }: ImageCropperProps) {
     setScale(parseFloat(e.target.value))
   }
 
-  const getEdgeColor = (img: HTMLImageElement, canvas: HTMLCanvasElement): string => {
-    const ctx = canvas.getContext('2d')!
+  const getEdgeColor = (img: HTMLImageElement, _canvas: HTMLCanvasElement): string => {
     const tempCanvas = document.createElement('canvas')
     const tempCtx = tempCanvas.getContext('2d')!
     tempCanvas.width = img.width

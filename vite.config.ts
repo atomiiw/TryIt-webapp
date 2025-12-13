@@ -6,7 +6,6 @@ import basicSsl from '@vitejs/plugin-basic-ssl'
 export default defineConfig({
   plugins: [react(), basicSsl()],
   server: {
-    https: true,
     host: true, // Expose to network for phone testing
     proxy: {
       '/duke-img': {

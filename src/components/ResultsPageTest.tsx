@@ -452,7 +452,7 @@ function ResultsPageTest({ userData, onBack }: ResultsPageProps) {
         const tightMeasurements = sizeRec.tight ? getSizeGuideMeasurements(sizeRec.tight, sizeGuide, useInches) : []
         const regularMeasurements = sizeRec.regular ? getSizeGuideMeasurements(sizeRec.regular, sizeGuide, useInches) : []
         const comfortableMeasurements = sizeRec.comfortable ? getSizeGuideMeasurements(sizeRec.comfortable, sizeGuide, useInches) : []
-        const unit = useInches ? 'in' : 'cm'
+        const _unit = useInches ? 'in' : 'cm'
 
         return (
           <div className="sizes-section">

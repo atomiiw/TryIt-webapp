@@ -290,7 +290,7 @@ export class BarcodeProcessor {
    * Extract SKU from raw barcode value by looking up UPC in Duke API
    * Assumes scanned value is the middle section of a UPC barcode
    */
-  private async extractSKU(rawValue: string, format: string): Promise<string> {
+  private async extractSKU(rawValue: string, _format: string): Promise<string> {
     // Clean the raw value
     const cleaned = rawValue.trim()
 

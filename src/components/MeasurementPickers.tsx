@@ -85,7 +85,7 @@ function MeasurementPickers({
   }
 
   // Scroll to selected value when picker opens
-  const scrollToValue = useCallback((ref: React.RefObject<HTMLDivElement>, index: number) => {
+  const scrollToValue = useCallback((ref: React.RefObject<HTMLDivElement | null>, index: number) => {
     if (ref.current) {
       const scrollTop = index * ITEM_HEIGHT
       ref.current.scrollTo({ top: scrollTop, behavior: 'auto' })
@@ -94,7 +94,7 @@ function MeasurementPickers({
 
   // Handle scroll end - snap to nearest value
   const handleScrollEnd = useCallback((
-    ref: React.RefObject<HTMLDivElement>,
+    ref: React.RefObject<HTMLDivElement | null>,
     options: number[],
     onSelect: (val: number) => void
   ) => {
@@ -114,7 +114,7 @@ function MeasurementPickers({
       const currentIndex = weight !== null ? options.indexOf(weight) : 0
       scrollToValue(weightScrollRef, Math.max(0, currentIndex))
 
-      let scrollTimeout: NodeJS.Timeout
+      let scrollTimeout: ReturnType<typeof setTimeout>
       const handleScroll = () => {
         clearTimeout(scrollTimeout)
         scrollTimeout = setTimeout(() => {
@@ -136,7 +136,7 @@ function MeasurementPickers({
       const currentIndex = height !== null ? heightCmOptions.indexOf(height) : 0
       scrollToValue(heightScrollRef, Math.max(0, currentIndex))
 
-      let scrollTimeout: NodeJS.Timeout
+      let scrollTimeout: ReturnType<typeof setTimeout>
       const handleScroll = () => {
         clearTimeout(scrollTimeout)
         scrollTimeout = setTimeout(() => {
@@ -159,7 +159,7 @@ function MeasurementPickers({
         const ftIndex = height !== null ? heightFtOptions.indexOf(height) : 0
         scrollToValue(ftScrollRef, Math.max(0, ftIndex))
 
-        let scrollTimeout: NodeJS.Timeout
+        let scrollTimeout: ReturnType<typeof setTimeout>
         const handleScroll = () => {
           clearTimeout(scrollTimeout)
           scrollTimeout = setTimeout(() => {
@@ -183,7 +183,7 @@ function MeasurementPickers({
         const inIndex = heightInches !== null ? heightInOptions.indexOf(heightInches) : 0
         scrollToValue(inScrollRef, Math.max(0, inIndex))
 
-        let scrollTimeout: NodeJS.Timeout
+        let scrollTimeout: ReturnType<typeof setTimeout>
         const handleScroll = () => {
           clearTimeout(scrollTimeout)
           scrollTimeout = setTimeout(() => {
