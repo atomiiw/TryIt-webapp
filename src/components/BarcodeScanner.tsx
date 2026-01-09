@@ -161,7 +161,7 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
         onScan: (result: BarcodeScanResult) => {
           // Prevent duplicate scans
           if (hasScannedRef.current) {
-            console.log('📷 Ignoring duplicate scan:', result.sku)
+            console.log('📷 Ignoring duplicate scan:', result.rawValue)
             return
           }
           hasScannedRef.current = true
@@ -169,8 +169,18 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
           const scanTime = Date.now() - startTime
           console.log(`📷 Barcode scanned in ${scanTime}ms:`, result)
           console.log(`   Raw value: ${result.rawValue}`)
-          console.log(`   SKU: ${result.sku}`)
+          console.log(`   SKU: ${result.sku ?? 'NOT FOUND'}`)
           console.log(`   Format: ${result.format}`)
+
+          // Check if SKU was found in lookup table
+          if (result.sku === null) {
+            // UPC not found in lookup table
+            setDetectedSku(result.rawValue)
+            setScanStatus('not_found')
+            setError(`UPC not found: ${result.rawValue}`)
+            stopScanner()
+            return
+          }
 
           // Update detected SKU state
           setDetectedSku(result.sku)
@@ -272,25 +282,25 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
   }
 
   /**
-   * Fetch item data - uses sample data in demo mode, API in production
+   * Fetch item data - uses sample data in demo mode, backend API in production
    */
-  const fetchItemData = async (barcode: string, isDemo: boolean): Promise<ItemData> => {
+  const fetchItemData = async (sku: string, isDemo: boolean): Promise<ItemData> => {
     if (isDemo) {
       // Demo mode: use sample item data from JSON file
       console.log('🎭 Demo mode: using sample item data')
       return sampleItemData as ItemData
     }
 
-    // Production mode: fetch from API
-    console.log('📡 Fetching item for SKU:', barcode)
-    const response = await fetch(`https://closai-backend.vercel.app/api/duke/item?sku=${barcode}`)
+    // Production mode: fetch from backend (proxies to Duke API)
+    console.log('📡 Fetching item for SKU:', sku)
+    const response = await fetch(`https://closai-backend.vercel.app/api/duke/item?sku=${sku}`)
 
     if (response.ok) {
       const data = await response.json()
       return data.item as ItemData
     }
 
-    throw new Error(`Item not found: ${barcode}`)
+    throw new Error(`Item not found: ${sku}`)
   }
 
   const handleDetectedBarcode = async (barcode: string, isDemo: boolean = false) => {

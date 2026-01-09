@@ -6,13 +6,13 @@
 
 import { BrowserMultiFormatReader } from '@zxing/browser'
 import type { IScannerControls } from '@zxing/browser'
-import { Result, BarcodeFormat } from '@zxing/library'
+import { Result, BarcodeFormat, DecodeHintType } from '@zxing/library'
 import { lookupSKUByUPC } from './upcLookup'
 
 // Scan result
 export interface BarcodeScanResult {
   rawValue: string           // Raw barcode value
-  sku: string                // Extracted/processed SKU
+  sku: string | null         // Extracted SKU (null if not found in lookup table)
   format: string             // Barcode format (EAN_13, UPC_A, etc.)
   timestamp: number          // When the scan occurred
 }
@@ -39,7 +39,23 @@ export class BarcodeProcessor {
   private scanCooldown: number = 2000 // Prevent duplicate scans for 2 seconds
 
   constructor() {
-    this.reader = new BrowserMultiFormatReader()
+    // Configure hints for better barcode detection
+    const hints = new Map()
+
+    // Enable common 1D barcode formats (retail barcodes)
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, [
+      BarcodeFormat.EAN_13,
+      BarcodeFormat.EAN_8,
+      BarcodeFormat.UPC_A,
+      BarcodeFormat.UPC_E,
+      BarcodeFormat.CODE_128,
+      BarcodeFormat.CODE_39,
+    ])
+
+    // Try harder to find barcodes
+    hints.set(DecodeHintType.TRY_HARDER, true)
+
+    this.reader = new BrowserMultiFormatReader(hints)
   }
 
   /**
@@ -183,7 +199,7 @@ export class BarcodeProcessor {
         result = await this.reader!.decodeFromImageElement(imageSource)
       }
 
-      return await this.processResult(result)
+      return this.processResult(result)
 
     } catch (err) {
       console.log('No barcode found in image')
@@ -208,10 +224,10 @@ export class BarcodeProcessor {
   /**
    * Handle scan result from continuous scanning
    */
-  private async handleScanResult(
+  private handleScanResult(
     result: Result,
     onScan?: (result: BarcodeScanResult) => void
-  ): Promise<void> {
+  ): void {
     const rawValue = result.getText()
     const now = Date.now()
 
@@ -223,8 +239,8 @@ export class BarcodeProcessor {
     this.lastScannedValue = rawValue
     this.lastScanTime = now
 
-    const scanResult = await this.processResult(result)
-    console.log(`📊 Barcode scanned: ${scanResult.sku} (${scanResult.format})`)
+    const scanResult = this.processResult(result)
+    console.log(`📊 Barcode scanned: ${scanResult.sku ?? 'NOT FOUND'} (${scanResult.format})`)
 
     if (onScan) {
       onScan(scanResult)
@@ -234,13 +250,13 @@ export class BarcodeProcessor {
   /**
    * Process raw scan result into BarcodeScanResult
    */
-  private async processResult(result: Result): Promise<BarcodeScanResult> {
+  private processResult(result: Result): BarcodeScanResult {
     const rawValue = result.getText()
     const format = BarcodeFormat[result.getBarcodeFormat()]
 
     return {
       rawValue,
-      sku: await this.extractSKU(rawValue, format),
+      sku: this.extractSKU(rawValue, format),
       format,
       timestamp: Date.now()
     }
@@ -287,37 +303,24 @@ export class BarcodeProcessor {
   }
 
   /**
-   * Extract SKU from raw barcode value by looking up UPC in Duke API
-   * Assumes scanned value is the middle section of a UPC barcode
+   * Extract SKU from raw barcode value using local UPC lookup table
+   * Returns null if UPC is not found (so caller can show "not found" message)
    */
-  private async extractSKU(rawValue: string, _format: string): Promise<string> {
-    // Clean the raw value
-    const cleaned = rawValue.trim()
+  private extractSKU(rawValue: string, _format: string): string | null {
+    // Clean the raw value - digits only
+    const cleaned = rawValue.trim().replace(/\D/g, '')
+    console.log(`🔍 Scanned barcode: "${cleaned}" (${cleaned.length} digits)`)
 
-    // Convert scanned middle section to full UPC
-    const fullUPC = this.convertToFullUPC(cleaned)
-    console.log(`🔄 Converted scanned "${cleaned}" to UPC: ${fullUPC}`)
-
-    // Look up SKU from Duke API
-    const lookupResult = await lookupSKUByUPC(fullUPC)
+    // Use the lookup function which already tries multiple variations
+    const lookupResult = lookupSKUByUPC(cleaned)
 
     if (lookupResult.success && lookupResult.sku) {
-      console.log(`✅ Fetched SKU: ${lookupResult.sku}`)
       return lookupResult.sku
     }
 
-    // Fallback: try with raw value as UPC directly
-    console.log(`⚠️ UPC lookup failed, trying raw value as UPC...`)
-    const fallbackResult = await lookupSKUByUPC(cleaned)
-
-    if (fallbackResult.success && fallbackResult.sku) {
-      console.log(`✅ Fetched SKU (fallback): ${fallbackResult.sku}`)
-      return fallbackResult.sku
-    }
-
-    // Final fallback: return cleaned raw value
-    console.log(`❌ Could not fetch SKU, returning raw value`)
-    return cleaned.replace(/[^a-zA-Z0-9-]/g, '')
+    // Not found - return null so caller can handle appropriately
+    console.log(`❌ UPC not found in lookup table`)
+    return null
   }
 
   /**

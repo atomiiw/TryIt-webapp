@@ -1,144 +1,68 @@
 /**
  * UPC to SKU Lookup Utility
- * Looks up product SKU from UPC barcode using Duke NetSuite API
+ * Looks up product SKU from UPC barcode using local JSON lookup table
  */
 
-// NetSuite API configuration
-const DUKE_API_BASE = 'https://shop.duke.edu/api/items'
-const COMPANY_ID = '4811716'
+// Import local UPC to SKU mapping
+import upcToSkuData from '../data/upcToSku.json'
 
-// API response types
-interface MatrixChildItem {
-  itemid: string
-  internalid: number
-  custitem_duke_size?: string
-  custitem_duke_color?: string
-  isinstock?: boolean
-  quantityavailable?: number
-}
-
-interface ItemResponse {
-  itemid: string
-  internalid: number
-  displayname?: string
-  storedisplayname2?: string
-  matrixchilditems_detail?: MatrixChildItem[]
-  itemimages_detail?: {
-    urls: Array<{ url: string; altimagetext?: string }>
-  }
-}
-
-interface APIResponse {
-  items?: ItemResponse[]
-}
+// Type the imported JSON
+const upcToSku: Record<string, string> = upcToSkuData
 
 export interface UPCLookupResult {
   success: boolean
   sku: string | null
-  itemid: string | null
-  displayName: string | null
-  internalId: number | null
-  imageUrl: string | null
   error?: string
 }
 
 /**
- * Extract the numeric SKU prefix from an itemid
- * e.g., "29088-ROY-S" → "29088", "29088" → "29088"
+ * Look up product SKU from UPC barcode using local JSON table
+ * Tries multiple UPC format variations to handle different digit lengths
+ * @param upc - The UPC barcode value
+ * @returns Lookup result with SKU or error
  */
-function extractSKU(itemid: string): string {
-  const match = itemid.match(/^(\d+)/)
-  return match ? match[1] : itemid
-}
+export function lookupSKUByUPC(upc: string): UPCLookupResult {
+  // Clean the UPC - digits only
+  const cleaned = upc.trim().replace(/\D/g, '')
 
-/**
- * Look up product SKU from UPC barcode
- * @param upc - The UPC barcode value (e.g., "0198237901297")
- * @returns Promise resolving to lookup result with SKU
- */
-export async function lookupSKUByUPC(upc: string): Promise<UPCLookupResult> {
-  // Clean the UPC - remove any whitespace
-  const cleanUPC = upc.trim()
-
-  if (!cleanUPC) {
+  if (!cleaned) {
     return {
       success: false,
       sku: null,
-      itemid: null,
-      displayName: null,
-      internalId: null,
-      imageUrl: null,
       error: 'UPC code is required'
     }
   }
 
-  const url = `${DUKE_API_BASE}?c=${COMPANY_ID}&upc=${encodeURIComponent(cleanUPC)}&fieldset=details`
+  console.log(`🔍 Looking up UPC: ${cleaned} (${cleaned.length} digits)`)
 
-  try {
-    console.log(`🔍 Looking up UPC: ${cleanUPC}`)
+  // Try multiple variations to handle check digit / leading zero differences
+  const variations: string[] = [
+    cleaned,                    // Full scanned value (12-13 digits)
+    cleaned.slice(0, -1),       // Remove check digit (11-12 digits)
+    cleaned.slice(1),           // Remove leading zero (11-12 digits)
+    cleaned.slice(1, -1),       // Remove both (10-11 digits)
+  ]
 
-    const response = await fetch(url)
+  for (const variation of variations) {
+    if (!variation) continue
 
-    if (!response.ok) {
-      throw new Error(`API request failed with status ${response.status}`)
-    }
-
-    const data: APIResponse = await response.json()
-
-    // Check if we got any items
-    if (!data.items || data.items.length === 0) {
-      console.log(`❌ No product found for UPC: ${cleanUPC}`)
+    const sku = upcToSku[variation]
+    if (sku) {
+      console.log(`✅ Found SKU: ${sku} (matched UPC: ${variation})`)
       return {
-        success: false,
-        sku: null,
-        itemid: null,
-        displayName: null,
-        internalId: null,
-        imageUrl: null,
-        error: 'No product found for this UPC'
+        success: true,
+        sku
       }
     }
-
-    // Get the first matching item (parent item)
-    const item = data.items[0]
-    const sku = extractSKU(item.itemid)
-    const imageUrl = item.itemimages_detail?.urls?.[0]?.url || null
-
-    console.log(`✅ Found SKU: ${sku} for UPC: ${cleanUPC}`)
-
-    return {
-      success: true,
-      sku,
-      itemid: item.itemid,
-      displayName: item.storedisplayname2 || item.displayname || null,
-      internalId: item.internalid,
-      imageUrl
-    }
-
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-    console.error(`❌ UPC lookup failed: ${errorMessage}`)
-
-    return {
-      success: false,
-      sku: null,
-      itemid: null,
-      displayName: null,
-      internalId: null,
-      imageUrl: null,
-      error: errorMessage
-    }
   }
-}
 
-/**
- * Batch lookup multiple UPCs
- * @param upcs - Array of UPC codes
- * @returns Promise resolving to array of lookup results
- */
-export async function batchLookupSKUs(upcs: string[]): Promise<UPCLookupResult[]> {
-  const results = await Promise.all(upcs.map(upc => lookupSKUByUPC(upc)))
-  return results
+  // Not found in lookup table
+  console.log(`❌ UPC not found in lookup table: ${cleaned}`)
+  return {
+    success: false,
+    sku: null,
+    error: `UPC not found: ${cleaned}`
+  }
 }
 
 export default lookupSKUByUPC
