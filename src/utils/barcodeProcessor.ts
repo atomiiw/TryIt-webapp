@@ -21,6 +21,7 @@ export interface BarcodeScanResult {
 export interface ScannerOptions {
   preferRearCamera?: boolean  // Try rear camera first (default: true)
   scanInterval?: number       // Time between scan attempts in ms (default: 100)
+  zoom?: number               // Zoom level (default: 2.0 for easier scanning)
   onScan?: (result: BarcodeScanResult) => void  // Callback for each scan
   onError?: (error: Error) => void              // Error callback
 }
@@ -70,6 +71,7 @@ export class BarcodeProcessor {
   ): Promise<void> {
     const {
       preferRearCamera = true,
+      zoom = 2.0,
       onScan,
       onError
     } = options
@@ -105,6 +107,9 @@ export class BarcodeProcessor {
       this.stream = videoElement.srcObject as MediaStream
       this.isRunning = true
 
+      // Apply zoom if supported
+      await this.applyZoom(zoom)
+
       const initTime = Date.now() - startTime
       console.log(`✅ Barcode scanner started in ${initTime}ms`)
 
@@ -129,6 +134,7 @@ export class BarcodeProcessor {
           )
           this.stream = videoElement.srcObject as MediaStream
           this.isRunning = true
+          await this.applyZoom(zoom)
           console.log('✅ Scanner started with fallback camera')
         } catch (fallbackErr) {
           throw fallbackErr
@@ -321,6 +327,37 @@ export class BarcodeProcessor {
     // Not found - return null so caller can handle appropriately
     console.log(`❌ UPC not found in lookup table`)
     return null
+  }
+
+  /**
+   * Apply zoom to the camera stream if supported
+   */
+  private async applyZoom(zoomLevel: number): Promise<void> {
+    if (!this.stream) return
+
+    const videoTrack = this.stream.getVideoTracks()[0]
+    if (!videoTrack) return
+
+    try {
+      // Check if zoom is supported
+      const capabilities = videoTrack.getCapabilities() as MediaTrackCapabilities & { zoom?: { min: number; max: number } }
+
+      if (capabilities.zoom) {
+        const { min, max } = capabilities.zoom
+        // Clamp zoom level to supported range
+        const clampedZoom = Math.min(Math.max(zoomLevel, min), max)
+
+        await videoTrack.applyConstraints({
+          advanced: [{ zoom: clampedZoom } as MediaTrackConstraintSet]
+        })
+
+        console.log(`🔍 Zoom applied: ${clampedZoom}x (range: ${min}-${max})`)
+      } else {
+        console.log('📷 Zoom not supported on this camera')
+      }
+    } catch (err) {
+      console.log('📷 Could not apply zoom:', err)
+    }
   }
 
   /**
