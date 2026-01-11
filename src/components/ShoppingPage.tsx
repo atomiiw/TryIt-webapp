@@ -80,7 +80,7 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
 
   // Check if we have enough data to try on
   const hasRequiredData = userData.image && userData.item
-  const hasScannedItem = !!userData.item
+  const hasScannedItems = (userData.items?.length || 0) > 0
 
   // Check if data has changed since last generation
   const hasDataChanged = !lastGeneratedData ||
@@ -151,13 +151,15 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
           <h2 className="section-title">What's the item?</h2>
           <BarcodeScanner
             item={userData.item}
+            items={userData.items || []}
             onItemScanned={(item) => onUpdate({ item })}
+            onItemsChange={(items) => onUpdate({ items })}
           />
         </section>
 
         <button
           className={`tryit-button ${canTryIt ? 'active' : (showResults && hasRequiredData ? 'generated' : 'disabled')}`}
-          style={{ marginTop: hasScannedItem ? BUTTON_SPACING.itemCard : BUTTON_SPACING.scanner }}
+          style={{ marginTop: hasScannedItems ? BUTTON_SPACING.itemCard : BUTTON_SPACING.scanner }}
           onClick={handleTryIt}
           disabled={!canTryIt}
         >

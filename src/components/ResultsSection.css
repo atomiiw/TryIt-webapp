@@ -271,6 +271,16 @@
   white-space: nowrap;
 }
 
+/* Sizing disclaimer */
+.sizing-disclaimer {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 300;
+  color: #666;
+  text-align: center;
+  margin: 16px 0 0 0;
+}
+
 /* Loading state */
 .loading {
   display: flex;

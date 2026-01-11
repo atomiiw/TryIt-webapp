@@ -1,23 +1,29 @@
 import { useState, useEffect, useRef } from 'react'
-import { BrowserMultiFormatReader } from '@zxing/browser'
 import { getBarcodeProcessor } from '../utils/barcodeProcessor'
 import type { BarcodeScanResult } from '../utils/barcodeProcessor'
 import barcodeBackground from '../assets/Barcode.jpeg'
-import dukeLogo from '../assets/Duke Logo.png'
 import type { ItemData } from '../App'
 import { identifyBrand } from '../utils/brandIdentifier'
 import { collectSizeGuide } from '../utils/sizeCollector'
 import sampleItemData from '../data/sampleItem.json'
+import StackedCards from './StackedCards'
+import type { ClothingItem } from './StackedCards'
 import './BarcodeScanner.css'
 
-// Demo mode flag - set to true for demo, false for production
-// When true: Uses sample item data after 3 seconds (no real scanning)
-// When false: Uses real barcode scanning with barcodeProcessor
-const DEMO_MODE = false
+// Demo mode detection via URL parameter
+// Add ?demo=true to URL to enable demo mode (auto-detects after 3 seconds)
+// Production mode (default): Uses real barcode scanning with barcodeProcessor
+const getDemoMode = (): boolean => {
+  const urlParams = new URLSearchParams(window.location.search)
+  return urlParams.get('demo') === 'true'
+}
+const DEMO_MODE = getDemoMode()
 
 interface BarcodeScannerProps {
   item: ItemData | null
+  items: ItemData[]
   onItemScanned: (item: ItemData | null) => void
+  onItemsChange: (items: ItemData[]) => void
 }
 
 /**
@@ -51,15 +57,17 @@ function formatSizeRange(sizes: string[]): string {
   return `${firstAbbrev} - ${lastAbbrev}`
 }
 
-function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
+function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeScannerProps) {
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [isScanning, setIsScanning] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [detectedSku, setDetectedSku] = useState<string | null>(null)
+  const [matchedUpc, setMatchedUpc] = useState<string | null>(null)
+  const [detectedInternalId, setDetectedInternalId] = useState<string | null>(null)
   const [scanStatus, setScanStatus] = useState<'scanning' | 'detected' | 'not_found' | 'error' | null>(null)
+  const [capturedFrame, setCapturedFrame] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
-  // Demo mode refs (using BrowserMultiFormatReader directly)
-  const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Production mode flag to prevent duplicate scans
@@ -71,7 +79,9 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
   const startScanner = async () => {
     setError(null)
     setDetectedSku(null)
+    setMatchedUpc(null)
     setScanStatus('scanning')
+    setCapturedFrame(null)
     setIsScanning(true)
     hasScannedRef.current = false
 
@@ -85,13 +95,10 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
   }
 
   /**
-   * Demo mode scanner - shows camera but auto-detects after 3 seconds
+   * Demo mode scanner - shows camera briefly then auto-skips to item card
    */
   const startDemoScanner = async () => {
     try {
-      // Initialize ZXing reader
-      codeReaderRef.current = new BrowserMultiFormatReader()
-
       // Wait for video element to be in DOM
       await new Promise(resolve => setTimeout(resolve, 100))
 
@@ -99,37 +106,18 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
         throw new Error('Video element not found')
       }
 
-      // Try rear camera first, fallback to any camera
-      const constraints = { video: { facingMode: { ideal: 'environment' } } }
+      // Get camera stream directly for demo mode
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: 'environment' } }
+      })
 
-      try {
-        await codeReaderRef.current.decodeFromConstraints(
-          constraints,
-          videoRef.current,
-          (result) => {
-            // In demo mode, we ignore real scans and wait for timeout
-            if (result) {
-              console.log('📷 [Demo] Real barcode detected but ignoring:', result.getText())
-            }
-          }
-        )
-      } catch (cameraErr) {
-        // Fallback to any available camera
-        console.log('Rear camera failed, trying any camera...')
-        await codeReaderRef.current.decodeFromConstraints(
-          { video: true },
-          videoRef.current,
-          () => {} // Ignore results in demo mode
-        )
-      }
+      videoRef.current.srcObject = stream
+      streamRef.current = stream
 
-      // Store stream for cleanup
-      streamRef.current = videoRef.current.srcObject as MediaStream
-
-      // Auto-detect after 3 seconds (simulates finding the lemur shirt)
+      // Auto-skip to item card after 3 seconds
       timeoutRef.current = setTimeout(() => {
-        console.log('🎭 Demo: Simulating barcode detection after 3 seconds')
-        handleDetectedBarcode('29042', true) // isDemo = true
+        console.log('🎭 Demo: Auto-skipping to item card')
+        handleDetectedBarcode('29042', null, true) // isDemo = true
       }, 3000)
 
     } catch (err) {
@@ -170,29 +158,33 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
           console.log(`📷 Barcode scanned in ${scanTime}ms:`, result)
           console.log(`   Raw value: ${result.rawValue}`)
           console.log(`   SKU: ${result.sku ?? 'NOT FOUND'}`)
+          console.log(`   Matched UPC: ${result.matchedUpc ?? 'N/A'}`)
           console.log(`   Format: ${result.format}`)
 
           // Check if SKU was found in lookup table
           if (result.sku === null) {
             // UPC not found in lookup table
             setDetectedSku(result.rawValue)
+            setMatchedUpc(null)
             setScanStatus('not_found')
             setError(`UPC not found: ${result.rawValue}`)
             stopScanner()
             return
           }
 
-          // Update detected SKU state
+          // Update detected SKU, UPC, and internalId state
           setDetectedSku(result.sku)
+          setMatchedUpc(result.matchedUpc)
+          setDetectedInternalId(result.internalId)
           setScanStatus('detected')
 
-          // Process the detected barcode
-          handleDetectedBarcode(result.sku, false) // Real scan, isDemo = false
+          // Process the detected barcode with internalId for direct Duke API lookup
+          handleDetectedBarcode(result.sku, result.internalId, false) // Real scan, isDemo = false
         },
         onError: (err: Error) => {
-          console.error('Scanner error:', err)
-          // Don't show NotFoundException errors (normal when no barcode visible)
-          if (err.name !== 'NotFoundException') {
+          // Don't log or show NotFoundException errors (normal when no barcode visible)
+          if (!err.name.startsWith('NotFoundException')) {
+            console.error('Scanner error:', err)
             setError('Scanner error')
           }
         }
@@ -209,9 +201,35 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
   }
 
   /**
+   * Capture current video frame as data URL
+   */
+  const captureVideoFrame = (): string | null => {
+    // Try to get Quagga's video element first, then fall back to our ref
+    const container = videoRef.current?.parentElement
+    const video = container?.querySelector('video') || videoRef.current
+
+    if (!video) return null
+
+    const canvas = document.createElement('canvas')
+    canvas.width = video.videoWidth || 640
+    canvas.height = video.videoHeight || 480
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return null
+
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+    return canvas.toDataURL('image/jpeg', 0.8)
+  }
+
+  /**
    * Stop scanner - handles both demo and production modes
    */
   const stopScanner = () => {
+    // Capture frame before stopping
+    const frame = captureVideoFrame()
+    if (frame) {
+      setCapturedFrame(frame)
+    }
     // Clear the demo timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current)
@@ -232,13 +250,25 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
       streamRef.current = null
     }
 
-    // Clear video source
-    if (videoRef.current) {
-      videoRef.current.srcObject = null
+    // Clean up Quagga elements from container
+    if (videoRef.current?.parentElement) {
+      const container = videoRef.current.parentElement
+      // Remove Quagga's video and canvas elements
+      const quaggaVideo = container.querySelector('video:not([data-original])')
+      const quaggaCanvas = container.querySelector('canvas')
+      if (quaggaVideo && quaggaVideo !== videoRef.current) {
+        quaggaVideo.remove()
+      }
+      if (quaggaCanvas) {
+        quaggaCanvas.remove()
+      }
     }
 
-    // Clear reader reference (demo mode)
-    codeReaderRef.current = null
+    // Show and clear original video element
+    if (videoRef.current) {
+      videoRef.current.style.display = ''
+      videoRef.current.srcObject = null
+    }
 
     setIsScanning(false)
   }
@@ -284,16 +314,16 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
   /**
    * Fetch item data - uses sample data in demo mode, backend API in production
    */
-  const fetchItemData = async (sku: string, isDemo: boolean): Promise<ItemData> => {
+  const fetchItemData = async (sku: string, internalId: string | null, isDemo: boolean): Promise<ItemData> => {
     if (isDemo) {
       // Demo mode: use sample item data from JSON file
       console.log('🎭 Demo mode: using sample item data')
       return sampleItemData as ItemData
     }
 
-    // Production mode: fetch from backend (proxies to Duke API)
-    console.log('📡 Fetching item for SKU:', sku)
-    const response = await fetch(`https://closai-backend.vercel.app/api/duke/item?sku=${sku}`)
+    // Production mode: fetch from backend using internalId for direct Duke API lookup
+    console.log('📡 Fetching item with internalId:', internalId)
+    const response = await fetch(`https://closai-backend.vercel.app/api/duke/item?id=${internalId}`)
 
     if (response.ok) {
       const data = await response.json()
@@ -303,7 +333,7 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
     throw new Error(`Item not found: ${sku}`)
   }
 
-  const handleDetectedBarcode = async (barcode: string, isDemo: boolean = false) => {
+  const handleDetectedBarcode = async (barcode: string, internalId: string | null, isDemo: boolean = false) => {
     console.log('🚀 handleDetectedBarcode called, barcode:', barcode, 'isDemo:', isDemo)
     stopScanner()
     setIsAnalyzing(true)
@@ -314,7 +344,7 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
     try {
       // Step 1: Get raw item data (from sample file or API)
       console.log('📡 Step 1: Fetching item data...')
-      const rawItem = await fetchItemData(barcode, isDemo)
+      const rawItem = await fetchItemData(barcode, internalId, isDemo)
       console.log('📦 Got item data:', rawItem.name)
 
       // Step 2: Analyze item (identify brand + collect size guide)
@@ -326,12 +356,24 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
         hasSizeGuide: !!analyzedItem.sizeGuide
       })
 
-      // Done - show the item (keep detectedSku for display)
+      // Done - add the item to items array
       setIsAnalyzing(false)
       setScanStatus('detected')
-      // Keep detectedSku so it displays permanently
-      console.log('📤 Calling onItemScanned with analyzed item')
-      onItemScanned(analyzedItem)
+      console.log('📤 Adding item to items array')
+
+      // Add unique id with timestamp to avoid duplicates
+      const itemWithUniqueId = {
+        ...analyzedItem,
+        id: `${analyzedItem.id}-${Date.now()}`
+      }
+
+      // Add to items array
+      const newItems = [...items, itemWithUniqueId]
+      onItemsChange(newItems)
+
+      // Set as current active item and focus on the new card
+      onItemScanned(itemWithUniqueId)
+      setCurrentCardIndex(newItems.length - 1)
 
     } catch (err) {
       console.error('❌ Failed to process item:', err)
@@ -373,65 +415,43 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
     }
   }, [])
 
-  const handleRemoveItem = () => {
-    onItemScanned(null)
+  const handleRemoveItem = (itemToRemove: ClothingItem, index: number) => {
+    const newItems = items.filter((_, i) => i !== index)
+    onItemsChange(newItems)
+
+    // Update current active item
+    if (newItems.length === 0) {
+      onItemScanned(null)
+      setCurrentCardIndex(0)
+    } else {
+      // Set the new active item (previous one or first)
+      const newIndex = Math.min(index, newItems.length - 1)
+      setCurrentCardIndex(newIndex)
+      onItemScanned(newItems[newIndex])
+    }
   }
+
+  const handleItemSelect = (selectedItem: ClothingItem, index: number) => {
+    // Find the corresponding ItemData and set as active
+    const itemData = items[index]
+    if (itemData) {
+      onItemScanned(itemData)
+      setCurrentCardIndex(index)
+    }
+  }
+
+  // Convert ItemData to ClothingItem for StackedCards
+  const clothingItems: ClothingItem[] = items.map(item => ({
+    id: item.id,
+    name: item.name,
+    brand: item.brand || 'Duke',
+    imageUrl: item.imageUrl,
+    price: `$${item.price.toFixed(2)}`,
+    size: formatSizeRange(item.availableSizes)
+  }))
 
   // Debug: log item prop on every render
   console.log('🎨 BarcodeScanner render, item:', item ? item.name : 'null', 'isAnalyzing:', isAnalyzing, 'isScanning:', isScanning)
-
-  // Item card view
-  if (item) {
-    return (
-      <div className="barcode-scanner">
-        {/* Permanently display detected SKU */}
-        {detectedSku && (
-          <div className="scan-status detected">
-            SKU: {detectedSku}
-          </div>
-        )}
-        <div className="product-card">
-          <div className="product-header">
-            <span className="product-badge">ITEM ADDED</span>
-            <button className="remove-btn" onClick={handleRemoveItem}>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-          </div>
-          <div className="product-info">
-            <div className="product-thumbnail">
-              <img src={item.imageUrl} alt={item.name} />
-            </div>
-            <div className="product-details">
-              <div className="product-name">{item.name}</div>
-              <div className="product-sizes">Sizes: {formatSizeRange(item.availableSizes)}</div>
-            </div>
-            <img src={dukeLogo} alt="Duke" className="product-logo" />
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Analyzing state - show loading with detected SKU
-  if (isAnalyzing) {
-    return (
-      <div className="barcode-scanner">
-        <div className="scanner-window analyzing">
-          <div className="analyzing-spinner" />
-          <div className="analyzing-text">
-            {detectedSku ? (
-              <>Detected SKU: <strong>{detectedSku}</strong><br />Fetching item...</>
-            ) : (
-              'Analyzing item...'
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   // Get status message for display
   const getStatusMessage = () => {
@@ -452,17 +472,31 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
 
   const statusMessage = getStatusMessage()
 
-  // Scanner view
+  // Combined view: scanner always on top, item card below when present
   return (
     <div className="barcode-scanner">
       {/* Status display - shows under "What's the item?" */}
-      {statusMessage && !isScanning && (
+      {statusMessage && !isScanning && !item && (
         <div className={`scan-status ${scanStatus}`}>
           {statusMessage}
         </div>
       )}
 
-      {isScanning ? (
+      {/* Scanner - always visible */}
+      {isAnalyzing ? (
+        <div className="scanner-window analyzing">
+          {capturedFrame && (
+            <div
+              className="analyzing-blur-background"
+              style={{ backgroundImage: `url(${capturedFrame})` }}
+            />
+          )}
+          <div className="analyzing-content">
+            <div className="spinner" />
+            <p>Fetching item...</p>
+          </div>
+        </div>
+      ) : isScanning ? (
         <div className="scanner-window camera-active" onClick={stopScanner}>
           <video
             ref={videoRef}
@@ -486,10 +520,20 @@ function BarcodeScanner({ item, onItemScanned }: BarcodeScannerProps) {
             {error ? (
               <span className="scanner-error">{error}</span>
             ) : (
-              <span>Tap to scan</span>
+              <span>{items.length > 0 ? 'Tap to add another' : 'Tap to scan'}</span>
             )}
           </div>
         </div>
+      )}
+
+      {/* Stacked cards - shown below scanner when items exist */}
+      {items.length > 0 && (
+        <StackedCards
+          items={clothingItems}
+          onItemSelect={handleItemSelect}
+          onRemoveItem={handleRemoveItem}
+          initialIndex={currentCardIndex}
+        />
       )}
     </div>
   )

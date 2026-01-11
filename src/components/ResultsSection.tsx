@@ -383,6 +383,31 @@ function ResultsSection({ userData, isVisible }: ResultsSectionProps) {
   const GAP = 16
   const isScrollingProgrammatically = useRef(false)
 
+  // Sync carousel scroll position to selectedFit on initial load
+  useEffect(() => {
+    if (!scrollContainerRef.current || availableFits.length <= 1) return
+    const index = availableFits.indexOf(selectedFit)
+    if (index < 0) return
+
+    const cardWidth = scrollContainerRef.current.offsetWidth
+    const targetScrollLeft = index * (cardWidth + GAP)
+
+    // Only sync if scroll position doesn't match (avoids interfering with user scroll)
+    const currentScrollLeft = scrollContainerRef.current.scrollLeft
+    const tolerance = 10 // Allow small tolerance for rounding
+    if (Math.abs(currentScrollLeft - targetScrollLeft) > tolerance) {
+      isScrollingProgrammatically.current = true
+      scrollContainerRef.current.scrollTo({
+        left: targetScrollLeft,
+        behavior: 'instant'
+      })
+      // Reset flag after scroll completes
+      requestAnimationFrame(() => {
+        isScrollingProgrammatically.current = false
+      })
+    }
+  }, [selectedFit, availableFits])
+
   // Handle scroll to update selected fit (manual scroll only)
   const handleScroll = () => {
     if (!scrollContainerRef.current || availableFits.length <= 1) return
@@ -693,6 +718,7 @@ function ResultsSection({ userData, isVisible }: ResultsSectionProps) {
                 )
               })}
             </div>
+            <p className="sizing-disclaimer">*Sizing recommendations are estimates only and do not guarantee fit.</p>
           </div>
         )
       })()}

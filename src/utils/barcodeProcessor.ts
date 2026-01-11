@@ -7,12 +7,15 @@
 import { BrowserMultiFormatReader } from '@zxing/browser'
 import type { IScannerControls } from '@zxing/browser'
 import { Result, BarcodeFormat, DecodeHintType } from '@zxing/library'
+import Tesseract from 'tesseract.js'
 import { lookupSKUByUPC } from './upcLookup'
 
 // Scan result
 export interface BarcodeScanResult {
   rawValue: string           // Raw barcode value
   sku: string | null         // Extracted SKU (null if not found in lookup table)
+  internalId: string | null  // Duke API internal ID for direct lookup
+  matchedUpc: string | null  // The UPC variation that matched
   format: string             // Barcode format (EAN_13, UPC_A, etc.)
   timestamp: number          // When the scan occurred
 }
@@ -21,7 +24,6 @@ export interface BarcodeScanResult {
 export interface ScannerOptions {
   preferRearCamera?: boolean  // Try rear camera first (default: true)
   scanInterval?: number       // Time between scan attempts in ms (default: 100)
-  zoom?: number               // Zoom level (default: 2.0 for easier scanning)
   onScan?: (result: BarcodeScanResult) => void  // Callback for each scan
   onError?: (error: Error) => void              // Error callback
 }
@@ -38,25 +40,142 @@ export class BarcodeProcessor {
   private lastScannedValue: string | null = null
   private lastScanTime: number = 0
   private scanCooldown: number = 2000 // Prevent duplicate scans for 2 seconds
+  private onScanCallback?: (result: BarcodeScanResult) => void
+  private lastErrorLogTime: number = 0 // For throttling debug logs
+
+  // OCR fallback scanning
+  private videoElement: HTMLVideoElement | null = null
+  private ocrCanvas: HTMLCanvasElement | null = null
+  private ocrCtx: CanvasRenderingContext2D | null = null
+  private ocrInterval: ReturnType<typeof setInterval> | null = null
+  private ocrWorker: Tesseract.Worker | null = null
+  private isOcrScanning: boolean = false
 
   constructor() {
     // Configure hints for better barcode detection
     const hints = new Map()
 
-    // Enable common 1D barcode formats (retail barcodes)
+    // Enable common 1D barcode formats - Code 128 first for priority
     hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-      BarcodeFormat.EAN_13,
-      BarcodeFormat.EAN_8,
-      BarcodeFormat.UPC_A,
-      BarcodeFormat.UPC_E,
       BarcodeFormat.CODE_128,
       BarcodeFormat.CODE_39,
+      BarcodeFormat.UPC_A,
+      BarcodeFormat.UPC_E,
+      BarcodeFormat.EAN_13,
+      BarcodeFormat.EAN_8,
     ])
 
     // Try harder to find barcodes
     hints.set(DecodeHintType.TRY_HARDER, true)
 
     this.reader = new BrowserMultiFormatReader(hints)
+
+    // Create canvas for OCR
+    this.ocrCanvas = document.createElement('canvas')
+    this.ocrCtx = this.ocrCanvas.getContext('2d')
+
+    console.log('📊 Barcode scanner initialized with formats: CODE_128, CODE_39, UPC_A, UPC_E, EAN_13, EAN_8')
+    console.log('📊 OCR fallback enabled for reading printed numbers')
+  }
+
+  /**
+   * Initialize Tesseract OCR worker
+   */
+  private async initOcrWorker(): Promise<void> {
+    if (this.ocrWorker) return
+
+    console.log('🔤 Initializing OCR worker...')
+    this.ocrWorker = await Tesseract.createWorker('eng')
+    // Optimize for digits only
+    await this.ocrWorker.setParameters({
+      tessedit_char_whitelist: '0123456789',
+    })
+    console.log('✅ OCR worker ready')
+  }
+
+  /**
+   * Start OCR fallback scanning
+   */
+  private startOcrScanning(): void {
+    if (this.ocrInterval || !this.videoElement) return
+
+    // Run OCR every 500ms
+    this.ocrInterval = setInterval(async () => {
+      if (!this.isRunning || !this.videoElement || this.isOcrScanning) return
+
+      this.isOcrScanning = true
+      try {
+        await this.performOcrScan()
+      } catch (err) {
+        // OCR failed, continue
+      }
+      this.isOcrScanning = false
+    }, 500)
+  }
+
+  /**
+   * Perform OCR scan on current video frame
+   */
+  private async performOcrScan(): Promise<void> {
+    if (!this.videoElement || !this.ocrCanvas || !this.ocrCtx || !this.ocrWorker) return
+
+    const video = this.videoElement
+    if (video.videoWidth === 0 || video.videoHeight === 0) return
+
+    // Capture frame
+    this.ocrCanvas.width = video.videoWidth
+    this.ocrCanvas.height = video.videoHeight
+    this.ocrCtx.drawImage(video, 0, 0)
+
+    // Run OCR
+    const result = await this.ocrWorker.recognize(this.ocrCanvas)
+    const text = result.data.text
+
+    // Extract potential UPC codes (sequences of 8-14 digits)
+    const matches = text.match(/\d{8,14}/g)
+    if (matches) {
+      for (const match of matches) {
+        console.log(`🔤 OCR detected number: ${match}`)
+
+        // Check if it looks like a valid UPC and exists in our lookup
+        const lookupResult = this.lookupUPC(match)
+        if (lookupResult.sku) {
+          console.log(`✅ OCR found valid UPC: ${match} -> SKU: ${lookupResult.sku}`)
+
+          // Create scan result
+          const scanResult: BarcodeScanResult = {
+            rawValue: match,
+            sku: lookupResult.sku,
+            internalId: lookupResult.internalId,
+            matchedUpc: lookupResult.matchedUpc,
+            format: 'OCR',
+            timestamp: Date.now()
+          }
+
+          // Prevent duplicates
+          const now = Date.now()
+          if (match !== this.lastScannedValue || (now - this.lastScanTime) >= this.scanCooldown) {
+            this.lastScannedValue = match
+            this.lastScanTime = now
+
+            if (this.onScanCallback) {
+              this.onScanCallback(scanResult)
+            }
+          }
+          return
+        }
+      }
+    }
+  }
+
+  /**
+   * Stop OCR scanning
+   */
+  private stopOcrScanning(): void {
+    if (this.ocrInterval) {
+      clearInterval(this.ocrInterval)
+      this.ocrInterval = null
+    }
   }
 
   /**
@@ -71,7 +190,6 @@ export class BarcodeProcessor {
   ): Promise<void> {
     const {
       preferRearCamera = true,
-      zoom = 2.0,
       onScan,
       onError
     } = options
@@ -80,6 +198,12 @@ export class BarcodeProcessor {
       console.log('⚠️ Scanner already running')
       return
     }
+
+    this.onScanCallback = onScan
+    this.videoElement = videoElement
+
+    // Initialize OCR worker in background
+    this.initOcrWorker().catch(err => console.error('OCR init failed:', err))
 
     try {
       // Get camera constraints
@@ -94,11 +218,22 @@ export class BarcodeProcessor {
         videoElement,
         (result: Result | undefined, error: Error | undefined) => {
           if (result) {
-            this.handleScanResult(result, onScan)
+            console.log(`✅ Detected barcode type: ${BarcodeFormat[result.getBarcodeFormat()]}`)
+            this.handleScanResult(result)
           }
-          // Ignore errors during scanning (they happen when no barcode is visible)
-          if (error && onError && error.name !== 'NotFoundException') {
-            onError(error)
+          // Log all errors for debugging (NotFoundException is normal when no barcode visible)
+          if (error) {
+            // Only log occasionally to avoid spam (every 2 seconds)
+            const now = Date.now()
+            if (!this.lastErrorLogTime || now - this.lastErrorLogTime > 2000) {
+              this.lastErrorLogTime = now
+              if (error.name.startsWith('NotFoundException')) {
+                console.log('🔍 Scanning... (no barcode detected in current frame)')
+              } else {
+                console.log(`⚠️ Scanner error: ${error.name}: ${error.message}`)
+                if (onError) onError(error)
+              }
+            }
           }
         }
       )
@@ -107,8 +242,8 @@ export class BarcodeProcessor {
       this.stream = videoElement.srcObject as MediaStream
       this.isRunning = true
 
-      // Apply zoom if supported
-      await this.applyZoom(zoom)
+      // Start OCR fallback scanning
+      this.startOcrScanning()
 
       const initTime = Date.now() - startTime
       console.log(`✅ Barcode scanner started in ${initTime}ms`)
@@ -125,16 +260,26 @@ export class BarcodeProcessor {
             videoElement,
             (result: Result | undefined, error: Error | undefined) => {
               if (result) {
-                this.handleScanResult(result, onScan)
+                console.log(`✅ Detected barcode type: ${BarcodeFormat[result.getBarcodeFormat()]}`)
+                this.handleScanResult(result)
               }
-              if (error && onError && error.name !== 'NotFoundException') {
-                onError(error)
+              if (error) {
+                const now = Date.now()
+                if (!this.lastErrorLogTime || now - this.lastErrorLogTime > 2000) {
+                  this.lastErrorLogTime = now
+                  if (error.name.startsWith('NotFoundException')) {
+                    console.log('🔍 Scanning... (no barcode detected in current frame)')
+                  } else {
+                    console.log(`⚠️ Scanner error: ${error.name}: ${error.message}`)
+                    if (onError) onError(error)
+                  }
+                }
               }
             }
           )
           this.stream = videoElement.srcObject as MediaStream
           this.isRunning = true
-          await this.applyZoom(zoom)
+          this.startOcrScanning()
           console.log('✅ Scanner started with fallback camera')
         } catch (fallbackErr) {
           throw fallbackErr
@@ -150,6 +295,9 @@ export class BarcodeProcessor {
    */
   stopScanning(): void {
     console.log('🛑 Stopping barcode scanner...')
+
+    // Stop OCR scanning
+    this.stopOcrScanning()
 
     // Stop scanner controls
     if (this.controls) {
@@ -169,6 +317,8 @@ export class BarcodeProcessor {
     this.isRunning = false
     this.lastScannedValue = null
     this.lastScanTime = 0
+    this.onScanCallback = undefined
+    this.videoElement = null
 
     console.log('✅ Scanner stopped')
   }
@@ -230,10 +380,7 @@ export class BarcodeProcessor {
   /**
    * Handle scan result from continuous scanning
    */
-  private handleScanResult(
-    result: Result,
-    onScan?: (result: BarcodeScanResult) => void
-  ): void {
+  private handleScanResult(result: Result): void {
     const rawValue = result.getText()
     const now = Date.now()
 
@@ -248,8 +395,8 @@ export class BarcodeProcessor {
     const scanResult = this.processResult(result)
     console.log(`📊 Barcode scanned: ${scanResult.sku ?? 'NOT FOUND'} (${scanResult.format})`)
 
-    if (onScan) {
-      onScan(scanResult)
+    if (this.onScanCallback) {
+      this.onScanCallback(scanResult)
     }
   }
 
@@ -259,60 +406,23 @@ export class BarcodeProcessor {
   private processResult(result: Result): BarcodeScanResult {
     const rawValue = result.getText()
     const format = BarcodeFormat[result.getBarcodeFormat()]
+    const lookupResult = this.lookupUPC(rawValue)
 
     return {
       rawValue,
-      sku: this.extractSKU(rawValue, format),
+      sku: lookupResult.sku,
+      internalId: lookupResult.internalId,
+      matchedUpc: lookupResult.matchedUpc,
       format,
       timestamp: Date.now()
     }
   }
 
   /**
-   * Calculate EAN-13 check digit
+   * Look up SKU from raw barcode value using local UPC lookup table
+   * Returns sku and matchedUpc (both null if not found)
    */
-  private calculateEAN13CheckDigit(digits: string): string {
-    let sum = 0
-    for (let i = 0; i < 12; i++) {
-      const digit = parseInt(digits[i], 10)
-      sum += i % 2 === 0 ? digit : digit * 3
-    }
-    const checkDigit = (10 - (sum % 10)) % 10
-    return checkDigit.toString()
-  }
-
-  /**
-   * Convert scanned middle section to full UPC (EAN-13 format)
-   * Adds "01" prefix and calculates check digit
-   * e.g., "9823790129" → "0198237901297"
-   */
-  private convertToFullUPC(middleSection: string): string {
-    // Clean to digits only
-    const cleaned = middleSection.replace(/\D/g, '')
-
-    // Add "01" prefix
-    const withPrefix = '01' + cleaned
-
-    // Pad or trim to 12 digits (before check digit)
-    let base12: string
-    if (withPrefix.length < 12) {
-      base12 = withPrefix.padEnd(12, '0')
-    } else if (withPrefix.length > 12) {
-      base12 = withPrefix.substring(0, 12)
-    } else {
-      base12 = withPrefix
-    }
-
-    // Calculate and append check digit
-    const checkDigit = this.calculateEAN13CheckDigit(base12)
-    return base12 + checkDigit
-  }
-
-  /**
-   * Extract SKU from raw barcode value using local UPC lookup table
-   * Returns null if UPC is not found (so caller can show "not found" message)
-   */
-  private extractSKU(rawValue: string, _format: string): string | null {
+  private lookupUPC(rawValue: string): { sku: string | null; internalId: string | null; matchedUpc: string | null } {
     // Clean the raw value - digits only
     const cleaned = rawValue.trim().replace(/\D/g, '')
     console.log(`🔍 Scanned barcode: "${cleaned}" (${cleaned.length} digits)`)
@@ -321,62 +431,36 @@ export class BarcodeProcessor {
     const lookupResult = lookupSKUByUPC(cleaned)
 
     if (lookupResult.success && lookupResult.sku) {
-      return lookupResult.sku
-    }
-
-    // Not found - return null so caller can handle appropriately
-    console.log(`❌ UPC not found in lookup table`)
-    return null
-  }
-
-  /**
-   * Apply zoom to the camera stream if supported
-   */
-  private async applyZoom(zoomLevel: number): Promise<void> {
-    if (!this.stream) return
-
-    const videoTrack = this.stream.getVideoTracks()[0]
-    if (!videoTrack) return
-
-    try {
-      // Check if zoom is supported
-      const capabilities = videoTrack.getCapabilities() as MediaTrackCapabilities & { zoom?: { min: number; max: number } }
-
-      if (capabilities.zoom) {
-        const { min, max } = capabilities.zoom
-        // Clamp zoom level to supported range
-        const clampedZoom = Math.min(Math.max(zoomLevel, min), max)
-
-        await videoTrack.applyConstraints({
-          advanced: [{ zoom: clampedZoom } as MediaTrackConstraintSet]
-        })
-
-        console.log(`🔍 Zoom applied: ${clampedZoom}x (range: ${min}-${max})`)
-      } else {
-        console.log('📷 Zoom not supported on this camera')
+      return {
+        sku: lookupResult.sku,
+        internalId: lookupResult.internalId,
+        matchedUpc: lookupResult.matchedUpc || null
       }
-    } catch (err) {
-      console.log('📷 Could not apply zoom:', err)
     }
+
+    // Not found
+    console.log(`❌ UPC not found in lookup table`)
+    return { sku: null, internalId: null, matchedUpc: null }
   }
 
   /**
    * Get camera constraints for scanning
+   * Higher resolution helps with Code 128 which has denser bars
    */
   private getCameraConstraints(preferRear: boolean): MediaStreamConstraints {
     if (preferRear) {
       return {
         video: {
           facingMode: { ideal: 'environment' },
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
+          width: { ideal: 1920 },
+          height: { ideal: 1080 }
         }
       }
     }
     return {
       video: {
-        width: { ideal: 1280 },
-        height: { ideal: 720 }
+        width: { ideal: 1920 },
+        height: { ideal: 1080 }
       }
     }
   }
@@ -384,9 +468,17 @@ export class BarcodeProcessor {
   /**
    * Cleanup resources
    */
-  destroy(): void {
+  async destroy(): Promise<void> {
     this.stopScanning()
     this.reader = null
+
+    // Terminate OCR worker
+    if (this.ocrWorker) {
+      await this.ocrWorker.terminate()
+      this.ocrWorker = null
+    }
+    this.ocrCanvas = null
+    this.ocrCtx = null
   }
 }
 

@@ -2,10 +2,15 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 85%;
-  max-width: 300px;
+  width: 100%;
   margin: 0 auto;
   min-height: 120px; /* Prevent layout shift between scanner and card */
+  overflow: visible;
+}
+
+.barcode-scanner .scanner-window {
+  width: 85%;
+  max-width: 300px;
 }
 
 /* Scanner window */
@@ -152,6 +157,7 @@
   background: #f8f9fa;
   border-radius: 12px;
   overflow: hidden;
+  margin-top: 12px;
 }
 
 .product-header {
@@ -298,36 +304,90 @@
 
 /* Analyzing state */
 .scanner-window.analyzing {
-  background: #001A57;
+  background: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.analyzing-blur-background {
+  position: absolute;
+  top: -20px;
+  left: -20px;
+  right: -20px;
+  bottom: -20px;
+  background-size: cover;
+  background-position: center;
+  filter: blur(15px);
+  opacity: 0.8;
+}
+
+.analyzing-content {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 12px;
 }
 
-.analyzing-spinner {
-  width: 24px;
-  height: 24px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
+.analyzing-content p {
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 400;
+  color: #fff;
+  margin: 0;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Smooth gradient arc spinner */
+.scanner-window .spinner {
+  width: 32px;
+  height: 32px;
+  position: relative;
+  animation: spin 1s linear infinite;
+}
+
+.scanner-window .spinner::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 60deg,
+    rgba(255, 255, 255, 0) 60deg,
+    rgba(255, 255, 255, 0.1) 120deg,
+    rgba(255, 255, 255, 0.3) 180deg,
+    rgba(255, 255, 255, 0.6) 240deg,
+    rgba(255, 255, 255, 0.9) 300deg,
+    #fff 360deg
+  );
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #fff calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #fff calc(100% - 3px));
+}
+
+.scanner-window .spinner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 3px;
+  height: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transform: translateX(-50%);
 }
 
 @keyframes spin {
   to {
     transform: rotate(360deg);
   }
-}
-
-.analyzing-text {
-  font-family: var(--font-sans);
-  font-size: 13px;
-  font-weight: 400;
-  color: #fff;
-  text-align: center;
-  line-height: 1.4;
 }
 
 /* Scan status display */

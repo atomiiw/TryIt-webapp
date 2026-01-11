@@ -1,17 +1,19 @@
 /**
- * UPC to SKU Lookup Utility
- * Looks up product SKU from UPC barcode using local JSON lookup table
+ * UPC Lookup Utility
+ * Looks up product SKU and internalId from UPC barcode using local JSON lookup table
  */
 
-// Import local UPC to SKU mapping
-import upcToSkuData from '../data/upcToSku.json'
+// Import local UPC lookup mapping
+import upcLookupData from '../data/upcLookup.json'
 
 // Type the imported JSON
-const upcToSku: Record<string, string> = upcToSkuData
+const upcLookup: Record<string, { sku: string; internalId: string }> = upcLookupData
 
 export interface UPCLookupResult {
   success: boolean
   sku: string | null
+  internalId: string | null
+  matchedUpc?: string  // The UPC variation that matched
   error?: string
 }
 
@@ -29,6 +31,7 @@ export function lookupSKUByUPC(upc: string): UPCLookupResult {
     return {
       success: false,
       sku: null,
+      internalId: null,
       error: 'UPC code is required'
     }
   }
@@ -46,12 +49,14 @@ export function lookupSKUByUPC(upc: string): UPCLookupResult {
   for (const variation of variations) {
     if (!variation) continue
 
-    const sku = upcToSku[variation]
-    if (sku) {
-      console.log(`✅ Found SKU: ${sku} (matched UPC: ${variation})`)
+    const result = upcLookup[variation]
+    if (result) {
+      console.log(`✅ Found SKU: ${result.sku}, internalId: ${result.internalId} (matched UPC: ${variation})`)
       return {
         success: true,
-        sku
+        sku: result.sku,
+        internalId: result.internalId,
+        matchedUpc: variation
       }
     }
   }
@@ -61,6 +66,7 @@ export function lookupSKUByUPC(upc: string): UPCLookupResult {
   return {
     success: false,
     sku: null,
+    internalId: null,
     error: `UPC not found: ${cleaned}`
   }
 }

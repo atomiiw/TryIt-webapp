@@ -35,7 +35,8 @@ export interface UserData {
   height: number | null
   heightUnit: 'ft' | 'cm'
   heightInches: number | null
-  item: ItemData | null
+  item: ItemData | null  // Current active item (for backward compatibility)
+  items: ItemData[]      // All scanned items for stacked cards
 }
 
 function App() {
@@ -59,7 +60,8 @@ function App() {
       height: 180,
       heightUnit: 'cm',
       heightInches: null,
-      item: null
+      item: null,
+      items: []
     }
   })
 

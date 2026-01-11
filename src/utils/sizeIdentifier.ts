@@ -161,15 +161,15 @@ function calculateMaleDimension(H: number, W: number, key: string, F: number): n
 
   switch (key) {
     case 'chest':
-      // C_m = 0.40*H + 0.40*W + Δ(F) where Δ: lean=-5, normal=0, soft=+1
+      // C_m = 0.24*H + 0.76*W + Δ(F) where Δ: lean=-5, normal=0, soft=+1
       const maleChestDelta = F === 0.85 ? -5 : F === 1.25 ? 1 : 0
-      result = 0.40 * H + 0.40 * W + maleChestDelta
-      formula = `0.40×${H} + 0.40×${W} + ${maleChestDelta} = ${result.toFixed(1)}`
+      result = 0.24 * H + 0.76 * W + maleChestDelta
+      formula = `0.24×${H} + 0.76×${W} + ${maleChestDelta} = ${result.toFixed(1)}`
       break
     case 'waist':
-      // Waist = 0.45*H × (BMI/22) - scales ideal waist by BMI ratio to reference BMI (22)
-      result = (0.45 * H) * (BMI / 22)
-      formula = `(0.45×${H}) × (${BMI.toFixed(1)}/22) = ${result.toFixed(1)}`
+      // Waist = 0.16*H + 0.68*W - linear formula based on height and weight
+      result = 0.16 * H + 0.68 * W
+      formula = `0.16×${H} + 0.68×${W} = ${result.toFixed(1)}`
       break
     case 'hips':
       result = (0.28 * H + 0.40 * W + 20) * (0.93 + 0.07 * F)
@@ -215,15 +215,15 @@ function calculateFemaleDimension(H: number, W: number, key: string, F: number):
 
   switch (key) {
     case 'chest':
-      // C_f = 0.40*H + 0.40*W + 2 + Δ(F) where Δ: lean=-5, normal=0, soft=+1
+      // C_f = 0.16*H + 1.08*W + 1 + Δ(F) where Δ: lean=-5, normal=0, soft=+1
       const femaleChestDelta = F === 0.85 ? -5 : F === 1.25 ? 1 : 0
-      result = 0.40 * H + 0.40 * W + 2 + femaleChestDelta
-      formula = `0.40×${H} + 0.40×${W} + 2 + ${femaleChestDelta} = ${result.toFixed(1)}`
+      result = 0.16 * H + 1.08 * W + 1 + femaleChestDelta
+      formula = `0.16×${H} + 1.08×${W} + 1 + ${femaleChestDelta} = ${result.toFixed(1)}`
       break
     case 'waist':
-      // Waist = (0.45*H + 2) × (BMI/22) - scales ideal waist by BMI ratio to reference BMI (22)
-      result = (0.45 * H + 2) * (BMI / 22)
-      formula = `(0.45×${H} + 2) × (${BMI.toFixed(1)}/22) = ${result.toFixed(1)}`
+      // Waist = 0.225*H + 0.61*W - linear formula based on height and weight
+      result = 0.225 * H + 0.61 * W
+      formula = `0.225×${H} + 0.61×${W} = ${result.toFixed(1)}`
       break
     case 'hips':
       result = (0.30 * H + 0.50 * W + 22) * (0.91 + 0.09 * F)
