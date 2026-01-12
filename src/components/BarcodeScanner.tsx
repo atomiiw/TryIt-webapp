@@ -64,8 +64,8 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [detectedSku, setDetectedSku] = useState<string | null>(null)
-  const [matchedUpc, setMatchedUpc] = useState<string | null>(null)
-  const [detectedInternalId, setDetectedInternalId] = useState<string | null>(null)
+  const [_matchedUpc, setMatchedUpc] = useState<string | null>(null)
+  const [_detectedInternalId, setDetectedInternalId] = useState<string | null>(null)
   const [scanStatus, setScanStatus] = useState<'scanning' | 'detected' | 'not_found' | 'error' | null>(null)
   const [capturedFrame, setCapturedFrame] = useState<string | null>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -431,7 +431,7 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
     }
   }, [])
 
-  const handleRemoveItem = (itemToRemove: ClothingItem, index: number) => {
+  const handleRemoveItem = (_itemToRemove: ClothingItem, index: number) => {
     const newItems = items.filter((_, i) => i !== index)
     onItemsChange(newItems)
 
@@ -447,7 +447,7 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
     }
   }
 
-  const handleItemSelect = (selectedItem: ClothingItem, index: number) => {
+  const handleItemSelect = (_selectedItem: ClothingItem, index: number) => {
     // Find the corresponding ItemData and set as active
     const itemData = items[index]
     if (itemData) {

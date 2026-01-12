@@ -157,7 +157,6 @@ export function calculateDimension(
 function calculateMaleDimension(H: number, W: number, key: string, F: number): number | null {
   let result: number | null = null
   let formula = ''
-  const BMI = W / Math.pow(H / 100, 2)
 
   switch (key) {
     case 'chest':
@@ -211,7 +210,6 @@ function calculateMaleDimension(H: number, W: number, key: string, F: number): n
 function calculateFemaleDimension(H: number, W: number, key: string, F: number): number | null {
   let result: number | null = null
   let formula = ''
-  const BMI = W / Math.pow(H / 100, 2)
 
   switch (key) {
     case 'chest':
