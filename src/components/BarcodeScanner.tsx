@@ -59,6 +59,7 @@ function formatSizeRange(sizes: string[]): string {
 
 function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeScannerProps) {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [navigationTrigger, setNavigationTrigger] = useState(0);
   const [isScanning, setIsScanning] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -356,24 +357,39 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
         hasSizeGuide: !!analyzedItem.sizeGuide
       })
 
-      // Done - add the item to items array
+      // Done - check for duplicates or add to items array
       setIsAnalyzing(false)
       setScanStatus('detected')
-      console.log('📤 Adding item to items array')
 
-      // Add unique id with timestamp to avoid duplicates
-      const itemWithUniqueId = {
-        ...analyzedItem,
-        id: `${analyzedItem.id}-${Date.now()}`
+      // Check if item already exists (by matching base ID)
+      const existingIndex = items.findIndex(existingItem =>
+        existingItem.id.startsWith(analyzedItem.id)
+      )
+
+      if (existingIndex !== -1) {
+        // Item already exists - jump to it instead of adding duplicate
+        console.log('📍 Item already exists, jumping to card', existingIndex + 1)
+        onItemScanned(items[existingIndex])
+        setCurrentCardIndex(existingIndex)
+        setNavigationTrigger(prev => prev + 1) // Force navigation even if index same
+      } else {
+        // New item - add to array
+        console.log('📤 Adding item to items array')
+
+        // Add unique id with timestamp
+        const itemWithUniqueId = {
+          ...analyzedItem,
+          id: `${analyzedItem.id}-${Date.now()}`
+        }
+
+        // Add to items array
+        const newItems = [...items, itemWithUniqueId]
+        onItemsChange(newItems)
+
+        // Set as current active item and focus on the new card
+        onItemScanned(itemWithUniqueId)
+        setCurrentCardIndex(newItems.length - 1)
       }
-
-      // Add to items array
-      const newItems = [...items, itemWithUniqueId]
-      onItemsChange(newItems)
-
-      // Set as current active item and focus on the new card
-      onItemScanned(itemWithUniqueId)
-      setCurrentCardIndex(newItems.length - 1)
 
     } catch (err) {
       console.error('❌ Failed to process item:', err)
@@ -533,6 +549,7 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
           onItemSelect={handleItemSelect}
           onRemoveItem={handleRemoveItem}
           initialIndex={currentCardIndex}
+          navigationTrigger={navigationTrigger}
         />
       )}
     </div>

@@ -9,9 +9,23 @@ import { identifySize } from '../utils/sizeIdentifier'
 import { generateTryOnImage, type FitType as TryOnFitType } from '../utils/tryOnService'
 import './ResultsSection.css'
 
+// Cached analysis from parent
+interface CachedAnalysis {
+  sizeRec: {
+    tight: string | null
+    regular: string | null
+    comfortable: string | null
+  }
+  measurements: Array<{ name: string; value: number }>
+}
+
 interface ResultsSectionProps {
   userData: UserData
   isVisible: boolean
+  initialImages?: Partial<Record<FitType, string>>
+  cachedAnalysis?: CachedAnalysis | null
+  onImageGenerated?: (fit: FitType, imageDataUrl: string) => void
+  onAnalysisComplete?: (analysis: CachedAnalysis) => void
 }
 
 type FitType = 'tight' | 'regular' | 'comfortable'
@@ -187,19 +201,33 @@ const LOADING_MESSAGES = [
 // Type for generated images state
 type GeneratedImages = Record<FitType, string | null>
 
-function ResultsSection({ userData, isVisible }: ResultsSectionProps) {
-  const [isLoading, setIsLoading] = useState(true)
+function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, onImageGenerated, onAnalysisComplete }: ResultsSectionProps) {
+  // If we have cached analysis, skip loading state
+  const hasCachedData = !!cachedAnalysis
+  const [isLoading, setIsLoading] = useState(!hasCachedData)
   const [loadingMessage, setLoadingMessage] = useState(LOADING_MESSAGES[0])
   const [error, setError] = useState<string | null>(null)
-  const [sizeRec, setSizeRec] = useState<SizeRecommendation | null>(null)
-  const [measurements, setMeasurements] = useState<CalculatedMeasurement[]>([])
-  const [selectedFit, setSelectedFit] = useState<FitType>('regular')
-  const [hasStarted, setHasStarted] = useState(false)
+  const [sizeRec, setSizeRec] = useState<SizeRecommendation | null>(
+    cachedAnalysis ? cachedAnalysis.sizeRec as SizeRecommendation : null
+  )
+  const [measurements, setMeasurements] = useState<CalculatedMeasurement[]>(
+    cachedAnalysis ? cachedAnalysis.measurements : []
+  )
+  const [selectedFit, setSelectedFit] = useState<FitType>(() => {
+    // Initialize selected fit based on cached data or default to 'regular'
+    if (cachedAnalysis?.sizeRec) {
+      if (cachedAnalysis.sizeRec.regular) return 'regular'
+      if (cachedAnalysis.sizeRec.comfortable) return 'comfortable'
+      if (cachedAnalysis.sizeRec.tight) return 'tight'
+    }
+    return 'regular'
+  })
+  const [hasStarted, setHasStarted] = useState(hasCachedData) // Skip analysis if cached
   const [regeneratingFits, setRegeneratingFits] = useState<Set<FitType>>(new Set())
   const [generatedImages, setGeneratedImages] = useState<GeneratedImages>({
-    tight: null,
-    regular: null,
-    comfortable: null
+    tight: initialImages?.tight || null,
+    regular: initialImages?.regular || null,
+    comfortable: initialImages?.comfortable || null
   })
   const [generatingFits, setGeneratingFits] = useState<Set<FitType>>(new Set())
   const [showShareModal, setShowShareModal] = useState(false)
@@ -250,6 +278,8 @@ function ResultsSection({ userData, isVisible }: ResultsSectionProps) {
 
       if (result.success && result.imageDataUrl) {
         setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))
+        // Notify parent of generated image
+        onImageGenerated?.(fit, result.imageDataUrl)
       } else {
         console.error(`Failed to generate ${fit} fit:`, result.error)
       }
@@ -335,6 +365,16 @@ function ResultsSection({ userData, isVisible }: ResultsSectionProps) {
           setSelectedFit('tight')
         }
 
+        // Cache analysis results in parent
+        onAnalysisComplete?.({
+          sizeRec: {
+            tight: recommendation.tight,
+            regular: recommendation.regular,
+            comfortable: recommendation.comfortable
+          },
+          measurements: calculatedMeasurements
+        })
+
       } catch (err) {
         console.error('Analysis failed:', err)
         setError(err instanceof Error ? err.message : 'Analysis failed')
@@ -344,7 +384,7 @@ function ResultsSection({ userData, isVisible }: ResultsSectionProps) {
     }
 
     runAnalysis()
-  }, [isVisible, hasStarted, userData])
+  }, [isVisible, hasStarted, userData, onAnalysisComplete])
 
   // Scroll into view when section becomes visible
   useEffect(() => {
@@ -357,6 +397,7 @@ function ResultsSection({ userData, isVisible }: ResultsSectionProps) {
 
   // Generate try-on images when size recommendation is available
   // Each fit is completely independent - uses ref to prevent duplicate triggers
+  // Skip generation for fits that already have images from initialImages
   useEffect(() => {
     if (!sizeRec || !userData.image || !userData.item?.imageUrl) return
 
@@ -364,13 +405,14 @@ function ResultsSection({ userData, isVisible }: ResultsSectionProps) {
     const fits: FitType[] = ['tight', 'regular', 'comfortable']
 
     fits.forEach(fit => {
-      // Only start if: size exists for this fit AND we haven't started it yet
-      if (sizeRec[fit] && !startedGeneratingRef.current.has(fit)) {
+      // Only start if: size exists for this fit AND we haven't started it yet AND no existing image
+      const hasExistingImage = !!generatedImages[fit]
+      if (sizeRec[fit] && !startedGeneratingRef.current.has(fit) && !hasExistingImage) {
         startedGeneratingRef.current.add(fit)
         generateFitImage(fit)
       }
     })
-  }, [sizeRec, userData.image, userData.item?.imageUrl])
+  }, [sizeRec, userData.image, userData.item?.imageUrl, generatedImages])
 
   // Get available fit types (those with actual sizes)
   // Memoized to prevent scroll effect from running on every re-render
@@ -470,6 +512,8 @@ function ResultsSection({ userData, isVisible }: ResultsSectionProps) {
 
       if (result.success && result.imageDataUrl) {
         setGeneratedImages(prev => ({ ...prev, [currentFit]: result.imageDataUrl }))
+        // Notify parent of regenerated image
+        onImageGenerated?.(currentFit, result.imageDataUrl)
       } else {
         console.error(`Failed to regenerate ${currentFit} fit:`, result.error)
       }
@@ -718,10 +762,14 @@ function ResultsSection({ userData, isVisible }: ResultsSectionProps) {
                 )
               })}
             </div>
-            <p className="sizing-disclaimer">*Sizing recommendations are estimates only and do not guarantee fit.</p>
           </div>
         )
       })()}
+
+      {/* Sizing disclaimer - show whenever we have a size recommendation */}
+      {sizeRec && (
+        <p className="sizing-disclaimer">*Sizing recommendations are estimates only and do not guarantee fit.</p>
+      )}
 
       {/* Share button - only show when at least one image is generated */}
       {sharableFits.length > 0 && (

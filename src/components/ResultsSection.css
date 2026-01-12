@@ -124,7 +124,7 @@
 .size-picker-container {
   width: 100%;
   max-width: 280px;
-  margin: 0 auto 48px;
+  margin: 0 auto 16px;
 }
 
 .size-picker {
@@ -212,7 +212,7 @@
 .fit-comparison-section {
   width: 100%;
   max-width: 280px;
-  margin: 0 auto 32px;
+  margin: 32px auto 0;
   background: none;
   padding: 0;
   border-radius: 0;
@@ -278,7 +278,8 @@
   font-weight: 300;
   color: #666;
   text-align: center;
-  margin: 16px 0 0 0;
+  max-width: 280px;
+  margin: 16px auto 0;
 }
 
 /* Loading state */

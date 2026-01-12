@@ -24,21 +24,40 @@ const USE_DEMO_MODE = false
 // Session storage keys
 const SHOPPING_STATE_KEY = 'tryit_shopping_state'
 
-interface ShoppingState {
+// Generated images by fit type
+type FitType = 'tight' | 'regular' | 'comfortable'
+type GeneratedImages = Partial<Record<FitType, string>>
+
+// Cached analysis results
+interface CachedAnalysis {
+  sizeRec: {
+    tight: string | null
+    regular: string | null
+    comfortable: string | null
+  }
+  measurements: Array<{ name: string; value: number }>
+}
+
+// Per-item state for "try it on" results
+interface ItemTryOnState {
   showResults: boolean
   resultsKey: number
-  lastGeneratedData: {
+  generatedImages: GeneratedImages
+  cachedAnalysis: CachedAnalysis | null
+  generatedData: {
     image: string | null
     weight: number | null
     weightUnit: string
     height: number | null
     heightUnit: string
     heightInches: number | null
-    itemId: string | null
   } | null
 }
 
-function loadShoppingState(): ShoppingState {
+// State is now keyed by item ID
+type TryOnStateByItem = Record<string, ItemTryOnState>
+
+function loadShoppingState(): TryOnStateByItem {
   try {
     const stored = sessionStorage.getItem(SHOPPING_STATE_KEY)
     if (stored) {
@@ -49,77 +68,124 @@ function loadShoppingState(): ShoppingState {
   } catch (e) {
     console.warn('Failed to load shopping state:', e)
   }
-  return { showResults: false, resultsKey: 0, lastGeneratedData: null }
+  return {}
 }
 
 // Load initial state once (outside component to avoid re-running on each render)
 const initialShoppingState = loadShoppingState()
 
 function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
-  const [showResults, setShowResults] = useState(initialShoppingState.showResults)
-  const [resultsKey, setResultsKey] = useState(initialShoppingState.resultsKey)
-  const [lastGeneratedData, setLastGeneratedData] = useState<{
-    image: string | null
-    weight: number | null
-    weightUnit: string
-    height: number | null
-    heightUnit: string
-    heightInches: number | null
-    itemId: string | null
-  } | null>(initialShoppingState.lastGeneratedData)
+  // Per-item try-on state
+  const [tryOnState, setTryOnState] = useState<TryOnStateByItem>(initialShoppingState)
 
-  // Persist shopping state to sessionStorage
+  // Get current item's state (or default)
+  const currentItemId = userData.item?.id || ''
+  const currentItemState = tryOnState[currentItemId] || {
+    showResults: false,
+    resultsKey: 0,
+    generatedImages: {},
+    cachedAnalysis: null,
+    generatedData: null
+  }
+
+  // Persist shopping state to sessionStorage (excluding large image data)
   useEffect(() => {
     try {
-      const state: ShoppingState = { showResults, resultsKey, lastGeneratedData }
-      sessionStorage.setItem(SHOPPING_STATE_KEY, JSON.stringify(state))
+      // Strip out generatedImages before saving - they're too large for sessionStorage
+      const stateToSave: TryOnStateByItem = {}
+      for (const [itemId, state] of Object.entries(tryOnState)) {
+        stateToSave[itemId] = {
+          ...state,
+          generatedImages: {} // Don't persist images - they'll regenerate if needed
+        }
+      }
+      sessionStorage.setItem(SHOPPING_STATE_KEY, JSON.stringify(stateToSave))
     } catch (e) {
       console.warn('Failed to save shopping state:', e)
     }
-  }, [showResults, resultsKey, lastGeneratedData])
+  }, [tryOnState])
 
   // Check if we have enough data to try on
   const hasRequiredData = userData.image && userData.item
   const hasScannedItems = (userData.items?.length || 0) > 0
 
-  // Check if data has changed since last generation
-  const hasDataChanged = !lastGeneratedData ||
-    lastGeneratedData.image !== userData.image ||
-    lastGeneratedData.weight !== userData.weight ||
-    lastGeneratedData.weightUnit !== userData.weightUnit ||
-    lastGeneratedData.height !== userData.height ||
-    lastGeneratedData.heightUnit !== userData.heightUnit ||
-    lastGeneratedData.heightInches !== userData.heightInches ||
-    lastGeneratedData.itemId !== userData.item?.id
+  // Check if data has changed since last generation for THIS item
+  const lastGenerated = currentItemState.generatedData
+  const hasDataChanged = !lastGenerated ||
+    lastGenerated.image !== userData.image ||
+    lastGenerated.weight !== userData.weight ||
+    lastGenerated.weightUnit !== userData.weightUnit ||
+    lastGenerated.height !== userData.height ||
+    lastGenerated.heightUnit !== userData.heightUnit ||
+    lastGenerated.heightInches !== userData.heightInches
 
   // Can only try it on if we have data AND (haven't generated yet OR data changed)
   const canTryIt = hasRequiredData && hasDataChanged
 
-  // Hide results if required data is removed
+  // Hide results for current item if required data is removed
   useEffect(() => {
-    if (!hasRequiredData && showResults) {
-      setShowResults(false)
-      setLastGeneratedData(null)
+    if (!hasRequiredData && currentItemState.showResults && currentItemId) {
+      setTryOnState(prev => ({
+        ...prev,
+        [currentItemId]: {
+          showResults: false,
+          resultsKey: prev[currentItemId]?.resultsKey || 0,
+          generatedImages: {},
+          cachedAnalysis: null,
+          generatedData: null
+        }
+      }))
     }
-  }, [hasRequiredData, showResults])
+  }, [hasRequiredData, currentItemState.showResults, currentItemId])
 
   const handleTryIt = () => {
-    if (!canTryIt) return
+    if (!canTryIt || !currentItemId) return
 
-    // Save the current data state
-    setLastGeneratedData({
-      image: userData.image,
-      weight: userData.weight,
-      weightUnit: userData.weightUnit,
-      height: userData.height,
-      heightUnit: userData.heightUnit,
-      heightInches: userData.heightInches,
-      itemId: userData.item?.id || null
-    })
+    // Update this item's state - clear images and analysis if data changed
+    setTryOnState(prev => ({
+      ...prev,
+      [currentItemId]: {
+        showResults: true,
+        resultsKey: (prev[currentItemId]?.resultsKey || 0) + 1,
+        generatedImages: {}, // Clear images when re-trying with new data
+        cachedAnalysis: null, // Clear analysis too
+        generatedData: {
+          image: userData.image,
+          weight: userData.weight,
+          weightUnit: userData.weightUnit,
+          height: userData.height,
+          heightUnit: userData.heightUnit,
+          heightInches: userData.heightInches
+        }
+      }
+    }))
+  }
 
-    // Increment key to force ResultsSection to remount and reprocess
-    setResultsKey(prev => prev + 1)
-    setShowResults(true)
+  // Handler for when ResultsSection generates an image
+  const handleImageGenerated = (fit: FitType, imageDataUrl: string) => {
+    if (!currentItemId) return
+    setTryOnState(prev => ({
+      ...prev,
+      [currentItemId]: {
+        ...prev[currentItemId],
+        generatedImages: {
+          ...prev[currentItemId]?.generatedImages,
+          [fit]: imageDataUrl
+        }
+      }
+    }))
+  }
+
+  // Handler for when ResultsSection completes analysis
+  const handleAnalysisComplete = (analysis: CachedAnalysis) => {
+    if (!currentItemId) return
+    setTryOnState(prev => ({
+      ...prev,
+      [currentItemId]: {
+        ...prev[currentItemId],
+        cachedAnalysis: analysis
+      }
+    }))
   }
 
   return (
@@ -158,7 +224,7 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
         </section>
 
         <button
-          className={`tryit-button ${canTryIt ? 'active' : (showResults && hasRequiredData ? 'generated' : 'disabled')}`}
+          className={`tryit-button ${canTryIt ? 'active' : (currentItemState.showResults && hasRequiredData ? 'generated' : 'disabled')}`}
           style={{ marginTop: hasScannedItems ? BUTTON_SPACING.itemCard : BUTTON_SPACING.scanner }}
           onClick={handleTryIt}
           disabled={!canTryIt}
@@ -167,18 +233,22 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
         </button>
       </div>
 
-      {/* Results Section - appears below when Try it on is clicked */}
+      {/* Results Section - appears below when Try it on is clicked for current item */}
       {USE_DEMO_MODE ? (
         <ResultsSectionDemo
-          key={resultsKey}
+          key={`${currentItemId}-${currentItemState.resultsKey}`}
           userData={userData}
-          isVisible={showResults}
+          isVisible={currentItemState.showResults}
         />
       ) : (
         <ResultsSection
-          key={resultsKey}
+          key={`${currentItemId}-${currentItemState.resultsKey}`}
           userData={userData}
-          isVisible={showResults}
+          isVisible={currentItemState.showResults}
+          initialImages={currentItemState.generatedImages}
+          cachedAnalysis={currentItemState.cachedAnalysis}
+          onImageGenerated={handleImageGenerated}
+          onAnalysisComplete={handleAnalysisComplete}
         />
       )}
     </div>
