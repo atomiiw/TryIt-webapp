@@ -125,7 +125,7 @@
 /* Z-ORDER: 1 */
 .card-item-image {
   position: absolute;
-  top: -40px;
+  top: 10px;
   left: 34px;
   width: 160px;
   height: 204px;
@@ -150,7 +150,7 @@
   top: 70px;
   left: 47px;
   width: 133px;
-  height: 100px;
+  height: 120px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 100%);
   z-index: 2;
   pointer-events: none;
