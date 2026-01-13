@@ -138,9 +138,9 @@
   max-width: 120px;
   max-height: 204px;
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 50%;
-  transform-origin: bottom center;
+  transform-origin: top center;
 }
 
 /* Gradient fade on image - Rectangle 5: x=47, y=85, 133x80px */
