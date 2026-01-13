@@ -283,6 +283,7 @@ RULES:
 - If the new ${itemType} is shorts but the person is wearing pants, show their bare legs
 - Keep exact same color as the provided ${itemType}
 - Any text, letters, or logos on the ${itemType} must match EXACTLY - same words, same spelling, same design
+- Keep ALL colors the same including the colors of any words, letters, or graphics on the ${itemType}
 - Keep person's pose, face, and background unchanged`,
 
     regular: `VIRTUAL TRY-ON: First remove all existing clothes from the person, then dress them in the ${colorDesc}${itemType} "${itemName}".${removeJacketInstruction}
@@ -300,6 +301,7 @@ RULES:
 - If the new ${itemType} is shorts but the person is wearing pants, show their bare legs
 - Keep exact same color as the provided ${itemType}
 - Any text, letters, or logos on the ${itemType} must match EXACTLY - same words, same spelling, same design
+- Keep ALL colors the same including the colors of any words, letters, or graphics on the ${itemType}
 - Keep person's pose, face, and background unchanged`,
 
     comfortable: `VIRTUAL TRY-ON: First remove all existing clothes from the person, then dress them in the ${colorDesc}${itemType} "${itemName}".${removeJacketInstruction}
@@ -317,6 +319,7 @@ RULES:
 - If the new ${itemType} is shorts but the person is wearing pants, show their bare legs
 - Keep exact same color as the provided ${itemType}
 - Any text, letters, or logos on the ${itemType} must match EXACTLY - same words, same spelling, same design
+- Keep ALL colors the same including the colors of any words, letters, or graphics on the ${itemType}
 - Keep person's pose, face, and background unchanged`
   }
 

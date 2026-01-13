@@ -160,10 +160,9 @@ function calculateMaleDimension(H: number, W: number, key: string, F: number): n
 
   switch (key) {
     case 'chest':
-      // C_m = 0.24*H + 0.76*W + Δ(F) where Δ: lean=-5, normal=0, soft=+1
-      const maleChestDelta = F === 0.85 ? -5 : F === 1.25 ? 1 : 0
-      result = 0.24 * H + 0.76 * W + maleChestDelta
-      formula = `0.24×${H} + 0.76×${W} + ${maleChestDelta} = ${result.toFixed(1)}`
+      // C_m = 0.24*H + 0.76*W (no body composition adjustment for male chest)
+      result = 0.24 * H + 0.76 * W
+      formula = `0.24×${H} + 0.76×${W} = ${result.toFixed(1)}`
       break
     case 'waist':
       // Waist = 0.16*H + 0.68*W - linear formula based on height and weight

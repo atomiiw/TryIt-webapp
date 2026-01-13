@@ -390,7 +390,7 @@ const StackedCards: React.FC<StackedCardsProps> = ({
         <div className="stacked-cards-counter">
           {currentIndex + 1} of {items.length}
         </div>
-        {items.length > 1 && (
+        {items.length >= 1 && (
           <div className="stacked-cards-pagination">
             {items.map((_, index) => (
               <button

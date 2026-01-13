@@ -6,28 +6,19 @@
       "gender": "unisex",
       "sizes": [
         {
-          "label": "XXS",
-          "measurements": {
-            "chest": {
-              "min": 73.7,
-              "max": 78.7
-            },
-            "waist": {
-              "min": 68.6,
-              "max": 73.7
-            }
-          }
-        },
-        {
           "label": "XS",
           "measurements": {
             "chest": {
-              "min": 76.2,
-              "max": 81.3
+              "min": 81.3,
+              "max": 86.4
             },
             "waist": {
-              "min": 71.1,
-              "max": 76.2
+              "min": 63.5,
+              "max": 68.6
+            },
+            "hips": {
+              "min": 83.8,
+              "max": 86.4
             }
           }
         },
@@ -35,12 +26,16 @@
           "label": "S",
           "measurements": {
             "chest": {
-              "min": 86.4,
-              "max": 91.4
+              "min": 88.9,
+              "max": 94.0
             },
             "waist": {
-              "min": 76.2,
-              "max": 81.3
+              "min": 71.1,
+              "max": 76.2
+            },
+            "hips": {
+              "min": 88.9,
+              "max": 94.0
             }
           }
         },
@@ -52,8 +47,12 @@
               "max": 101.6
             },
             "waist": {
-              "min": 81.3,
+              "min": 78.7,
               "max": 83.8
+            },
+            "hips": {
+              "min": 96.5,
+              "max": 101.6
             }
           }
         },
@@ -61,12 +60,16 @@
           "label": "L",
           "measurements": {
             "chest": {
-              "min": 106.7,
+              "min": 104.1,
               "max": 111.8
             },
             "waist": {
-              "min": 83.8,
-              "max": 86.4
+              "min": 86.4,
+              "max": 94.0
+            },
+            "hips": {
+              "min": 104.1,
+              "max": 111.8
             }
           }
         },
@@ -74,12 +77,16 @@
           "label": "XL",
           "measurements": {
             "chest": {
-              "min": 116.8,
+              "min": 114.3,
               "max": 121.9
             },
             "waist": {
-              "min": 91.4,
-              "max": 96.5
+              "min": 96.5,
+              "max": 104.1
+            },
+            "hips": {
+              "min": 114.3,
+              "max": 121.9
             }
           }
         },
@@ -87,12 +94,16 @@
           "label": "2XL",
           "measurements": {
             "chest": {
-              "min": 121.9,
-              "max": 127.0
+              "min": 124.5,
+              "max": 132.1
             },
             "waist": {
-              "min": 101.6,
-              "max": 106.7
+              "min": 106.7,
+              "max": 114.3
+            },
+            "hips": {
+              "min": 124.5,
+              "max": 132.1
             }
           }
         },
@@ -100,12 +111,16 @@
           "label": "3XL",
           "measurements": {
             "chest": {
-              "min": 127.0,
-              "max": 132.1
+              "min": 134.6,
+              "max": 142.2
             },
             "waist": {
-              "min": 111.8,
-              "max": 121.9
+              "min": 116.8,
+              "max": 124.5
+            },
+            "hips": {
+              "min": 134.6,
+              "max": 142.2
             }
           }
         }
@@ -302,83 +317,6 @@
             },
             "length": {
               "value": 100.1
-            }
-          }
-        }
-      ]
-    },
-    {
-      "brand": "Duke",
-      "clothing_type": "jacket",
-      "gender": "unisex",
-      "sizes": [
-        {
-          "label": "S",
-          "measurements": {
-            "width": {
-              "value": 50.8
-            },
-            "height": {
-              "value": 66.0
-            },
-            "sleeve": {
-              "value": 83.8
-            }
-          }
-        },
-        {
-          "label": "M",
-          "measurements": {
-            "width": {
-              "value": 55.9
-            },
-            "height": {
-              "value": 68.6
-            },
-            "sleeve": {
-              "value": 86.4
-            }
-          }
-        },
-        {
-          "label": "L",
-          "measurements": {
-            "width": {
-              "value": 61.0
-            },
-            "height": {
-              "value": 71.1
-            },
-            "sleeve": {
-              "value": 88.9
-            }
-          }
-        },
-        {
-          "label": "XL",
-          "measurements": {
-            "width": {
-              "value": 66.0
-            },
-            "height": {
-              "value": 73.7
-            },
-            "sleeve": {
-              "value": 91.4
-            }
-          }
-        },
-        {
-          "label": "2XL",
-          "measurements": {
-            "width": {
-              "value": 71.1
-            },
-            "height": {
-              "value": 76.2
-            },
-            "sleeve": {
-              "value": 94.0
             }
           }
         }

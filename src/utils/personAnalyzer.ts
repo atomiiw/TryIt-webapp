@@ -83,11 +83,11 @@ Determine:
 2. Age range: "children" (under 12), "teenager" (12-18), "adult" (18-65), or "elderly" (65+)
 
 3. Body composition - classify the person's overall build as ONE of:
-   - "lean": Athletic, slim, muscular, or skinny build. Visible muscle definition, slender frame, or underweight.
-   - "average": Normal/typical build. This includes most people - slightly overweight is still "average".
-   - "soft": Significantly overweight, obese, or very large build. Reserve this ONLY for clearly heavy/fat individuals.
+   - "lean": Slim, slender, athletic, skinny, or thin build. This includes: visible collarbones, thin arms/legs, narrow frame, fit/toned appearance, or underweight look. Use this for anyone who appears thinner than typical.
+   - "average": Typical/medium build. Normal body proportions without being notably thin or heavy.
+   - "soft": Overweight, heavy, curvy, or larger build. This includes: round face, thick midsection, larger arms/thighs, visible belly, or fuller figure. Use this for anyone who appears heavier than typical.
 
-IMPORTANT: Most people should be classified as "average". Only use "soft" for people who are clearly obese or significantly overweight.
+Be decisive - most people lean toward either "lean" or "soft" rather than perfectly "average". Look at arm thickness, face shape, and midsection to decide.
 
 Respond ONLY with valid JSON in this exact format:
 {
