@@ -3,6 +3,7 @@ import ShoppingPage from './components/ShoppingPage'
 import logo from './assets/TryIt_Logo.png'
 import './App.css'
 import type { SizeGuide } from './utils/sizeCollector'
+import type { PersonAnalysis } from './utils/personAnalyzer'
 
 const SESSION_STORAGE_KEY = 'tryit_session'
 
@@ -37,6 +38,7 @@ export interface UserData {
   heightInches: number | null
   item: ItemData | null  // Current active item (for backward compatibility)
   items: ItemData[]      // All scanned items for stacked cards
+  personAnalysis: PersonAnalysis | null  // Cached person analysis (run once when image changes)
 }
 
 function App() {
@@ -45,12 +47,10 @@ function App() {
     try {
       const saved = sessionStorage.getItem(SESSION_STORAGE_KEY)
       if (saved) {
-        const parsed = JSON.parse(saved)
-        console.log('📦 Restored session from storage')
-        return parsed
+        return JSON.parse(saved)
       }
-    } catch (e) {
-      console.warn('Failed to restore session:', e)
+    } catch {
+      // Failed to restore session
     }
     return {
       image: null,
@@ -61,17 +61,33 @@ function App() {
       heightUnit: 'cm',
       heightInches: null,
       item: null,
-      items: []
+      items: [],
+      personAnalysis: null
     }
   })
 
   // Save to sessionStorage whenever userData changes
   useEffect(() => {
     try {
-      sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(userData))
+      // Try to save with image first
+      const dataToSave = {
+        ...userData,
+        personAnalysis: null // Exclude analysis - regenerates quickly
+      }
+      sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(dataToSave))
     } catch (e) {
-      // sessionStorage might be full or unavailable
-      console.warn('Failed to save session:', e)
+      // If quota exceeded, try without image
+      try {
+        const dataWithoutImage = {
+          ...userData,
+          image: null,
+          croppedImage: null,
+          personAnalysis: null
+        }
+        sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(dataWithoutImage))
+      } catch {
+        // sessionStorage might be full or unavailable
+      }
     }
   }, [userData])
 

@@ -131,8 +131,8 @@ export class BarcodeProcessor {
     const result = await this.ocrWorker.recognize(this.ocrCanvas)
     const text = result.data.text
 
-    // Extract potential UPC codes (sequences of 8-14 digits)
-    const matches = text.match(/\d{8,14}/g)
+    // Extract potential UPC codes (exactly 12 digits for UPC-A)
+    const matches = text.match(/\b\d{12}\b/g)
     if (matches) {
       for (const match of matches) {
         console.log(`🔤 OCR detected number: ${match}`)
@@ -425,6 +425,13 @@ export class BarcodeProcessor {
   private lookupUPC(rawValue: string): { sku: string | null; internalId: string | null; matchedUpc: string | null } {
     // Clean the raw value - digits only
     const cleaned = rawValue.trim().replace(/\D/g, '')
+
+    // Only process 12-digit UPC-A codes (or 13-digit EAN with leading 0)
+    if (cleaned.length !== 12 && cleaned.length !== 13) {
+      // Silently skip non-standard lengths
+      return { sku: null, internalId: null, matchedUpc: null }
+    }
+
     console.log(`🔍 Scanned barcode: "${cleaned}" (${cleaned.length} digits)`)
 
     // Use the lookup function which already tries multiple variations

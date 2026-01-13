@@ -75,10 +75,17 @@ function buildAnalysisPrompt(): string {
 
 Determine:
 1. Gender: "male" or "female" (only use "unknown" if truly impossible to tell)
-   - Look for: facial features (jawline, brow ridge), body shape (shoulder-to-hip ratio, chest), hair style, clothing style
-   - Male indicators: broader shoulders, angular jaw, facial hair, Adam's apple, flatter chest
-   - Female indicators: wider hips relative to waist, breasts, softer facial features, typically longer hair
-   - Make your best guess - most photos will clearly show male or female. Only say "unknown" if the person is completely obscured.
+   MALE indicators (look for ANY of these):
+   - Facial: square/angular jawline, prominent brow ridge, larger nose, facial hair/stubble, Adam's apple
+   - Body: broad/wide shoulders relative to hips, flat chest, straight waist (no curves), muscular arms
+   - Style: short hair, men's clothing, no makeup, masculine stance
+
+   FEMALE indicators (look for ANY of these):
+   - Facial: rounded/softer jawline, smaller nose, fuller lips, makeup, shaped eyebrows
+   - Body: narrower shoulders relative to hips, visible bust/chest, curved waist, wider hips
+   - Style: longer hair, women's clothing, jewelry, feminine stance
+
+   IMPORTANT: Make a decisive choice based on the overall impression. Even if some features are ambiguous, choose the most likely gender. Only use "unknown" if the face AND body are completely hidden.
 
 2. Age range: "children" (under 12), "teenager" (12-18), "adult" (18-65), or "elderly" (65+)
 

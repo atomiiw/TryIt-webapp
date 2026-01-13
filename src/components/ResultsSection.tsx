@@ -4,7 +4,7 @@ import type { SizeRecommendation } from '../utils/sizeIdentifier'
 import { calculateDimension } from '../utils/sizeIdentifier'
 import type { BodyComposition } from '../utils/personAnalyzer'
 import type { SizeGuide } from '../utils/sizeCollector'
-import { analyzePersonPhoto } from '../utils/personAnalyzer'
+// Person analysis is now done in ShoppingPage and passed via userData.personAnalysis
 import { identifySize } from '../utils/sizeIdentifier'
 import { generateTryOnImage, type FitType as TryOnFitType } from '../utils/tryOnService'
 import './ResultsSection.css'
@@ -24,8 +24,10 @@ interface ResultsSectionProps {
   isVisible: boolean
   initialImages?: Partial<Record<FitType, string>>
   cachedAnalysis?: CachedAnalysis | null
+  shouldAutoScroll?: boolean  // Only scroll when this is true (first time "Try it on" is clicked)
   onImageGenerated?: (fit: FitType, imageDataUrl: string) => void
   onAnalysisComplete?: (analysis: CachedAnalysis) => void
+  onScrollComplete?: () => void  // Called after scrolling to clear the flag
 }
 
 type FitType = 'tight' | 'regular' | 'comfortable'
@@ -201,7 +203,7 @@ const LOADING_MESSAGES = [
 // Type for generated images state
 type GeneratedImages = Record<FitType, string | null>
 
-function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, onImageGenerated, onAnalysisComplete }: ResultsSectionProps) {
+function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, shouldAutoScroll, onImageGenerated, onAnalysisComplete, onScrollComplete }: ResultsSectionProps) {
   // If we have cached analysis, skip loading state
   const hasCachedData = !!cachedAnalysis
   const [isLoading, setIsLoading] = useState(!hasCachedData)
@@ -321,9 +323,21 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, on
           weightKg = userData.weight * 0.453592
         }
 
-        // Analyze the person's photo
-        const clothingType = userData.item?.specificType === 'tee' ? 'shirt' : 'unknown'
-        const analysis = await analyzePersonPhoto(userData.image, clothingType as any)
+        // Use cached person analysis or wait for it
+        let analysis = userData.personAnalysis
+        if (!analysis) {
+          // If analysis isn't ready yet, wait a bit and use default
+          console.log('⏳ Person analysis not ready, using defaults...')
+          analysis = {
+            gender: 'unknown' as const,
+            age_range: 'adult' as const,
+            body_composition: 'average' as const,
+            confidence: 'low' as const,
+            proportions: {}
+          }
+        } else {
+          console.log('✅ Using cached person analysis:', analysis)
+        }
 
         // Get measurement keys from size guide
         const sizeGuide = userData.item?.sizeGuide
@@ -386,14 +400,15 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, on
     runAnalysis()
   }, [isVisible, hasStarted, userData, onAnalysisComplete])
 
-  // Scroll into view when section becomes visible
+  // Scroll into view only when shouldAutoScroll is true (first time "Try it on" clicked)
   useEffect(() => {
-    if (isVisible && sectionRef.current) {
+    if (isVisible && shouldAutoScroll && sectionRef.current) {
       setTimeout(() => {
         sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        onScrollComplete?.()  // Clear the flag after scrolling
       }, 100)
     }
-  }, [isVisible])
+  }, [isVisible, shouldAutoScroll, onScrollComplete])
 
   // Generate try-on images when size recommendation is available
   // Each fit is completely independent - uses ref to prevent duplicate triggers

@@ -1,11 +1,46 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { UserData } from '../App'
 import PhotoUpload from './PhotoUpload'
 import MeasurementPickers from './MeasurementPickers'
 import BarcodeScanner from './BarcodeScanner'
 import ResultsSection from './ResultsSection'
 import ResultsSectionDemo from './ResultsSectionDemo'
+import { analyzePersonPhoto } from '../utils/personAnalyzer'
 import './ShoppingPage.css'
+
+/**
+ * Compress image for API calls (reduce size to avoid 413 errors)
+ */
+async function compressImageForAnalysis(imageBase64: string, maxWidth = 800): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image()
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      let width = img.width
+      let height = img.height
+
+      // Scale down if too large
+      if (width > maxWidth) {
+        height = (height * maxWidth) / width
+        width = maxWidth
+      }
+
+      canvas.width = width
+      canvas.height = height
+
+      const ctx = canvas.getContext('2d')
+      if (ctx) {
+        ctx.drawImage(img, 0, 0, width, height)
+        // Use JPEG with 0.7 quality for smaller size
+        resolve(canvas.toDataURL('image/jpeg', 0.7))
+      } else {
+        resolve(imageBase64)
+      }
+    }
+    img.onerror = () => resolve(imageBase64)
+    img.src = imageBase64
+  })
+}
 
 interface ShoppingPageProps {
   userData: UserData
@@ -14,8 +49,8 @@ interface ShoppingPageProps {
 
 // Spacing config - adjust these values to match visual spacing
 const BUTTON_SPACING = {
-  scanner: 8,   // marginTop when BarcodeScanner is shown
-  itemCard: 20,   // marginTop when ItemCard is shown
+  scanner: 12,   // marginTop when BarcodeScanner is shown
+  itemCard: 26,   // marginTop when ItemCard is shown
 }
 
 // Toggle this to switch between Normal and Demo results
@@ -44,6 +79,7 @@ interface ItemTryOnState {
   resultsKey: number
   generatedImages: GeneratedImages
   cachedAnalysis: CachedAnalysis | null
+  shouldAutoScroll: boolean  // Only true when "Try it on" is clicked, not when switching cards
   generatedData: {
     image: string | null
     weight: number | null
@@ -61,9 +97,7 @@ function loadShoppingState(): TryOnStateByItem {
   try {
     const stored = sessionStorage.getItem(SHOPPING_STATE_KEY)
     if (stored) {
-      const parsed = JSON.parse(stored)
-      console.log('📂 Restored shopping state from sessionStorage')
-      return parsed
+      return JSON.parse(stored)
     }
   } catch (e) {
     console.warn('Failed to load shopping state:', e)
@@ -78,6 +112,44 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
   // Per-item try-on state
   const [tryOnState, setTryOnState] = useState<TryOnStateByItem>(initialShoppingState)
 
+  // Track which image we've already analyzed
+  const analyzedImageRef = useRef<string | null>(null)
+
+  // Run person analysis in background when image changes
+  useEffect(() => {
+    // Skip if no image or if we've already analyzed this image
+    if (!userData.image || userData.image === analyzedImageRef.current) {
+      return
+    }
+
+    // Skip if we already have analysis for this image
+    if (userData.personAnalysis && analyzedImageRef.current === userData.image) {
+      return
+    }
+
+    // Mark this image as being analyzed
+    const imageToAnalyze = userData.image
+    analyzedImageRef.current = imageToAnalyze
+
+    // Clear old analysis when image changes
+    if (userData.personAnalysis) {
+      onUpdate({ personAnalysis: null })
+    }
+
+    // Compress image first to avoid 413 errors
+    compressImageForAnalysis(imageToAnalyze)
+      .then(compressedImage => analyzePersonPhoto(compressedImage, 'unknown'))
+      .then(analysis => {
+        // Only update if this is still the current image
+        if (analyzedImageRef.current === imageToAnalyze) {
+          onUpdate({ personAnalysis: analysis })
+        }
+      })
+      .catch(error => {
+        console.error('❌ Person analysis failed:', error)
+      })
+  }, [userData.image])
+
   // Get current item's state (or default)
   const currentItemId = userData.item?.id || ''
   const currentItemState = tryOnState[currentItemId] || {
@@ -85,6 +157,7 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
     resultsKey: 0,
     generatedImages: {},
     cachedAnalysis: null,
+    shouldAutoScroll: false,
     generatedData: null
   }
 
@@ -132,6 +205,7 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
           resultsKey: prev[currentItemId]?.resultsKey || 0,
           generatedImages: {},
           cachedAnalysis: null,
+          shouldAutoScroll: false,
           generatedData: null
         }
       }))
@@ -149,6 +223,7 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
         resultsKey: (prev[currentItemId]?.resultsKey || 0) + 1,
         generatedImages: {}, // Clear images when re-trying with new data
         cachedAnalysis: null, // Clear analysis too
+        shouldAutoScroll: true, // Scroll to results when button is clicked
         generatedData: {
           image: userData.image,
           weight: userData.weight,
@@ -184,6 +259,18 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
       [currentItemId]: {
         ...prev[currentItemId],
         cachedAnalysis: analysis
+      }
+    }))
+  }
+
+  // Handler to clear auto-scroll flag after scrolling
+  const handleScrollComplete = () => {
+    if (!currentItemId) return
+    setTryOnState(prev => ({
+      ...prev,
+      [currentItemId]: {
+        ...prev[currentItemId],
+        shouldAutoScroll: false
       }
     }))
   }
@@ -247,8 +334,10 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
           isVisible={currentItemState.showResults}
           initialImages={currentItemState.generatedImages}
           cachedAnalysis={currentItemState.cachedAnalysis}
+          shouldAutoScroll={currentItemState.shouldAutoScroll}
           onImageGenerated={handleImageGenerated}
           onAnalysisComplete={handleAnalysisComplete}
+          onScrollComplete={handleScrollComplete}
         />
       )}
     </div>

@@ -7,6 +7,7 @@ export default defineConfig({
   plugins: [react(), basicSsl()],
   server: {
     host: true, // Expose to network for phone testing
+    hmr: false, // Disable hot module replacement (auto-reload)
     proxy: {
       '/duke-img': {
         target: 'https://shop.duke.edu',

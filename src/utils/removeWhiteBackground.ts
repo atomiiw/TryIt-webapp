@@ -11,6 +11,8 @@ interface RemoveBackgroundOptions {
   tolerance?: number;
   /** Whether to use edge detection for smoother cutouts. Default: true */
   smoothEdges?: boolean;
+  /** Crop to content bounds, removing transparent areas. Default: false */
+  cropToContent?: boolean;
 }
 
 // Cache processed images to avoid re-processing
@@ -232,11 +234,12 @@ export async function removeWhiteBackground(
   const {
     threshold = 245,
     tolerance = 25,
-    smoothEdges = true
+    smoothEdges = true,
+    cropToContent = false
   } = options;
 
   // Check cache first
-  const cacheKey = `${imageUrl}-${threshold}-${tolerance}-${smoothEdges}`;
+  const cacheKey = `${imageUrl}-${threshold}-${tolerance}-${smoothEdges}-${cropToContent}`;
   if (processedImageCache.has(cacheKey)) {
     return processedImageCache.get(cacheKey)!;
   }
@@ -314,6 +317,45 @@ export async function removeWhiteBackground(
     // Put processed data back
     ctx.putImageData(imageData, 0, 0);
 
+    // Crop to content bounds if requested
+    if (cropToContent) {
+      // Find bounding box of non-transparent pixels (alpha > 10 to ignore nearly-transparent artifacts)
+      const processedData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      let minX = canvas.width, maxX = 0, minY = canvas.height, maxY = 0;
+      let hasContent = false;
+      const alphaThreshold = 10;
+
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+          const idx = (y * canvas.width + x) * 4;
+          if (processedData.data[idx + 3] > alphaThreshold) {
+            hasContent = true;
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+          }
+        }
+      }
+
+      if (hasContent) {
+        const cropWidth = maxX - minX + 1;
+        const cropHeight = maxY - minY + 1;
+
+        const croppedCanvas = document.createElement('canvas');
+        croppedCanvas.width = cropWidth;
+        croppedCanvas.height = cropHeight;
+        const croppedCtx = croppedCanvas.getContext('2d');
+
+        if (croppedCtx) {
+          croppedCtx.drawImage(canvas, minX, minY, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+          const processedUrl = croppedCanvas.toDataURL('image/png');
+          processedImageCache.set(cacheKey, processedUrl);
+          return processedUrl;
+        }
+      }
+    }
+
     // Convert to data URL
     const processedUrl = canvas.toDataURL('image/png');
 
@@ -358,6 +400,82 @@ export async function preProcessImage(
   options?: RemoveBackgroundOptions
 ): Promise<string> {
   return removeWhiteBackground(imageUrl, options);
+}
+
+/**
+ * Detect the width and height of the colored (non-transparent) region in an image
+ * @param imageUrl - URL or data URL of the image
+ * @returns Object with contentWidth, contentHeight, and bounding box coordinates
+ */
+export async function detectContentDimensions(
+  imageUrl: string
+): Promise<{
+  contentWidth: number;
+  contentHeight: number;
+  minX: number;
+  maxX: number;
+  minY: number;
+  maxY: number;
+  imageWidth: number;
+  imageHeight: number;
+} | null> {
+  try {
+    const img = await loadImage(imageUrl);
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    if (!ctx) return null;
+
+    canvas.width = img.naturalWidth || img.width;
+    canvas.height = img.naturalHeight || img.height;
+    ctx.drawImage(img, 0, 0);
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    let minX = canvas.width;
+    let maxX = 0;
+    let minY = canvas.height;
+    let maxY = 0;
+    let hasContent = false;
+
+    const alphaThreshold = 10; // Ignore nearly-transparent artifacts
+    for (let y = 0; y < canvas.height; y++) {
+      for (let x = 0; x < canvas.width; x++) {
+        const idx = (y * canvas.width + x) * 4;
+        const alpha = data[idx + 3];
+
+        // Non-transparent pixel (above threshold)
+        if (alpha > alphaThreshold) {
+          hasContent = true;
+          if (x < minX) minX = x;
+          if (x > maxX) maxX = x;
+          if (y < minY) minY = y;
+          if (y > maxY) maxY = y;
+        }
+      }
+    }
+
+    if (!hasContent) return null;
+
+    const contentWidth = maxX - minX + 1;
+    const contentHeight = maxY - minY + 1;
+
+    return {
+      contentWidth,
+      contentHeight,
+      minX,
+      maxX,
+      minY,
+      maxY,
+      imageWidth: canvas.width,
+      imageHeight: canvas.height
+    };
+  } catch (error) {
+    console.warn('Failed to detect content dimensions:', error);
+    return null;
+  }
 }
 
 export default removeWhiteBackground;

@@ -59,6 +59,7 @@ const StackedCards: React.FC<StackedCardsProps> = ({
   // Store processed images with white backgrounds removed
   const [processedImages, setProcessedImages] = useState<Record<string, string>>({});
 
+
   // Store y offset for each item's name (to position size badge)
   const [nameYOffset, setNameYOffset] = useState<Record<string, number>>({});
   const nameRefs = useRef<Record<string, HTMLSpanElement | null>>({});
@@ -149,11 +150,12 @@ const StackedCards: React.FC<StackedCardsProps> = ({
           // Step 1: Fetch image as base64 via proxy (avoids CORS)
           const base64Url = await fetchImageAsBase64(item.imageUrl);
 
-          // Step 2: Remove white background using canvas
+          // Step 2: Remove white background and crop to content
           const processedUrl = await removeWhiteBackground(base64Url, {
             threshold: 254,
             tolerance: 3,
-            smoothEdges: false
+            smoothEdges: false,
+            cropToContent: true
           });
 
           setProcessedImages(prev => ({
@@ -179,7 +181,7 @@ const StackedCards: React.FC<StackedCardsProps> = ({
   const startYRef = useRef(0);
   const isHorizontalSwipeRef = useRef<boolean | null>(null);
 
-  const SWIPE_THRESHOLD = 50;
+  const SWIPE_THRESHOLD = 30;  // Reduced for faster response
   const MAX_DRAG = 150;
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -199,14 +201,14 @@ const StackedCards: React.FC<StackedCardsProps> = ({
     const diffX = currentX - startXRef.current;
     const diffY = currentY - startYRef.current;
 
-    // Determine swipe direction on first significant movement
+    // Determine swipe direction on first significant movement (reduced threshold)
     if (isHorizontalSwipeRef.current === null) {
-      if (Math.abs(diffX) > 10 || Math.abs(diffY) > 10) {
-        isHorizontalSwipeRef.current = Math.abs(diffX) > Math.abs(diffY);
+      if (Math.abs(diffX) > 5 || Math.abs(diffY) > 5) {
+        isHorizontalSwipeRef.current = Math.abs(diffX) >= Math.abs(diffY);
       }
     }
 
-    // Only handle horizontal swipes
+    // Only prevent page scrolling for horizontal swipes
     if (isHorizontalSwipeRef.current) {
       e.preventDefault();
 
@@ -240,7 +242,7 @@ const StackedCards: React.FC<StackedCardsProps> = ({
         setCurrentIndex(prev => prev + 1);
       }
 
-      setTimeout(() => setIsAnimating(false), 400);
+      setTimeout(() => setIsAnimating(false), 250);  // Faster animation
     }
 
     setDragOffset(0);
@@ -306,17 +308,35 @@ const StackedCards: React.FC<StackedCardsProps> = ({
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        {cardsToRender.map(({ item, itemIndex, position }) => (
+        {cardsToRender.map(({ item, itemIndex, position }) => {
+          // Base transforms for each position (from CSS)
+          const baseTransforms: Record<number, { x: number; rotate: number; origin: string }> = {
+            0: { x: 0, rotate: 0, origin: 'center bottom' },
+            '-1': { x: -191, rotate: -5, origin: 'right bottom' },
+            1: { x: 191, rotate: 5, origin: 'left bottom' },
+            '-2': { x: -400, rotate: -10, origin: 'right bottom' },
+            2: { x: 380, rotate: 10, origin: 'left bottom' },
+          };
+          const base = baseTransforms[position] || { x: 0, rotate: 0, origin: 'center bottom' };
+
+          // Apply dragOffset to all cards during dragging
+          const currentX = base.x + (isDragging ? dragOffset : 0);
+
+          return (
           <div
             key={item.id}
             className={`stacked-card ${position === 0 ? 'active' : ''}`}
             data-position={position}
+            style={{
+              transform: isDragging ? `translateX(${currentX}px) rotate(${base.rotate}deg)` : undefined,
+              transformOrigin: isDragging ? base.origin : undefined,
+            }}
             onClick={() => handleCardClick(item, itemIndex)}
           >
             {/* White card background - Rectangle 1 (trapezoid with stroke and shadow) */}
-            <svg className="card-background" viewBox="0 0 180 150" fill="none" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+            <svg className="card-background" viewBox="0 0 180 162" fill="none" xmlns="http://www.w3.org/2000/svg" overflow="visible">
               <path
-                d="M0 16.8938C0 9.57128 6.50135 3.956082 13.7459 5.02146L169.746 27.9626C175.636 28.8288 180 33.8819 180 39.8349L180 138C180 144.627 174.627 150 168 150L12 150C5.37258 150 0 144.627 0 138L0 16.8938Z"
+                d="M0 16.8938C0 9.57128 6.50135 3.956082 13.7459 5.02146L169.746 27.9626C175.636 28.8288 180 33.8819 180 39.8349L180 150C180 156.627 174.627 162 168 162L12 162C5.37258 162 0 156.627 0 150L0 16.8938Z"
                 fill="white"
                 stroke="rgba(0,0,0,0.25)"
                 strokeWidth="0.2"
@@ -331,6 +351,9 @@ const StackedCards: React.FC<StackedCardsProps> = ({
                 alt={item.name}
                 className="card-image"
                 draggable={false}
+                style={{
+                  transform: 'translateX(-50%)'
+                }}
               />
             </div>
 
@@ -382,7 +405,8 @@ const StackedCards: React.FC<StackedCardsProps> = ({
               </button>
             )}
           </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* Item counter and pagination - above cards */}

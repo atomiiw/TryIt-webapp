@@ -117,7 +117,6 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
 
       // Auto-skip to item card after 3 seconds
       timeoutRef.current = setTimeout(() => {
-        console.log('🎭 Demo: Auto-skipping to item card')
         handleDetectedBarcode('29042', null, true) // isDemo = true
       }, 3000)
 
