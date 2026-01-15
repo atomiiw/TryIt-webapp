@@ -274,6 +274,10 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
    * Stop scanner - handles both demo and production modes
    */
   const stopScanner = () => {
+    // Clear error state when user manually closes scanner
+    setError(null)
+    setScanStatus(null)
+
     // Capture frame before stopping
     const frame = captureVideoFrame()
     if (frame) {
