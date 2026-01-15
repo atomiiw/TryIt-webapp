@@ -268,29 +268,11 @@ function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType): stri
 
   // Fit-specific prompts
   const prompts: Record<FitType, string> = {
-    tight: `VIRTUAL TRY-ON: First remove all existing clothes from the person, then dress them in the ${colorDesc}${itemType} "${itemName}".${removeJacketInstruction}
+    tight: `VIRTUAL TRY-ON: First COMPLETELY REMOVE all existing shirts, tops, and upper body clothing from the person - strip them to bare skin on the torso. Then dress them in the ${colorDesc}${itemType} "${itemName}".${removeJacketInstruction}
 
-FIT: The ${itemType} should show the body shape and slightly tightly wrap around the body. The fabric should gently hug the torso and hips, defining the person's silhouette. Wear in the most BASIC way - NO rolling hem, NO tucking, no rolling sleeves, no knots, just plain and simple.
+CRITICAL SLEEVE RULE: If the new ${itemType} is short-sleeve, it MUST remain short-sleeve regardless of what the person was originally wearing. The person's arms must be BARE from the short sleeve edge down - absolutely NO long sleeves showing underneath. Remove ALL original shirts completely before putting on the new one - never layer.
 
-CRITICAL: Do NOT layer clothes. If the new ${itemType} is short-sleeve, the person's arms must be BARE from the sleeve edge down - no long sleeves showing underneath. Remove ALL original clothing first.
-
-RULES:
-- Don't tuck shirt into pants - show full style and hem
-- If person is wearing a DRESS: remove the entire dress and ${complementaryPiece.toLowerCase()}
-- If person is wearing two pieces (top + bottom): ONLY replace the matching piece - keep their other piece unchanged
-- Do NOT put the new ${itemType} on top of existing clothes - replace, don't layer
-- NEVER show original sleeves under new sleeves - if new shirt is short-sleeve, arms are bare
-- If the new ${itemType} is shorts but the person is wearing pants, show their bare legs
-- Keep exact same color as the provided ${itemType}
-- Any text, letters, or logos on the ${itemType} must match EXACTLY - same words, same spelling, same design
-- Keep ALL colors the same including the colors of any words, letters, or graphics on the ${itemType}
-- Keep person's pose, face, and background unchanged`,
-
-    regular: `VIRTUAL TRY-ON: First remove all existing clothes from the person, then dress them in the ${colorDesc}${itemType} "${itemName}".${removeJacketInstruction}
-
-FIT: The ${itemType} should be TRUE TO SIZE and fitting but comfortably fit instead of tightly fit. The garment fits the person correctly with some natural ease, not clinging or loose. Wear in the most BASIC way - NO rolling hem, NO tucking, no rolling sleeves, no knots, just plain and simple.
-
-CRITICAL: Do NOT layer clothes. If the new ${itemType} is short-sleeve, the person's arms must be BARE from the sleeve edge down - no long sleeves showing underneath. Remove ALL original clothing first.
+FIT: The ${itemType} should FIT JUST RIGHT - true to size with a slight natural looseness. Not tight or clingy, not oversized or baggy. The garment should sit comfortably on the body with proper proportions - just a normal, well-fitting piece of clothing. Wear in the most BASIC way - NO rolling hem, NO tucking, no rolling sleeves, no knots, just plain and simple.
 
 RULES:
 - Don't tuck shirt into pants - show full style and hem
@@ -304,11 +286,29 @@ RULES:
 - Keep ALL colors the same including the colors of any words, letters, or graphics on the ${itemType}
 - Keep person's pose, face, and background unchanged`,
 
-    comfortable: `VIRTUAL TRY-ON: First remove all existing clothes from the person, then dress them in the ${colorDesc}${itemType} "${itemName}".${removeJacketInstruction}
+    regular: `VIRTUAL TRY-ON: First COMPLETELY REMOVE all existing shirts, tops, and upper body clothing from the person - strip them to bare skin on the torso. Then dress them in the ${colorDesc}${itemType} "${itemName}".${removeJacketInstruction}
 
-FIT: The ${itemType} should be SLIGHTLY LOOSE and SLIGHTLY OVERSIZED but still true to size. The garment has extra room around the body with relaxed drape, but is not excessively baggy or drowning the person. Wear in the most BASIC way - NO rolling hem, NO tucking, no rolling sleeves, no knots, just plain and simple.
+CRITICAL SLEEVE RULE: If the new ${itemType} is short-sleeve, it MUST remain short-sleeve regardless of what the person was originally wearing. The person's arms must be BARE from the short sleeve edge down - absolutely NO long sleeves showing underneath. Remove ALL original shirts completely before putting on the new one - never layer.
 
-CRITICAL: Do NOT layer clothes. If the new ${itemType} is short-sleeve, the person's arms must be BARE from the sleeve edge down - no long sleeves showing underneath. Remove ALL original clothing first.
+FIT: The ${itemType} should be TRUE TO SIZE - comfortable and JUST RIGHT. The garment fits the person perfectly with natural ease, neither too tight nor too loose. Standard proportions with normal sleeve and body length. This is the ideal balanced fit. Wear in the most BASIC way - NO rolling hem, NO tucking, no rolling sleeves, no knots, just plain and simple.
+
+RULES:
+- Don't tuck shirt into pants - show full style and hem
+- If person is wearing a DRESS: remove the entire dress and ${complementaryPiece.toLowerCase()}
+- If person is wearing two pieces (top + bottom): ONLY replace the matching piece - keep their other piece unchanged
+- Do NOT put the new ${itemType} on top of existing clothes - replace, don't layer
+- NEVER show original sleeves under new sleeves - if new shirt is short-sleeve, arms are bare
+- If the new ${itemType} is shorts but the person is wearing pants, show their bare legs
+- Keep exact same color as the provided ${itemType}
+- Any text, letters, or logos on the ${itemType} must match EXACTLY - same words, same spelling, same design
+- Keep ALL colors the same including the colors of any words, letters, or graphics on the ${itemType}
+- Keep person's pose, face, and background unchanged`,
+
+    comfortable: `VIRTUAL TRY-ON: First COMPLETELY REMOVE all existing shirts, tops, and upper body clothing from the person - strip them to bare skin on the torso. Then dress them in the ${colorDesc}${itemType} "${itemName}".${removeJacketInstruction}
+
+CRITICAL SLEEVE RULE: If the new ${itemType} is short-sleeve, it MUST remain short-sleeve regardless of what the person was originally wearing. The person's arms must be BARE from the short sleeve edge down - absolutely NO long sleeves showing underneath. Remove ALL original shirts completely before putting on the new one - never layer.
+
+FIT: The ${itemType} should be COMFORTABLY RELAXED - longer than regular but still looking like it naturally belongs to the person. The garment should have a relaxed, easy drape with gentle looseness around the body. The hem should be reasonably long (extending a bit past the waist/hips) but NOT excessively oversized - it should still look intentional and stylish, like a comfortable fit the person would actually choose to wear. Think "comfortably roomy" rather than "swimming in fabric". Wear in the most BASIC way - NO rolling hem, NO tucking, no rolling sleeves, no knots, just plain and simple.
 
 RULES:
 - Don't tuck shirt into pants - show full style and hem
