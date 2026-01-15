@@ -554,8 +554,8 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
   // Combined view: scanner always on top, item card below when present
   return (
     <div className="barcode-scanner">
-      {/* Status display - shows under "What's the item?" */}
-      {statusMessage && !isScanning && !item && (
+      {/* Status display - only show errors, not debug info */}
+      {statusMessage && !isScanning && !item && items.length === 0 && scanStatus === 'error' && (
         <div className={`scan-status ${scanStatus}`}>
           {statusMessage}
         </div>
