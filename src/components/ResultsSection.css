@@ -209,6 +209,10 @@
   font-weight: 600;
   color: #000;
   line-height: 1;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .suggested-size-value.out-of-range {
