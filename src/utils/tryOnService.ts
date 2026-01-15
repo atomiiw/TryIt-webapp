@@ -272,7 +272,7 @@ function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType): stri
 
 CRITICAL SLEEVE RULE: If the new ${itemType} is short-sleeve, it MUST remain short-sleeve regardless of what the person was originally wearing. The person's arms must be BARE from the short sleeve edge down - absolutely NO long sleeves showing underneath. Remove ALL original shirts completely before putting on the new one - never layer.
 
-FIT: The ${itemType} should FIT JUST RIGHT - true to size with a slight natural looseness. Not tight or clingy, not oversized or baggy. The garment should sit comfortably on the body with proper proportions - just a normal, well-fitting piece of clothing. Wear in the most BASIC way - NO rolling hem, NO tucking, no rolling sleeves, no knots, just plain and simple.
+FIT: The ${itemType} should be FITTED and SNUG - hugging the body closely. The fabric should gently contour to the torso, chest, and hips, showing the person's shape. The garment should look like it fits closely without being skin-tight - think fitted, not baggy. Wear in the most BASIC way - NO rolling hem, NO tucking, no rolling sleeves, no knots, just plain and simple.
 
 RULES:
 - Don't tuck shirt into pants - show full style and hem
