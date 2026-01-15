@@ -384,6 +384,14 @@ export class BarcodeProcessor {
     const rawValue = result.getText()
     const now = Date.now()
 
+    // Only accept 12-digit UPC-A or 13-digit EAN codes
+    // Silently ignore 8-digit UPC-E, EAN-8, or other formats
+    const cleaned = rawValue.trim().replace(/\D/g, '')
+    if (cleaned.length !== 12 && cleaned.length !== 13) {
+      console.log(`🔕 Ignoring non-UPC barcode: ${cleaned} (${cleaned.length} digits)`)
+      return
+    }
+
     // Prevent duplicate scans
     if (rawValue === this.lastScannedValue && (now - this.lastScanTime) < this.scanCooldown) {
       return

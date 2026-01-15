@@ -135,12 +135,15 @@
 }
 
 .card-image {
+  height: 180px;
+  width: auto;
   max-width: 120px;
-  max-height: 204px;
   position: absolute;
   top: 0;
   left: 50%;
+  transform: translateX(-50%);
   transform-origin: top center;
+  object-fit: contain;
 }
 
 /* Gradient fade on image - Rectangle 5: x=47, y=85, 133x80px */
@@ -321,22 +324,33 @@
 .stacked-cards-pagination {
   display: flex;
   width: 300px;
-  height: 3px;
   gap: 2px;
 }
 
 .pagination-segment {
   flex: 1;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.15);
+  height: 24px;
+  background: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
+  position: relative;
+}
+
+.pagination-segment::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 3px;
+  background: rgba(0, 0, 0, 0.15);
   border-radius: 2px;
   transition: background 0.3s ease;
 }
 
-.pagination-segment.active {
+.pagination-segment.active::after {
   background: #000000;
 }
 
@@ -367,6 +381,58 @@
   opacity: 0.5;
 }
 
+/* Duplicate Notification - Apple VisionOS-style frosted glass */
+.duplicate-notification {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 5px 10px;
+  background: rgba(28, 28, 30, 0.55);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 0.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 100px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.88);
+  white-space: nowrap;
+  z-index: 100;
+  pointer-events: none;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.12),
+    0 0 1px rgba(0, 0, 0, 0.08);
+  animation: notification-fade-in 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.duplicate-notification.fading-out {
+  animation: notification-fade-out 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes notification-fade-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes notification-fade-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+}
+
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
   .stacked-card {
@@ -374,5 +440,12 @@
   }
   .pagination-segment {
     transition: background 0.2s ease;
+  }
+  .duplicate-notification {
+    animation: none;
+  }
+  .duplicate-notification.fading-out {
+    animation: none;
+    opacity: 0;
   }
 }

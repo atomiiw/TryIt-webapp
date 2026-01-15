@@ -215,15 +215,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
   const [measurements, setMeasurements] = useState<CalculatedMeasurement[]>(
     cachedAnalysis ? cachedAnalysis.measurements : []
   )
-  const [selectedFit, setSelectedFit] = useState<FitType>(() => {
-    // Initialize selected fit based on cached data or default to 'regular'
-    if (cachedAnalysis?.sizeRec) {
-      if (cachedAnalysis.sizeRec.regular) return 'regular'
-      if (cachedAnalysis.sizeRec.comfortable) return 'comfortable'
-      if (cachedAnalysis.sizeRec.tight) return 'tight'
-    }
-    return 'regular'
-  })
+  const [selectedFit, setSelectedFit] = useState<FitType>('regular')
   const [hasStarted, setHasStarted] = useState(hasCachedData) // Skip analysis if cached
   const [regeneratingFits, setRegeneratingFits] = useState<Set<FitType>>(new Set())
   const [generatedImages, setGeneratedImages] = useState<GeneratedImages>({
@@ -234,6 +226,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
   const [generatingFits, setGeneratingFits] = useState<Set<FitType>>(new Set())
   const [showShareModal, setShowShareModal] = useState(false)
   const [sharingFit, setSharingFit] = useState<FitType | null>(null)
+  const [showInfoSheet, setShowInfoSheet] = useState(false)
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const sectionRef = useRef<HTMLDivElement>(null)
@@ -253,9 +246,9 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
   }, [isLoading])
 
   const fitLabels: Record<FitType, string> = {
-    tight: 'Tight Fit',
-    regular: 'Regular Fit',
-    comfortable: 'Comfortable'
+    tight: 'Fitted',
+    regular: 'Standard',
+    comfortable: 'Relaxed'
   }
 
   // Function to generate try-on image for a specific fit
@@ -370,15 +363,6 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
 
         setSizeRec(recommendation)
 
-        // Set initial selected fit to the first available
-        if (recommendation.regular) {
-          setSelectedFit('regular')
-        } else if (recommendation.comfortable) {
-          setSelectedFit('comfortable')
-        } else if (recommendation.tight) {
-          setSelectedFit('tight')
-        }
-
         // Cache analysis results in parent
         onAnalysisComplete?.({
           sizeRec: {
@@ -410,32 +394,29 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     }
   }, [isVisible, shouldAutoScroll, onScrollComplete])
 
-  // Generate try-on images when size recommendation is available
+  // Generate try-on images for all three fits regardless of size availability
   // Each fit is completely independent - uses ref to prevent duplicate triggers
   // Skip generation for fits that already have images from initialImages
   useEffect(() => {
-    if (!sizeRec || !userData.image || !userData.item?.imageUrl) return
+    if (!userData.image || !userData.item?.imageUrl) return
 
     // Check each fit independently using ref to track what's already started
     const fits: FitType[] = ['tight', 'regular', 'comfortable']
 
     fits.forEach(fit => {
-      // Only start if: size exists for this fit AND we haven't started it yet AND no existing image
+      // Generate for all fits, not just those with size recommendations
       const hasExistingImage = !!generatedImages[fit]
-      if (sizeRec[fit] && !startedGeneratingRef.current.has(fit) && !hasExistingImage) {
+      if (!startedGeneratingRef.current.has(fit) && !hasExistingImage) {
         startedGeneratingRef.current.add(fit)
         generateFitImage(fit)
       }
     })
-  }, [sizeRec, userData.image, userData.item?.imageUrl, generatedImages])
+  }, [userData.image, userData.item?.imageUrl, generatedImages])
 
-  // Get available fit types (those with actual sizes)
-  // Memoized to prevent scroll effect from running on every re-render
+  // All three fit types are always available for image generation
   const availableFits = useMemo<FitType[]>(() => {
-    return sizeRec
-      ? (['tight', 'regular', 'comfortable'] as FitType[]).filter(fit => sizeRec[fit])
-      : []
-  }, [sizeRec])
+    return ['tight', 'regular', 'comfortable'] as FitType[]
+  }, [])
 
   const GAP = 16
   const isScrollingProgrammatically = useRef(false)
@@ -500,10 +481,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
   }
 
   const handleCardClick = (fit: FitType) => {
-    if (sizeRec && sizeRec[fit]) {
-      setSelectedFit(fit)
-      scrollToFit(fit)
-    }
+    setSelectedFit(fit)
+    scrollToFit(fit)
   }
 
   const handleRegenerate = async () => {
@@ -720,70 +699,95 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         )}
       </div>
 
-      {/* Size cards picker */}
+      {/* Size cards picker - all three fits always available */}
       <div className="size-picker-container">
         <div className="size-picker">
           {(['tight', 'regular', 'comfortable'] as FitType[]).map((fit) => {
-            const size = sizeRec?.[fit]
-            const isAvailable = !!size
             const isSelected = selectedFit === fit
-            const displaySize = size ? abbreviateSize(size) : '—'
 
             return (
               <button
                 key={fit}
-                className={`size-picker-card ${isSelected ? 'selected' : ''} ${!isAvailable ? 'unavailable' : ''}`}
+                className={`size-picker-card ${isSelected ? 'selected' : ''}`}
                 onClick={() => handleCardClick(fit)}
-                disabled={!isAvailable}
               >
                 <span className="size-picker-label">{fitLabels[fit]}</span>
-                <span className="size-picker-value">{displaySize}</span>
               </button>
             )
           })}
         </div>
       </div>
 
-      {/* Combined Fit Comparison - Their measurements vs Size Guide */}
-      {(() => {
-        const sizeMeasurements = getSizeMeasurements(selectedFit)
-        const selectedSize = sizeRec?.[selectedFit] || ''
-        const displaySelectedSize = selectedSize ? abbreviateSize(selectedSize) : ''
+      {/* Suggested size section */}
+      <div className="suggested-size-section">
+        <h3 className="results-section-title">Suggested size to bring to the fitting room</h3>
+        <p className="suggested-size-subtitle">Or use as a reference when shopping for someone else.</p>
+        <div className="suggested-size-row">
+          {sizeRec?.[selectedFit] ? (
+            <span className="suggested-size-value">{abbreviateSize(sizeRec[selectedFit]!)}</span>
+          ) : (
+            <span className="suggested-size-value out-of-range">Out of range</span>
+          )}
+          <button className="info-icon-button" onClick={() => setShowInfoSheet(true)} aria-label="Size info">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M10 9V14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              <circle cx="10" cy="6.5" r="1" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+      </div>
 
-        if (measurements.length === 0 && sizeMeasurements.length === 0) return null
-
-        return (
-          <div className="fit-comparison-section">
-            <h3 className="results-section-title">
-              Body vs Size {displaySelectedSize}
-            </h3>
-            <div className="measurements-grid">
-              {measurements.map((m) => {
-                const userValue = userData.heightUnit === 'ft'
-                  ? Math.round(m.value / 2.54 * 10) / 10
-                  : m.value
-                // Find matching size guide measurement
-                const normalizedName = m.name.toLowerCase().replace(/\s+/g, '_')
-                const sizeM = sizeMeasurements.find(sm => sm.key === normalizedName)
-                const sizeValue = sizeM?.display || '—'
+      {/* Info Bottom Sheet */}
+      {showInfoSheet && (
+        <div className="info-sheet-overlay" onClick={() => setShowInfoSheet(false)}>
+          <div className="info-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="info-sheet-handle" />
+            <div className="info-sheet-content">
+              <h3 className="info-sheet-title">How size is estimated</h3>
+              <p className="info-sheet-text">
+                This estimate is based on height, weight, and this item's size guide.
+              </p>
+              {(() => {
+                const sizeMeasurements = getSizeMeasurements(selectedFit)
+                const selectedSize = sizeRec?.[selectedFit] || ''
+                const displaySelectedSize = selectedSize ? abbreviateSize(selectedSize) : ''
                 const unit = userData.heightUnit === 'ft' ? 'in' : 'cm'
 
+                if (measurements.length === 0) return null
+
                 return (
-                  <div key={m.name} className="measurement-row comparison">
-                    <span className="measurement-name">{m.name} ({unit})</span>
-                    <span className="measurement-value user-value">{userValue}</span>
-                    <span className="measurement-value size-value">{sizeValue}</span>
+                  <div className="info-sheet-comparison">
+                    <div className="info-sheet-comparison-header">
+                      <span>Measurement</span>
+                      <span>Estimated body</span>
+                      <span>Size {displaySelectedSize}</span>
+                    </div>
+                    {measurements.map((m) => {
+                      const userValue = userData.heightUnit === 'ft'
+                        ? Math.round(m.value / 2.54 * 10) / 10
+                        : m.value
+                      const normalizedName = m.name.toLowerCase().replace(/\s+/g, '_')
+                      const sizeM = sizeMeasurements.find(sm => sm.key === normalizedName)
+                      const sizeValue = sizeM?.display || '—'
+
+                      return (
+                        <div key={m.name} className="info-sheet-comparison-row">
+                          <span>{m.name} ({unit})</span>
+                          <span>{userValue}</span>
+                          <span>{sizeValue}</span>
+                        </div>
+                      )
+                    })}
                   </div>
                 )
-              })}
+              })()}
+              <p className="info-sheet-disclaimer">
+                Fit may vary by style. Trying on in store is recommended when available.
+              </p>
             </div>
           </div>
-        )
-      })()}
-
-      {/* Sizing disclaimer - show whenever we have a size recommendation */}
-      {sizeRec && (
-        <p className="sizing-disclaimer">*Sizing recommendations are estimates only and do not guarantee fit.</p>
+        </div>
       )}
 
       {/* Share button - only show when at least one image is generated */}

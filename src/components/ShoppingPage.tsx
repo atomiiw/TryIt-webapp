@@ -152,7 +152,25 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
 
   // Get current item's state (or default)
   const currentItemId = userData.item?.id || ''
-  const currentItemState = tryOnState[currentItemId] || {
+
+  // Debounced item ID for ResultsSection - prevents flashing through intermediate cards
+  const [debouncedItemId, setDebouncedItemId] = useState(currentItemId)
+  const [isTransitioning, setIsTransitioning] = useState(false)
+
+  useEffect(() => {
+    if (currentItemId !== debouncedItemId) {
+      setIsTransitioning(true)
+      const timer = setTimeout(() => {
+        setDebouncedItemId(currentItemId)
+        // Small delay before removing transition class for fade-in
+        setTimeout(() => setIsTransitioning(false), 50)
+      }, 150) // Debounce delay
+      return () => clearTimeout(timer)
+    }
+  }, [currentItemId, debouncedItemId])
+
+  const displayItemId = debouncedItemId || currentItemId
+  const currentItemState = tryOnState[displayItemId] || {
     showResults: false,
     resultsKey: 0,
     generatedImages: {},
@@ -321,25 +339,27 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
       </div>
 
       {/* Results Section - appears below when Try it on is clicked for current item */}
-      {USE_DEMO_MODE ? (
-        <ResultsSectionDemo
-          key={`${currentItemId}-${currentItemState.resultsKey}`}
-          userData={userData}
-          isVisible={currentItemState.showResults}
-        />
-      ) : (
-        <ResultsSection
-          key={`${currentItemId}-${currentItemState.resultsKey}`}
-          userData={userData}
-          isVisible={currentItemState.showResults}
-          initialImages={currentItemState.generatedImages}
-          cachedAnalysis={currentItemState.cachedAnalysis}
-          shouldAutoScroll={currentItemState.shouldAutoScroll}
-          onImageGenerated={handleImageGenerated}
-          onAnalysisComplete={handleAnalysisComplete}
-          onScrollComplete={handleScrollComplete}
-        />
-      )}
+      <div className={`results-transition-wrapper ${isTransitioning ? 'transitioning' : ''}`}>
+        {USE_DEMO_MODE ? (
+          <ResultsSectionDemo
+            key={`${displayItemId}-${currentItemState.resultsKey}`}
+            userData={userData}
+            isVisible={currentItemState.showResults}
+          />
+        ) : (
+          <ResultsSection
+            key={`${displayItemId}-${currentItemState.resultsKey}`}
+            userData={userData}
+            isVisible={currentItemState.showResults}
+            initialImages={currentItemState.generatedImages}
+            cachedAnalysis={currentItemState.cachedAnalysis}
+            shouldAutoScroll={currentItemState.shouldAutoScroll}
+            onImageGenerated={handleImageGenerated}
+            onAnalysisComplete={handleAnalysisComplete}
+            onScrollComplete={handleScrollComplete}
+          />
+        )}
+      </div>
     </div>
   )
 }

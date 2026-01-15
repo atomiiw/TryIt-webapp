@@ -83,19 +83,28 @@
   object-fit: cover;
 }
 
-/* Scan line animation */
+/* Scan line animation - Apple style */
 .scanner-line {
   position: absolute;
-  left: 5%;
-  right: 5%;
+  top: 15%;
+  left: 6%;
+  right: 6%;
   height: 2px;
-  background: #ff3b30;
-  box-shadow: 0 0 8px rgba(255, 59, 48, 0.8);
-  animation: scan 1.5s ease-in-out infinite;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.85) 10%,
+    rgba(255, 255, 255, 1) 50%,
+    rgba(255, 255, 255, 0.85) 90%,
+    transparent 100%
+  );
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  animation: scanLine 2s ease-in-out infinite;
   pointer-events: none;
+  border-radius: 1px;
+  will-change: top;
 }
 
-@keyframes scan {
+@keyframes scanLine {
   0%, 100% {
     top: 15%;
   }
@@ -420,4 +429,69 @@
 .scan-status.error {
   background: #ffebee;
   color: #d32f2f;
+}
+
+/* Scanner notification - Apple frosted glass style */
+.scanner-notification {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 5px 10px;
+  background: rgba(28, 28, 30, 0.55);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 0.5px solid rgba(255, 255, 255, 0.12);
+  border-radius: 100px;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.88);
+  white-space: nowrap;
+  z-index: 100;
+  pointer-events: none;
+  box-shadow:
+    0 2px 8px rgba(0, 0, 0, 0.12),
+    0 0 1px rgba(0, 0, 0, 0.08);
+  animation: notificationFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes notificationFadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.scanner-notification.fading-out {
+  animation: notificationFadeOut 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes notificationFadeOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+}
+
+/* Scanner disclaimer - Apple style */
+.scanner-disclaimer {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--font-sans), sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: #86868b;
+  text-align: left;
+  width: 85%;
+  max-width: 300px;
+  margin: 6px auto 0;
 }

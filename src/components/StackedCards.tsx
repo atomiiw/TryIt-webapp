@@ -20,6 +20,8 @@ interface StackedCardsProps {
   onRemoveItem?: (item: ClothingItem, index: number) => void;
   initialIndex?: number;
   navigationTrigger?: number;
+  showDuplicateNotification?: boolean;
+  onDuplicateNotificationDismiss?: () => void;
 }
 
 /**
@@ -49,12 +51,15 @@ const StackedCards: React.FC<StackedCardsProps> = ({
   onItemSelect,
   onRemoveItem,
   initialIndex = 0,
-  navigationTrigger = 0
+  navigationTrigger = 0,
+  showDuplicateNotification = false,
+  onDuplicateNotificationDismiss
 }) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isNotificationFadingOut, setIsNotificationFadingOut] = useState(false);
 
   // Store processed images with white backgrounds removed
   const [processedImages, setProcessedImages] = useState<Record<string, string>>({});
@@ -138,6 +143,27 @@ const StackedCards: React.FC<StackedCardsProps> = ({
       animateToIndex(initialIndex);
     }
   }, [initialIndex, navigationTrigger]);
+
+  // Handle duplicate notification auto-dismiss after 5 seconds
+  useEffect(() => {
+    if (showDuplicateNotification) {
+      setIsNotificationFadingOut(false);
+
+      const fadeTimer = setTimeout(() => {
+        setIsNotificationFadingOut(true);
+      }, 4500); // Start fade 500ms before dismissing
+
+      const dismissTimer = setTimeout(() => {
+        onDuplicateNotificationDismiss?.();
+        setIsNotificationFadingOut(false);
+      }, 5000);
+
+      return () => {
+        clearTimeout(fadeTimer);
+        clearTimeout(dismissTimer);
+      };
+    }
+  }, [showDuplicateNotification, onDuplicateNotificationDismiss]);
 
   // Process images: fetch via proxy then remove white backgrounds
   useEffect(() => {
@@ -403,6 +429,13 @@ const StackedCards: React.FC<StackedCardsProps> = ({
                   <path d="M1 1L11 11M1 11L11 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
               </button>
+            )}
+
+            {/* Duplicate notification toast */}
+            {showDuplicateNotification && position === 0 && (
+              <div className={`duplicate-notification ${isNotificationFadingOut ? 'fading-out' : ''}`}>
+                Item has already been added!
+              </div>
             )}
           </div>
           );

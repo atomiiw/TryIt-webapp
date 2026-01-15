@@ -27,7 +27,7 @@
 /* Image carousel container */
 .image-carousel-container {
   width: 100%;
-  max-width: 280px;
+  max-width: 300px;
   margin: 0 auto 24px;
   background: #ffffff;
 }
@@ -123,21 +123,21 @@
 /* Size picker container */
 .size-picker-container {
   width: 100%;
-  max-width: 280px;
+  max-width: 300px;
   margin: 0 auto 16px;
 }
 
 .size-picker {
   display: flex;
   justify-content: center;
-  gap: 8px;
   width: 100%;
+  gap: 0;
 }
 
-/* Size picker cards */
+/* Size picker cards - equal width, evenly distributed */
 .size-picker-card {
-  flex: 1;
-  padding: 8px 8px 6px;
+  flex: 1 1 0;
+  padding: 8px 4px 6px;
   border: none;
   border-radius: 12px;
   background: transparent;
@@ -167,120 +167,203 @@
 
 .size-picker-label {
   font-family: var(--font-sans);
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 500;
   letter-spacing: 0.3px;
   color: #666;
   transition: color 0.3s ease;
-  margin-top: 10px;
   text-align: center;
+  padding: 8px 0;
 }
 
 .size-picker-card.selected .size-picker-label {
   color: #000004;
 }
 
-.size-picker-value {
-  font-family: var(--font-sans);
-  font-size: 28px;
-  font-weight: 600;
-  color: #999;
-  transition: color 0.3s ease;
-  line-height: 1.5;
-  padding-bottom: 8px;
-  display: block;
-  flex-shrink: 0;
-  min-height: 44px;
+/* Suggested size section */
+.suggested-size-section {
+  width: 100%;
+  max-width: 300px;
+  margin: 24px auto 0;
+  text-align: center;
 }
 
-.size-picker-card.selected .size-picker-value {
-  color: #000004;
+.suggested-size-subtitle {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 300;
+  color: #222;
+  margin: 0 0 16px 0;
+}
+
+.suggested-size-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.suggested-size-value {
+  font-family: var(--font-sans);
+  font-size: 36px;
+  font-weight: 600;
+  color: #000;
+  line-height: 1;
+}
+
+.suggested-size-value.out-of-range {
+  font-size: 22px;
+  font-weight: 500;
+  color: #86868b;
+}
+
+.info-icon-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #c7c7cc;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.info-icon-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Info Bottom Sheet */
+.info-sheet-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.info-sheet {
+  width: 100%;
+  max-width: 400px;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  padding: 20px;
+  animation: slideUp 0.25s ease;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.info-sheet-handle {
+  width: 36px;
+  height: 5px;
+  background: #e0e0e0;
+  border-radius: 3px;
+  margin: 0 auto 20px;
+}
+
+.info-sheet-content {
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.info-sheet-title {
+  font-family: var(--font-serif);
+  font-size: 20px;
+  font-weight: 400;
+  color: #000;
+  margin: 0 0 8px 0;
+  text-align: left;
+}
+
+.info-sheet-text {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 400;
+  color: #666;
+  line-height: 1.5;
+  margin: 0 0 20px 0;
+  text-align: left;
+}
+
+.info-sheet-comparison {
+  margin-bottom: 20px;
+}
+
+.info-sheet-comparison-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 0 0 8px 0;
+}
+
+.info-sheet-comparison-header span {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 400;
+  color: #86868b;
+}
+
+.info-sheet-comparison-header span:first-child {
+  text-align: left;
+}
+
+.info-sheet-comparison-header span:nth-child(2),
+.info-sheet-comparison-header span:nth-child(3) {
+  text-align: center;
+}
+
+.info-sheet-comparison-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 8px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.info-sheet-comparison-row span {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.info-sheet-comparison-row span:first-child {
+  text-align: left;
+  color: #86868b;
+}
+
+.info-sheet-comparison-row span:nth-child(2),
+.info-sheet-comparison-row span:nth-child(3) {
+  text-align: center;
+  color: #1d1d1f;
+}
+
+.info-sheet-disclaimer {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', var(--font-sans), sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: #86868b;
+  text-align: left;
+  margin: 6px 0 0 0;
+  line-height: 1.4;
 }
 
 /* Results page section title */
 .results-section-title {
   font-family: var(--font-serif);
   font-size: 20px;
-  font-weight: 300;
+  font-weight: 400;
   color: #000;
   margin: 0 0 16px 0;
   text-align: center;
   letter-spacing: 0.01em;
 }
 
-/* Fit comparison section */
-.fit-comparison-section {
-  width: 100%;
-  max-width: 280px;
-  margin: 32px auto 0;
-  background: none;
-  padding: 0;
-  border-radius: 0;
-}
-
-.results-demo .measurements-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  border-top: 1px solid #ddd;
-  padding-top: 12px;
-}
-
-.results-demo .measurement-row {
-  display: flex;
-  align-items: baseline;
-  padding: 8px 0;
-  background: none;
-  border: none;
-  border-radius: 0;
-}
-
-.results-demo .measurement-row.comparison {
-  display: flex;
-  width: 100%;
-  position: relative;
-}
-
-.results-demo .measurement-row.comparison .measurement-name {
-  flex: 1;
-  text-align: left;
-}
-
-.results-demo .measurement-row.comparison .measurement-value.user-value {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-}
-
-.results-demo .measurement-row.comparison .measurement-value.size-value {
-  margin-left: auto;
-  margin-right: 0;
-  text-align: right;
-}
-
-.results-demo .measurement-name {
-  font-size: 13px;
-  color: #666;
-}
-
-.results-demo .measurement-value {
-  font-size: 13px;
-  font-weight: 500;
-  color: #666;
-  white-space: nowrap;
-}
-
-/* Sizing disclaimer */
-.sizing-disclaimer {
-  font-family: var(--font-sans);
-  font-size: 12px;
-  font-weight: 300;
-  color: #666;
-  text-align: center;
-  max-width: 280px;
-  margin: 16px auto 0;
-}
 
 /* Loading state */
 .loading {

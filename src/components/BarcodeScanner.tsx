@@ -60,6 +60,11 @@ function formatSizeRange(sizes: string[]): string {
 function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeScannerProps) {
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [navigationTrigger, setNavigationTrigger] = useState(0);
+  const [showDuplicateNotification, setShowDuplicateNotification] = useState(false);
+  const [showNotAvailableNotification, setShowNotAvailableNotification] = useState(false);
+  const [notAvailableFadingOut, setNotAvailableFadingOut] = useState(false);
+  const [showLimitNotification, setShowLimitNotification] = useState(false);
+  const [limitFadingOut, setLimitFadingOut] = useState(false);
   const [isScanning, setIsScanning] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -71,13 +76,40 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
   const videoRef = useRef<HTMLVideoElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const notAvailableTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const limitTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Production mode flag to prevent duplicate scans
   const hasScannedRef = useRef<boolean>(false)
+
+  const MAX_ITEMS = 6
 
   /**
    * Start scanner - uses different approaches for demo vs production
    */
   const startScanner = async () => {
+    // Check if limit reached
+    if (items.length >= MAX_ITEMS) {
+      // Clear any existing timeout
+      if (limitTimeoutRef.current) {
+        clearTimeout(limitTimeoutRef.current)
+      }
+
+      // Show limit notification
+      setShowLimitNotification(true)
+      setLimitFadingOut(false)
+
+      // Start fade out after 2.6 seconds, then hide
+      limitTimeoutRef.current = setTimeout(() => {
+        setLimitFadingOut(true)
+        setTimeout(() => {
+          setShowLimitNotification(false)
+          setLimitFadingOut(false)
+        }, 400)
+      }, 2600)
+
+      return
+    }
+
     setError(null)
     setDetectedSku(null)
     setMatchedUpc(null)
@@ -163,12 +195,29 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
 
           // Check if SKU was found in lookup table
           if (result.sku === null) {
-            // UPC not found in lookup table
-            setDetectedSku(result.rawValue)
-            setMatchedUpc(null)
-            setScanStatus('not_found')
-            setError(`UPC not found: ${result.rawValue}`)
-            stopScanner()
+            // UPC not found - show notification but keep scanning
+            console.log(`❌ UPC not found: ${result.rawValue}`)
+
+            // Clear any existing timeout
+            if (notAvailableTimeoutRef.current) {
+              clearTimeout(notAvailableTimeoutRef.current)
+            }
+
+            // Show notification
+            setShowNotAvailableNotification(true)
+            setNotAvailableFadingOut(false)
+
+            // Start fade out after 2.5 seconds, then hide after 3 seconds
+            notAvailableTimeoutRef.current = setTimeout(() => {
+              setNotAvailableFadingOut(true)
+              setTimeout(() => {
+                setShowNotAvailableNotification(false)
+                setNotAvailableFadingOut(false)
+              }, 400)
+            }, 2600)
+
+            // Reset scan flag to allow continued scanning
+            hasScannedRef.current = false
             return
           }
 
@@ -371,6 +420,9 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
         onItemScanned(items[existingIndex])
         setCurrentCardIndex(existingIndex)
         setNavigationTrigger(prev => prev + 1) // Force navigation even if index same
+
+        // Show duplicate notification
+        setShowDuplicateNotification(true)
       } else {
         // New item - add to array
         console.log('📤 Adding item to items array')
@@ -415,6 +467,14 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
       // Clear demo timeout
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current)
+      }
+      // Clear not available notification timeout
+      if (notAvailableTimeoutRef.current) {
+        clearTimeout(notAvailableTimeoutRef.current)
+      }
+      // Clear limit notification timeout
+      if (limitTimeoutRef.current) {
+        clearTimeout(limitTimeoutRef.current)
       }
       // Stop barcodeProcessor if in production mode
       if (!DEMO_MODE) {
@@ -521,6 +581,11 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
             className="scanner-video"
           />
           <div className="scanner-line" />
+          {showNotAvailableNotification && (
+            <div className={`scanner-notification ${notAvailableFadingOut ? 'fading-out' : ''}`}>
+              This item isn't available yet.
+            </div>
+          )}
           <div className="scanner-hint">
             {scanStatus === 'scanning' ? 'Looking for barcode...' : 'Tap to cancel'}
           </div>
@@ -538,8 +603,16 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
               <span>{items.length > 0 ? 'Tap to add another' : 'Tap to scan'}</span>
             )}
           </div>
+          {showLimitNotification && (
+            <div className={`scanner-notification ${limitFadingOut ? 'fading-out' : ''}`}>
+              Remove an item to add more.
+            </div>
+          )}
         </div>
       )}
+
+      {/* Scanner disclaimer */}
+      <p className="scanner-disclaimer">Not all in-store items are supported yet.</p>
 
       {/* Stacked cards - shown below scanner when items exist */}
       {items.length > 0 && (
@@ -549,6 +622,8 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
           onRemoveItem={handleRemoveItem}
           initialIndex={currentCardIndex}
           navigationTrigger={navigationTrigger}
+          showDuplicateNotification={showDuplicateNotification}
+          onDuplicateNotificationDismiss={() => setShowDuplicateNotification(false)}
         />
       )}
     </div>
