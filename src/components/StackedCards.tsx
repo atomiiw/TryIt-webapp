@@ -144,19 +144,19 @@ const StackedCards: React.FC<StackedCardsProps> = ({
     }
   }, [initialIndex, navigationTrigger]);
 
-  // Handle duplicate notification auto-dismiss after 5 seconds
+  // Handle duplicate notification auto-dismiss after 2.5 seconds
   useEffect(() => {
     if (showDuplicateNotification) {
       setIsNotificationFadingOut(false);
 
       const fadeTimer = setTimeout(() => {
         setIsNotificationFadingOut(true);
-      }, 4500); // Start fade 500ms before dismissing
+      }, 2100); // Start fade 400ms before dismissing
 
       const dismissTimer = setTimeout(() => {
         onDuplicateNotificationDismiss?.();
         setIsNotificationFadingOut(false);
-      }, 5000);
+      }, 2500);
 
       return () => {
         clearTimeout(fadeTimer);
