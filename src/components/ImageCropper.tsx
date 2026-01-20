@@ -322,6 +322,11 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
                   className="ratio-icon"
                   style={{
                     aspectRatio: `${ratio.value}`,
+                    // Portrait: fix height, Landscape: fix width
+                    ...(ratio.value < 1
+                      ? { height: '24px' }
+                      : { width: '24px' }
+                    ),
                   }}
                 />
                 <span className="ratio-label">{ratio.label}</span>
