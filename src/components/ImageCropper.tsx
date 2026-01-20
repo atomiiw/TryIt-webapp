@@ -62,6 +62,7 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
   const [cropAreaSize, setCropAreaSize] = useState({ width: 0, height: 0 })
   const [imageLoaded, setImageLoaded] = useState(false)
   const [isInteracting, setIsInteracting] = useState(false) // Track user interaction for transitions
+  const [lastSelectedInPair, setLastSelectedInPair] = useState<Record<string, RatioLabel>>({}) // Remember last selection per pair
 
   const containerRef = useRef<HTMLDivElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
@@ -354,8 +355,12 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
   }
 
   // Handle ratio change
-  const handleRatioChange = (ratio: AspectRatio) => {
+  const handleRatioChange = (ratio: AspectRatio, pairKey?: string) => {
     setSelectedRatio(ratio)
+    // Remember which ratio was selected in this pair
+    if (pairKey) {
+      setLastSelectedInPair(prev => ({ ...prev, [pairKey]: ratio.label }))
+    }
     // Don't set imageLoaded to false - keep image mounted for smooth transition
   }
 
@@ -421,10 +426,14 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
           <div className="ratio-options" ref={ratioSelectorRef}>
             {RATIO_BUTTONS.map((btn) => {
               const isPair = btn.labels.length === 2
+              const pairKey = btn.labels[0] // Use first label as key for the pair
               // Check if this button contains the selected ratio
               const isActive = selectedRatio && btn.labels.includes(selectedRatio.label)
-              // Get the currently displayed label (selected one if active, first one otherwise)
-              const displayLabel = isActive ? selectedRatio.label : btn.labels[0]
+              // Get the currently displayed label: selected if active, last remembered, or first as default
+              const rememberedLabel = lastSelectedInPair[pairKey]
+              const displayLabel = isActive
+                ? selectedRatio.label
+                : (rememberedLabel && btn.labels.includes(rememberedLabel) ? rememberedLabel : btn.labels[0])
               const displayValue = ALL_RATIOS[displayLabel]
               // Get the opposite ratio for pairs (to show as ghost)
               const ghostLabel = isPair ? btn.labels.find(l => l !== displayLabel) : null
@@ -434,10 +443,11 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
                 if (isActive && isPair) {
                   // Toggle to the other ratio in the pair
                   const otherLabel = btn.labels.find(l => l !== selectedRatio.label)!
-                  handleRatioChange({ label: otherLabel, value: ALL_RATIOS[otherLabel] })
+                  handleRatioChange({ label: otherLabel, value: ALL_RATIOS[otherLabel] }, pairKey)
                 } else if (!isActive) {
-                  // Only change if not already active (prevents flash on singles)
-                  handleRatioChange({ label: btn.labels[0], value: ALL_RATIOS[btn.labels[0]] })
+                  // Use remembered label or default to first
+                  const labelToUse = rememberedLabel && btn.labels.includes(rememberedLabel) ? rememberedLabel : btn.labels[0]
+                  handleRatioChange({ label: labelToUse, value: ALL_RATIOS[labelToUse] }, pairKey)
                 }
               }
 
