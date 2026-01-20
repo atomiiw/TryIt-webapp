@@ -1,157 +1,222 @@
-.image-cropper {
+/* iOS-style Image Cropper */
+.image-cropper-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  background: #000;
+}
+
+.image-cropper-modal {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  background: #000;
+}
+
+/* Header - iOS style */
+.cropper-header {
+  display: flex;
   align-items: center;
-  padding: 20px;
+  justify-content: space-between;
+  padding: 12px 16px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  background: #000;
+  flex-shrink: 0;
 }
 
-.image-cropper h2 {
-  margin: 0 0 8px 0;
-  color: #e2e8f0;
+.cropper-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: -0.01em;
 }
 
-.cropper-hint {
-  color: #718096;
-  margin: 0 0 20px 0;
-  font-size: 14px;
+.cropper-btn {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 17px;
+  font-weight: 400;
+  background: none;
+  border: none;
+  padding: 8px 4px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.crop-container {
+.cropper-btn.cancel {
+  color: #fff;
+}
+
+.cropper-btn.done {
+  color: #FFD60A;
+  font-weight: 600;
+}
+
+.cropper-btn:active {
+  opacity: 0.5;
+}
+
+/* Crop container */
+.cropper-container {
+  flex: 1;
   position: relative;
-  background: #1a1a2e;
-  border-radius: 12px;
   overflow: hidden;
   touch-action: none;
-}
-
-.image-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  cursor: grab;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.image-wrapper img {
-  max-width: none;
-  transition: none;
-  user-select: none;
-  -webkit-user-drag: none;
+.cropper-container:active {
+  cursor: grabbing;
 }
 
-.crop-frame {
+/* Image */
+.cropper-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: none;
+  max-height: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+  transform-origin: center center;
+}
+
+/* Mask overlay */
+.cropper-mask {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  border: 3px solid #667eea;
-  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
 }
 
-.cropper-controls {
-  width: 100%;
-  max-width: 300px;
-  margin-top: 24px;
+/* Crop window - transparent area */
+.crop-window {
+  position: relative;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
-.scale-control {
+/* Grid lines - rule of thirds */
+.crop-grid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.grid-line {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.grid-line.h {
+  left: 0;
+  right: 0;
+  height: 1px;
+}
+
+.grid-line.v {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+}
+
+/* Aspect ratio selector */
+.ratio-selector {
+  padding: 16px;
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  background: #000;
+  flex-shrink: 0;
+}
+
+.ratio-options {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.ratio-options::-webkit-scrollbar {
+  display: none;
+}
+
+.ratio-btn {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  min-width: 52px;
 }
 
-.scale-control label {
-  color: #a0aec0;
-  font-size: 14px;
-  font-weight: 500;
+.ratio-btn:active {
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.scale-control input[type="range"] {
-  width: 100%;
-  height: 6px;
-  border-radius: 3px;
-  background: #2d3748;
-  outline: none;
-  -webkit-appearance: none;
+.ratio-btn.active {
+  background: rgba(255, 214, 10, 0.15);
 }
 
-.scale-control input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
+.ratio-icon {
   width: 20px;
   height: 20px;
-  border-radius: 50%;
-  background: #667eea;
-  cursor: pointer;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-radius: 3px;
+  transition: border-color 0.15s ease;
 }
 
-.fill-mode-toggle {
-  display: flex;
-  gap: 8px;
+.ratio-btn.active .ratio-icon {
+  border-color: #FFD60A;
 }
 
-.fill-mode-toggle button {
-  flex: 1;
-  padding: 10px 16px;
-  border: 2px solid #4a5568;
-  border-radius: 8px;
-  background: transparent;
-  color: #a0aec0;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
+.ratio-label {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  transition: color 0.15s ease;
 }
 
-.fill-mode-toggle button:hover {
-  border-color: #667eea;
+.ratio-btn.active .ratio-label {
+  color: #FFD60A;
 }
 
-.fill-mode-toggle button.active {
-  border-color: #667eea;
-  background: #667eea;
-  color: white;
-}
+/* Responsive adjustments */
+@media (max-width: 380px) {
+  .ratio-btn {
+    padding: 6px 8px;
+    min-width: 44px;
+  }
 
-.cropper-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 24px;
-  width: 100%;
-  max-width: 300px;
-}
+  .ratio-icon {
+    width: 18px;
+    height: 18px;
+  }
 
-.btn-primary,
-.btn-secondary {
-  flex: 1;
-  padding: 14px 24px;
-  border-radius: 10px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: none;
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.btn-secondary {
-  background: #2d3748;
-  color: #e2e8f0;
-}
-
-.btn-secondary:hover {
-  background: #4a5568;
+  .ratio-label {
+    font-size: 10px;
+  }
 }

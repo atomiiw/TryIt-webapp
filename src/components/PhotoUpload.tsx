@@ -1,5 +1,6 @@
-import { useRef, forwardRef, useImperativeHandle } from 'react'
+import { useState, useRef, forwardRef, useImperativeHandle } from 'react'
 import sampleBackground from '../assets/Simple_upload.jpg'
+import ImageCropper from './ImageCropper'
 import './PhotoUpload.css'
 
 interface PhotoUploadProps {
@@ -13,6 +14,8 @@ export interface PhotoUploadHandle {
 
 const PhotoUpload = forwardRef<PhotoUploadHandle, PhotoUploadProps>(
   ({ image, onImageChange }, ref) => {
+    const [rawImage, setRawImage] = useState<string | null>(null) // Original image for cropping
+    const [showCropper, setShowCropper] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
     const frameRef = useRef<HTMLDivElement>(null)
 
@@ -85,9 +88,25 @@ const PhotoUpload = forwardRef<PhotoUploadHandle, PhotoUploadProps>(
         const reader = new FileReader()
         reader.onload = (event) => {
           const result = event.target?.result as string
-          onImageChange(result)
+          setRawImage(result)
+          setShowCropper(true)
         }
         reader.readAsDataURL(file)
+      }
+    }
+
+    const handleCropComplete = (croppedImage: string) => {
+      setShowCropper(false)
+      setRawImage(null)
+      onImageChange(croppedImage)
+    }
+
+    const handleCropCancel = () => {
+      setShowCropper(false)
+      setRawImage(null)
+      // Clear file input so user can select same file again
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
       }
     }
 
@@ -149,6 +168,15 @@ const PhotoUpload = forwardRef<PhotoUploadHandle, PhotoUploadProps>(
           onChange={handleFileChange}
           className="hidden-input"
         />
+
+        {/* Image Cropper Modal */}
+        {showCropper && rawImage && (
+          <ImageCropper
+            image={rawImage}
+            onCrop={handleCropComplete}
+            onCancel={handleCropCancel}
+          />
+        )}
       </div>
     )
   }

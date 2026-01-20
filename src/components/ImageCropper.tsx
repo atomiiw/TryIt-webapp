@@ -1,235 +1,335 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import './ImageCropper.css'
 
+// Supported aspect ratios from production (most common ones for portrait photos)
+const ASPECT_RATIOS = [
+  { label: '3:4', value: 3/4 },
+  { label: '4:5', value: 4/5 },
+  { label: '9:16', value: 9/16 },
+  { label: '1:1', value: 1 },
+  { label: '4:3', value: 4/3 },
+  { label: '16:9', value: 16/9 },
+] as const
+
 interface ImageCropperProps {
-  imageSrc: string
-  onCropComplete: (croppedDataUrl: string) => void
-  onBack: () => void
+  image: string
+  onCrop: (croppedImage: string) => void
+  onCancel: () => void
 }
 
-function ImageCropper({ imageSrc, onCropComplete, onBack }: ImageCropperProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
+export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperProps) {
+  const [selectedRatio, setSelectedRatio] = useState<typeof ASPECT_RATIOS[number]>(ASPECT_RATIOS[0])
   const [scale, setScale] = useState(1)
   const [position, setPosition] = useState({ x: 0, y: 0 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  const [, setImageSize] = useState({ width: 0, height: 0 })
-  const [fillMode, setFillMode] = useState<'cover' | 'contain'>('cover')
+  const [imageSize, setImageSize] = useState({ width: 0, height: 0 })
+  const [cropAreaSize, setCropAreaSize] = useState({ width: 0, height: 0 })
+  const [imageLoaded, setImageLoaded] = useState(false)
 
-  const FRAME_RATIO = 4 / 3 // 4:3 aspect ratio (width:height -> but displayed as portrait so 3:4)
-  const FRAME_WIDTH = 300
-  const FRAME_HEIGHT = FRAME_WIDTH * FRAME_RATIO // 400px for 3:4 portrait
+  const containerRef = useRef<HTMLDivElement>(null)
+  const imageRef = useRef<HTMLImageElement>(null)
+  const isDragging = useRef(false)
+  const lastPosition = useRef({ x: 0, y: 0 })
+  const lastTouchDistance = useRef<number | null>(null)
+  const initialScale = useRef(1)
 
+  // Calculate crop area size based on container and aspect ratio
   useEffect(() => {
+    const updateCropArea = () => {
+      if (!containerRef.current) return
+
+      const container = containerRef.current
+      const containerWidth = container.clientWidth
+      const containerHeight = container.clientHeight
+      const padding = 32
+
+      const maxWidth = containerWidth - padding * 2
+      const maxHeight = containerHeight - padding * 2
+
+      let cropWidth, cropHeight
+
+      if (selectedRatio.value <= 1) {
+        // Portrait or square - constrain by height first
+        cropHeight = Math.min(maxHeight, maxWidth / selectedRatio.value)
+        cropWidth = cropHeight * selectedRatio.value
+        // Make sure it fits width too
+        if (cropWidth > maxWidth) {
+          cropWidth = maxWidth
+          cropHeight = cropWidth / selectedRatio.value
+        }
+      } else {
+        // Landscape - constrain by width first
+        cropWidth = Math.min(maxWidth, maxHeight * selectedRatio.value)
+        cropHeight = cropWidth / selectedRatio.value
+        // Make sure it fits height too
+        if (cropHeight > maxHeight) {
+          cropHeight = maxHeight
+          cropWidth = cropHeight * selectedRatio.value
+        }
+      }
+
+      setCropAreaSize({ width: cropWidth, height: cropHeight })
+    }
+
+    updateCropArea()
+    window.addEventListener('resize', updateCropArea)
+    return () => window.removeEventListener('resize', updateCropArea)
+  }, [selectedRatio])
+
+  // Load image and set initial scale when ratio or image changes
+  useEffect(() => {
+    if (cropAreaSize.width === 0 || cropAreaSize.height === 0) return
+
     const img = new Image()
     img.onload = () => {
       setImageSize({ width: img.width, height: img.height })
 
-      // Calculate initial scale to fit the frame
-      const imgRatio = img.width / img.height
-      const frameRatio = FRAME_WIDTH / FRAME_HEIGHT
+      // Calculate initial scale to cover crop area
+      const scaleX = cropAreaSize.width / img.width
+      const scaleY = cropAreaSize.height / img.height
+      const newScale = Math.max(scaleX, scaleY) * 1.001
 
-      let initialScale: number
-      if (fillMode === 'cover') {
-        // Cover: image fills the frame completely
-        if (imgRatio > frameRatio) {
-          initialScale = FRAME_HEIGHT / img.height
-        } else {
-          initialScale = FRAME_WIDTH / img.width
-        }
-      } else {
-        // Contain: entire image visible within frame
-        if (imgRatio > frameRatio) {
-          initialScale = FRAME_WIDTH / img.width
-        } else {
-          initialScale = FRAME_HEIGHT / img.height
-        }
-      }
-
-      setScale(initialScale)
+      initialScale.current = newScale
+      setScale(newScale)
       setPosition({ x: 0, y: 0 })
+      setImageLoaded(true)
     }
-    img.src = imageSrc
-  }, [imageSrc, fillMode])
+    img.src = image
+  }, [image, cropAreaSize])
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    setIsDragging(true)
-    setDragStart({ x: e.clientX - position.x, y: e.clientY - position.y })
+  // Constrain position to keep crop area covered
+  const constrainPosition = useCallback((pos: { x: number; y: number }, currentScale: number) => {
+    if (imageSize.width === 0 || cropAreaSize.width === 0) return pos
+
+    const scaledWidth = imageSize.width * currentScale
+    const scaledHeight = imageSize.height * currentScale
+
+    const maxX = Math.max(0, (scaledWidth - cropAreaSize.width) / 2)
+    const maxY = Math.max(0, (scaledHeight - cropAreaSize.height) / 2)
+
+    return {
+      x: Math.max(-maxX, Math.min(maxX, pos.x)),
+      y: Math.max(-maxY, Math.min(maxY, pos.y))
+    }
+  }, [imageSize, cropAreaSize])
+
+  // Get minimum scale to cover crop area
+  const getMinScale = useCallback(() => {
+    if (imageSize.width === 0 || cropAreaSize.width === 0) return 1
+    const scaleX = cropAreaSize.width / imageSize.width
+    const scaleY = cropAreaSize.height / imageSize.height
+    return Math.max(scaleX, scaleY)
+  }, [imageSize, cropAreaSize])
+
+  // Handle start of drag
+  const handleStart = (clientX: number, clientY: number) => {
+    isDragging.current = true
+    lastPosition.current = { x: clientX - position.x, y: clientY - position.y }
   }
 
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!isDragging) return
-    setPosition({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y
-    })
+  // Handle drag move
+  const handleMove = (clientX: number, clientY: number) => {
+    if (!isDragging.current) return
+
+    const newPos = {
+      x: clientX - lastPosition.current.x,
+      y: clientY - lastPosition.current.y
+    }
+
+    setPosition(constrainPosition(newPos, scale))
   }
 
-  const handleMouseUp = () => {
-    setIsDragging(false)
+  // Handle end of drag
+  const handleEnd = () => {
+    isDragging.current = false
+    lastTouchDistance.current = null
   }
 
+  // Touch handlers
   const handleTouchStart = (e: React.TouchEvent) => {
-    const touch = e.touches[0]
-    setIsDragging(true)
-    setDragStart({ x: touch.clientX - position.x, y: touch.clientY - position.y })
+    if (e.touches.length === 1) {
+      handleStart(e.touches[0].clientX, e.touches[0].clientY)
+    } else if (e.touches.length === 2) {
+      isDragging.current = false
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      )
+      lastTouchDistance.current = dist
+    }
   }
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return
-    const touch = e.touches[0]
-    setPosition({
-      x: touch.clientX - dragStart.x,
-      y: touch.clientY - dragStart.y
-    })
+    e.preventDefault()
+
+    if (e.touches.length === 1 && isDragging.current) {
+      handleMove(e.touches[0].clientX, e.touches[0].clientY)
+    } else if (e.touches.length === 2 && lastTouchDistance.current) {
+      const dist = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      )
+
+      const scaleFactor = dist / lastTouchDistance.current
+      const minScale = getMinScale()
+      const newScale = Math.max(minScale, Math.min(5, scale * scaleFactor))
+
+      setScale(newScale)
+      setPosition(prev => constrainPosition(prev, newScale))
+      lastTouchDistance.current = dist
+    }
   }
 
-  const handleTouchEnd = () => {
-    setIsDragging(false)
+  // Mouse handlers
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault()
+    handleStart(e.clientX, e.clientY)
   }
 
-  const handleScaleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setScale(parseFloat(e.target.value))
+  const handleMouseMove = (e: React.MouseEvent) => {
+    handleMove(e.clientX, e.clientY)
   }
 
-  const getEdgeColor = (img: HTMLImageElement, _canvas: HTMLCanvasElement): string => {
-    const tempCanvas = document.createElement('canvas')
-    const tempCtx = tempCanvas.getContext('2d')!
-    tempCanvas.width = img.width
-    tempCanvas.height = img.height
-    tempCtx.drawImage(img, 0, 0)
+  // Wheel zoom
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault()
+    const delta = e.deltaY > 0 ? 0.95 : 1.05
+    const minScale = getMinScale()
+    const newScale = Math.max(minScale, Math.min(5, scale * delta))
 
-    // Sample colors from edges
-    const samples: number[][] = []
-    const sampleSize = 10
-
-    // Top edge
-    for (let x = 0; x < img.width; x += Math.floor(img.width / sampleSize)) {
-      const data = tempCtx.getImageData(x, 0, 1, 1).data
-      samples.push([data[0], data[1], data[2]])
-    }
-    // Bottom edge
-    for (let x = 0; x < img.width; x += Math.floor(img.width / sampleSize)) {
-      const data = tempCtx.getImageData(x, img.height - 1, 1, 1).data
-      samples.push([data[0], data[1], data[2]])
-    }
-    // Left edge
-    for (let y = 0; y < img.height; y += Math.floor(img.height / sampleSize)) {
-      const data = tempCtx.getImageData(0, y, 1, 1).data
-      samples.push([data[0], data[1], data[2]])
-    }
-    // Right edge
-    for (let y = 0; y < img.height; y += Math.floor(img.height / sampleSize)) {
-      const data = tempCtx.getImageData(img.width - 1, y, 1, 1).data
-      samples.push([data[0], data[1], data[2]])
-    }
-
-    // Average the colors
-    const avg = samples.reduce(
-      (acc, color) => [acc[0] + color[0], acc[1] + color[1], acc[2] + color[2]],
-      [0, 0, 0]
-    ).map(v => Math.round(v / samples.length))
-
-    return `rgb(${avg[0]}, ${avg[1]}, ${avg[2]})`
+    setScale(newScale)
+    setPosition(prev => constrainPosition(prev, newScale))
   }
 
+  // Crop and output
   const handleCrop = () => {
-    const canvas = canvasRef.current!
-    const ctx = canvas.getContext('2d')!
+    if (!imageRef.current || imageSize.width === 0) return
 
-    canvas.width = FRAME_WIDTH * 2 // Higher resolution output
-    canvas.height = FRAME_HEIGHT * 2
+    const canvas = document.createElement('canvas')
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
-    const img = new Image()
-    img.onload = () => {
-      // Fill with edge color first (Instagram-style)
-      const edgeColor = getEdgeColor(img, canvas)
-      ctx.fillStyle = edgeColor
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
+    // Output at high quality (max 1536px on longest side)
+    const maxOutputSize = 1536
+    let outputWidth, outputHeight
 
-      // Calculate where to draw the image
-      const scaledWidth = img.width * scale * 2
-      const scaledHeight = img.height * scale * 2
-      const drawX = (canvas.width - scaledWidth) / 2 + position.x * 2
-      const drawY = (canvas.height - scaledHeight) / 2 + position.y * 2
-
-      ctx.drawImage(img, drawX, drawY, scaledWidth, scaledHeight)
-
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.9)
-      onCropComplete(dataUrl)
+    if (selectedRatio.value >= 1) {
+      outputWidth = maxOutputSize
+      outputHeight = Math.round(maxOutputSize / selectedRatio.value)
+    } else {
+      outputHeight = maxOutputSize
+      outputWidth = Math.round(maxOutputSize * selectedRatio.value)
     }
-    img.src = imageSrc
+
+    canvas.width = outputWidth
+    canvas.height = outputHeight
+
+    // Calculate source rectangle from the image
+    const scaledWidth = imageSize.width * scale
+    const scaledHeight = imageSize.height * scale
+
+    // Center of crop area in scaled image coordinates
+    const cropCenterX = scaledWidth / 2 - position.x
+    const cropCenterY = scaledHeight / 2 - position.y
+
+    // Source rectangle in original image coordinates
+    const srcX = (cropCenterX - cropAreaSize.width / 2) / scale
+    const srcY = (cropCenterY - cropAreaSize.height / 2) / scale
+    const srcWidth = cropAreaSize.width / scale
+    const srcHeight = cropAreaSize.height / scale
+
+    ctx.drawImage(
+      imageRef.current,
+      srcX, srcY, srcWidth, srcHeight,
+      0, 0, outputWidth, outputHeight
+    )
+
+    onCrop(canvas.toDataURL('image/jpeg', 0.92))
+  }
+
+  // Handle ratio change
+  const handleRatioChange = (ratio: typeof ASPECT_RATIOS[number]) => {
+    setSelectedRatio(ratio)
+    setImageLoaded(false)
   }
 
   return (
-    <div className="image-cropper">
-      <h2>Adjust Your Photo</h2>
-      <p className="cropper-hint">Drag to reposition, use slider to resize</p>
-
-      <div
-        className="crop-container"
-        ref={containerRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{ width: FRAME_WIDTH, height: FRAME_HEIGHT }}
-      >
-        <div className="image-wrapper">
-          <img
-            src={imageSrc}
-            alt="Upload preview"
-            style={{
-              transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-              cursor: isDragging ? 'grabbing' : 'grab'
-            }}
-            draggable={false}
-          />
-        </div>
-        <div className="crop-frame" />
-      </div>
-
-      <div className="cropper-controls">
-        <div className="scale-control">
-          <label>Size</label>
-          <input
-            type="range"
-            min="0.1"
-            max="3"
-            step="0.01"
-            value={scale}
-            onChange={handleScaleChange}
-          />
+    <div className="image-cropper-overlay">
+      <div className="image-cropper-modal">
+        {/* Header */}
+        <div className="cropper-header">
+          <button className="cropper-btn cancel" onClick={onCancel}>Cancel</button>
+          <span className="cropper-title">Crop</span>
+          <button className="cropper-btn done" onClick={handleCrop}>Done</button>
         </div>
 
-        <div className="fill-mode-toggle">
-          <button
-            className={fillMode === 'cover' ? 'active' : ''}
-            onClick={() => setFillMode('cover')}
-          >
-            Fill Frame
-          </button>
-          <button
-            className={fillMode === 'contain' ? 'active' : ''}
-            onClick={() => setFillMode('contain')}
-          >
-            Fit Inside
-          </button>
+        {/* Crop area */}
+        <div
+          ref={containerRef}
+          className="cropper-container"
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleEnd}
+          onMouseLeave={handleEnd}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleEnd}
+          onWheel={handleWheel}
+        >
+          {/* Image */}
+          {imageLoaded && (
+            <img
+              ref={imageRef}
+              src={image}
+              alt="Crop preview"
+              className="cropper-image"
+              style={{
+                transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px)) scale(${scale})`,
+              }}
+              draggable={false}
+            />
+          )}
+
+          {/* Dark overlay with transparent crop window */}
+          <div className="cropper-mask">
+            <div
+              className="crop-window"
+              style={{
+                width: cropAreaSize.width,
+                height: cropAreaSize.height,
+              }}
+            >
+              {/* Grid lines */}
+              <div className="crop-grid">
+                <div className="grid-line h" style={{ top: '33.33%' }} />
+                <div className="grid-line h" style={{ top: '66.66%' }} />
+                <div className="grid-line v" style={{ left: '33.33%' }} />
+                <div className="grid-line v" style={{ left: '66.66%' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Aspect ratio selector */}
+        <div className="ratio-selector">
+          <div className="ratio-options">
+            {ASPECT_RATIOS.map((ratio) => (
+              <button
+                key={ratio.label}
+                className={`ratio-btn ${selectedRatio.label === ratio.label ? 'active' : ''}`}
+                onClick={() => handleRatioChange(ratio)}
+              >
+                <div
+                  className="ratio-icon"
+                  style={{
+                    aspectRatio: `${ratio.value}`,
+                  }}
+                />
+                <span className="ratio-label">{ratio.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
-
-      <div className="cropper-actions">
-        <button className="btn-secondary" onClick={onBack}>Back</button>
-        <button className="btn-primary" onClick={handleCrop}>Continue</button>
-      </div>
-
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
     </div>
   )
 }
-
-export default ImageCropper
