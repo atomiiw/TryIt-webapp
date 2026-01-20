@@ -1,36 +1,51 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import './ImageCropper.css'
 
-// All supported aspect ratios - ordered with pairs adjacent (portrait/landscape)
-const ASPECT_RATIOS = [
-  { label: '9:16', value: 9/16 },
-  { label: '16:9', value: 16/9 },
-  { label: '2:3', value: 2/3 },
-  { label: '3:2', value: 3/2 },
-  { label: '3:4', value: 3/4 },
-  { label: '4:3', value: 4/3 },
-  { label: '4:5', value: 4/5 },
-  { label: '5:4', value: 5/4 },
-  { label: '1:1', value: 1 },
-  { label: '21:9', value: 21/9 },
-] as const
+// Individual aspect ratios
+const ALL_RATIOS = {
+  '9:16': 9/16,
+  '16:9': 16/9,
+  '2:3': 2/3,
+  '3:2': 3/2,
+  '3:4': 3/4,
+  '4:3': 4/3,
+  '4:5': 4/5,
+  '5:4': 5/4,
+  '1:1': 1,
+  '21:9': 21/9,
+} as const
 
-type AspectRatio = typeof ASPECT_RATIOS[number]
+type RatioLabel = keyof typeof ALL_RATIOS
+
+// Ratio buttons - pairs are toggleable, singles are not
+const RATIO_BUTTONS: { labels: [RatioLabel] | [RatioLabel, RatioLabel] }[] = [
+  { labels: ['9:16', '16:9'] },
+  { labels: ['2:3', '3:2'] },
+  { labels: ['3:4', '4:3'] },
+  { labels: ['4:5', '5:4'] },
+  { labels: ['1:1'] },
+  { labels: ['21:9'] },
+]
+
+interface AspectRatio {
+  label: RatioLabel
+  value: number
+}
 
 // Find closest aspect ratio to given dimensions
 function findClosestRatio(width: number, height: number): AspectRatio {
   const imageRatio = width / height
-  let closest: AspectRatio = ASPECT_RATIOS[0]
-  let minDiff = Math.abs(imageRatio - closest.value)
+  let closestLabel: RatioLabel = '3:4'
+  let minDiff = Infinity
 
-  for (const ratio of ASPECT_RATIOS) {
-    const diff = Math.abs(imageRatio - ratio.value)
+  for (const [label, value] of Object.entries(ALL_RATIOS)) {
+    const diff = Math.abs(imageRatio - value)
     if (diff < minDiff) {
       minDiff = diff
-      closest = ratio
+      closestLabel = label as RatioLabel
     }
   }
-  return closest
+  return { label: closestLabel, value: ALL_RATIOS[closestLabel] }
 }
 
 interface ImageCropperProps {
@@ -292,7 +307,7 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
   }
 
   // Handle ratio change
-  const handleRatioChange = (ratio: typeof ASPECT_RATIOS[number]) => {
+  const handleRatioChange = (ratio: AspectRatio) => {
     setSelectedRatio(ratio)
     setImageLoaded(false)
   }
@@ -357,26 +372,45 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
         {/* Aspect ratio selector - horizontally scrollable */}
         <div className="ratio-selector">
           <div className="ratio-options" ref={ratioSelectorRef}>
-            {ASPECT_RATIOS.map((ratio) => (
-              <button
-                key={ratio.label}
-                className={`ratio-btn ${selectedRatio?.label === ratio.label ? 'active' : ''}`}
-                onClick={() => handleRatioChange(ratio)}
-              >
-                <div
-                  className="ratio-icon"
-                  style={{
-                    aspectRatio: `${ratio.value}`,
-                    // Portrait: fix height, Landscape: fix width
-                    ...(ratio.value < 1
-                      ? { height: '24px' }
-                      : { width: '24px' }
-                    ),
-                  }}
-                />
-                <span className="ratio-label">{ratio.label}</span>
-              </button>
-            ))}
+            {RATIO_BUTTONS.map((btn) => {
+              // Check if this button contains the selected ratio
+              const isActive = selectedRatio && btn.labels.includes(selectedRatio.label)
+              // Get the currently displayed label (selected one if active, first one otherwise)
+              const displayLabel = isActive ? selectedRatio.label : btn.labels[0]
+              const displayValue = ALL_RATIOS[displayLabel]
+
+              const handleClick = () => {
+                if (isActive && btn.labels.length === 2) {
+                  // Toggle to the other ratio in the pair
+                  const otherLabel = btn.labels.find(l => l !== selectedRatio.label)!
+                  handleRatioChange({ label: otherLabel, value: ALL_RATIOS[otherLabel] })
+                } else {
+                  // Select the first ratio in the pair
+                  handleRatioChange({ label: btn.labels[0], value: ALL_RATIOS[btn.labels[0]] })
+                }
+              }
+
+              return (
+                <button
+                  key={btn.labels[0]}
+                  className={`ratio-btn ${isActive ? 'active' : ''}`}
+                  onClick={handleClick}
+                >
+                  <div
+                    className="ratio-icon"
+                    style={{
+                      aspectRatio: `${displayValue}`,
+                      // Portrait: fix height, Landscape: fix width
+                      ...(displayValue < 1
+                        ? { height: '24px' }
+                        : { width: '24px' }
+                      ),
+                    }}
+                  />
+                  <span className="ratio-label">{displayLabel}</span>
+                </button>
+              )
+            })}
           </div>
         </div>
       </div>
