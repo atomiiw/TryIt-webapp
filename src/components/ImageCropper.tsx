@@ -69,6 +69,7 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
   const isDragging = useRef(false)
   const lastPosition = useRef({ x: 0, y: 0 })
   const lastTouchDistance = useRef<number | null>(null)
+  const lastTouchCenter = useRef<{ x: number; y: number } | null>(null)
   const initialScale = useRef(1)
 
   // Auto-detect closest ratio on initial image load
@@ -236,6 +237,7 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
     isDragging.current = false
     setIsInteracting(false)
     lastTouchDistance.current = null
+    lastTouchCenter.current = null
   }
 
   // Touch handlers
@@ -250,6 +252,11 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
         e.touches[0].clientY - e.touches[1].clientY
       )
       lastTouchDistance.current = dist
+      // Track center point for two-finger pan
+      lastTouchCenter.current = {
+        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+      }
     }
   }
 
@@ -258,19 +265,38 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
 
     if (e.touches.length === 1 && isDragging.current) {
       handleMove(e.touches[0].clientX, e.touches[0].clientY)
-    } else if (e.touches.length === 2 && lastTouchDistance.current) {
+    } else if (e.touches.length === 2 && lastTouchDistance.current && lastTouchCenter.current) {
+      // Calculate new distance for zoom
       const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
       )
+
+      // Calculate new center point for pan
+      const newCenter = {
+        x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+        y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+      }
+
+      // Calculate pan delta
+      const panDelta = {
+        x: newCenter.x - lastTouchCenter.current.x,
+        y: newCenter.y - lastTouchCenter.current.y
+      }
 
       const scaleFactor = dist / lastTouchDistance.current
       const minScale = getMinScale()
       const newScale = Math.max(minScale, Math.min(5, scale * scaleFactor))
 
       setScale(newScale)
-      setPosition(prev => constrainPosition(prev, newScale))
+      // Apply both zoom and pan
+      setPosition(prev => constrainPosition({
+        x: prev.x + panDelta.x,
+        y: prev.y + panDelta.y
+      }, newScale))
+
       lastTouchDistance.current = dist
+      lastTouchCenter.current = newCenter
     }
   }
 
@@ -344,7 +370,7 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
   // Handle ratio change
   const handleRatioChange = (ratio: AspectRatio) => {
     setSelectedRatio(ratio)
-    setImageLoaded(false)
+    // Don't set imageLoaded to false - keep image mounted for smooth transition
   }
 
   return (
