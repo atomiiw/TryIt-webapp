@@ -135,26 +135,65 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
     return () => window.removeEventListener('resize', updateCropArea)
   }, [selectedRatio])
 
-  // Load image and set initial scale when ratio or image changes
-  useEffect(() => {
-    if (cropAreaSize.width === 0 || cropAreaSize.height === 0) return
+  // Track if this is the first load (to set initial scale to fill width)
+  const isFirstLoad = useRef(true)
 
+  // Load image dimensions on mount
+  useEffect(() => {
     const img = new Image()
     img.onload = () => {
       setImageSize({ width: img.width, height: img.height })
-
-      // Calculate initial scale to cover crop area
-      const scaleX = cropAreaSize.width / img.width
-      const scaleY = cropAreaSize.height / img.height
-      const newScale = Math.max(scaleX, scaleY) * 1.001
-
-      initialScale.current = newScale
-      setScale(newScale)
-      setPosition({ x: 0, y: 0 })
-      setImageLoaded(true)
     }
     img.src = image
-  }, [image, cropAreaSize])
+  }, [image])
+
+  // Set initial scale when image loads (fill container width)
+  useEffect(() => {
+    if (imageSize.width === 0 || !containerRef.current) return
+
+    if (isFirstLoad.current) {
+      // First load: scale image width to fill container width
+      const containerWidth = containerRef.current.clientWidth
+      const widthFillScale = containerWidth / imageSize.width
+      initialScale.current = widthFillScale
+      setScale(widthFillScale)
+      setPosition({ x: 0, y: 0 })
+      isFirstLoad.current = false
+      setImageLoaded(true)
+    }
+  }, [imageSize])
+
+  // When ratio changes, only adjust scale if needed to cover crop area
+  useEffect(() => {
+    if (cropAreaSize.width === 0 || cropAreaSize.height === 0 || imageSize.width === 0) return
+    if (isFirstLoad.current) return // Skip if first load hasn't happened yet
+
+    const minScaleX = cropAreaSize.width / imageSize.width
+    const minScaleY = cropAreaSize.height / imageSize.height
+    const minScale = Math.max(minScaleX, minScaleY)
+
+    setScale(currentScale => {
+      if (currentScale < minScale) {
+        return minScale * 1.001
+      }
+      return currentScale
+    })
+
+    // Constrain position after ratio change
+    setPosition(prev => {
+      const currentScale = scale < minScale ? minScale * 1.001 : scale
+      const scaledWidth = imageSize.width * currentScale
+      const scaledHeight = imageSize.height * currentScale
+      const maxX = Math.max(0, (scaledWidth - cropAreaSize.width) / 2)
+      const maxY = Math.max(0, (scaledHeight - cropAreaSize.height) / 2)
+      return {
+        x: Math.max(-maxX, Math.min(maxX, prev.x)),
+        y: Math.max(-maxY, Math.min(maxY, prev.y))
+      }
+    })
+
+    setImageLoaded(true)
+  }, [cropAreaSize, imageSize, scale])
 
   // Constrain position to keep crop area covered
   const constrainPosition = useCallback((pos: { x: number; y: number }, currentScale: number) => {

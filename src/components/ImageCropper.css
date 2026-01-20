@@ -196,7 +196,7 @@
 /* Ghost icon - faint box showing the alternate ratio */
 .ratio-icon.ghost {
   position: absolute;
-  border-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.25);
   z-index: 1;
 }
 
@@ -205,7 +205,7 @@
 }
 
 .ratio-btn.active .ratio-icon.ghost {
-  border-color: rgba(255, 214, 10, 0.25);
+  border-color: rgba(255, 214, 10, 0.35);
 }
 
 .ratio-label {
