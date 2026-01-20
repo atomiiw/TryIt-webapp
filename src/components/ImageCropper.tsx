@@ -1,19 +1,37 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import './ImageCropper.css'
 
-// All supported aspect ratios from production
+// All supported aspect ratios - ordered with pairs adjacent (portrait/landscape)
 const ASPECT_RATIOS = [
   { label: '9:16', value: 9/16 },
-  { label: '2:3', value: 2/3 },
-  { label: '3:4', value: 3/4 },
-  { label: '4:5', value: 4/5 },
-  { label: '1:1', value: 1 },
-  { label: '5:4', value: 5/4 },
-  { label: '4:3', value: 4/3 },
-  { label: '3:2', value: 3/2 },
   { label: '16:9', value: 16/9 },
+  { label: '2:3', value: 2/3 },
+  { label: '3:2', value: 3/2 },
+  { label: '3:4', value: 3/4 },
+  { label: '4:3', value: 4/3 },
+  { label: '4:5', value: 4/5 },
+  { label: '5:4', value: 5/4 },
+  { label: '1:1', value: 1 },
   { label: '21:9', value: 21/9 },
 ] as const
+
+type AspectRatio = typeof ASPECT_RATIOS[number]
+
+// Find closest aspect ratio to given dimensions
+function findClosestRatio(width: number, height: number): AspectRatio {
+  const imageRatio = width / height
+  let closest: AspectRatio = ASPECT_RATIOS[0]
+  let minDiff = Math.abs(imageRatio - closest.value)
+
+  for (const ratio of ASPECT_RATIOS) {
+    const diff = Math.abs(imageRatio - ratio.value)
+    if (diff < minDiff) {
+      minDiff = diff
+      closest = ratio
+    }
+  }
+  return closest
+}
 
 interface ImageCropperProps {
   image: string
@@ -22,7 +40,7 @@ interface ImageCropperProps {
 }
 
 export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperProps) {
-  const [selectedRatio, setSelectedRatio] = useState<typeof ASPECT_RATIOS[number]>(ASPECT_RATIOS[2]) // Default to 3:4
+  const [selectedRatio, setSelectedRatio] = useState<AspectRatio | null>(null)
   const [scale, setScale] = useState(1)
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 })
@@ -31,13 +49,36 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
 
   const containerRef = useRef<HTMLDivElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
+  const ratioSelectorRef = useRef<HTMLDivElement>(null)
   const isDragging = useRef(false)
   const lastPosition = useRef({ x: 0, y: 0 })
   const lastTouchDistance = useRef<number | null>(null)
   const initialScale = useRef(1)
 
+  // Auto-detect closest ratio on initial image load
+  useEffect(() => {
+    const img = new Image()
+    img.onload = () => {
+      const closest = findClosestRatio(img.width, img.height)
+      setSelectedRatio(closest)
+
+      // Scroll to the selected ratio button after a short delay
+      setTimeout(() => {
+        if (ratioSelectorRef.current) {
+          const selectedBtn = ratioSelectorRef.current.querySelector('.ratio-btn.active')
+          if (selectedBtn) {
+            selectedBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+          }
+        }
+      }, 100)
+    }
+    img.src = image
+  }, [image])
+
   // Calculate crop area size based on container and aspect ratio
   useEffect(() => {
+    if (!selectedRatio) return
+
     const updateCropArea = () => {
       if (!containerRef.current) return
 
@@ -206,7 +247,7 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
 
   // Crop and output
   const handleCrop = () => {
-    if (!imageRef.current || imageSize.width === 0) return
+    if (!imageRef.current || imageSize.width === 0 || !selectedRatio) return
 
     const canvas = document.createElement('canvas')
     const ctx = canvas.getContext('2d')
@@ -313,13 +354,13 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
           </div>
         </div>
 
-        {/* Aspect ratio selector */}
+        {/* Aspect ratio selector - horizontally scrollable */}
         <div className="ratio-selector">
-          <div className="ratio-options">
+          <div className="ratio-options" ref={ratioSelectorRef}>
             {ASPECT_RATIOS.map((ratio) => (
               <button
                 key={ratio.label}
-                className={`ratio-btn ${selectedRatio.label === ratio.label ? 'active' : ''}`}
+                className={`ratio-btn ${selectedRatio?.label === ratio.label ? 'active' : ''}`}
                 onClick={() => handleRatioChange(ratio)}
               >
                 <div

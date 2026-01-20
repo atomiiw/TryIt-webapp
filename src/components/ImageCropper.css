@@ -137,20 +137,21 @@
 
 /* Aspect ratio selector */
 .ratio-selector {
-  padding: 16px;
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  padding: 12px 0;
+  padding-bottom: max(12px, env(safe-area-inset-bottom));
   background: #000;
   flex-shrink: 0;
 }
 
 .ratio-options {
   display: flex;
-  justify-content: center;
-  gap: 8px;
+  gap: 4px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  padding: 0 16px;
+  scroll-behavior: smooth;
 }
 
 .ratio-options::-webkit-scrollbar {
@@ -161,15 +162,17 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  justify-content: flex-end;
+  padding: 8px 10px;
   background: none;
   border: none;
   cursor: pointer;
   border-radius: 8px;
   transition: background 0.15s ease;
   -webkit-tap-highlight-color: transparent;
-  min-width: 52px;
+  min-width: 48px;
+  height: 56px;
+  flex-shrink: 0;
 }
 
 .ratio-btn:active {
@@ -181,10 +184,11 @@
 }
 
 .ratio-icon {
-  border: 2px solid rgba(255, 255, 255, 0.5);
-  border-radius: 3px;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 2px;
   transition: border-color 0.15s ease;
-  /* Size determined by inline aspect-ratio style */
+  margin-bottom: auto;
+  margin-top: auto;
 }
 
 .ratio-btn.active .ratio-icon {
@@ -193,10 +197,11 @@
 
 .ratio-label {
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.6);
   transition: color 0.15s ease;
+  margin-top: 6px;
 }
 
 .ratio-btn.active .ratio-label {
