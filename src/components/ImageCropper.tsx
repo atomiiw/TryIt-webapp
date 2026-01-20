@@ -102,31 +102,17 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
       const container = containerRef.current
       const containerWidth = container.clientWidth
       const containerHeight = container.clientHeight
-      const padding = 32
-
-      const maxWidth = containerWidth - padding * 2
-      const maxHeight = containerHeight - padding * 2
 
       let cropWidth, cropHeight
 
-      if (selectedRatio.value <= 1) {
-        // Portrait or square - constrain by height first
-        cropHeight = Math.min(maxHeight, maxWidth / selectedRatio.value)
+      // Default: fill full width
+      cropWidth = containerWidth
+      cropHeight = cropWidth / selectedRatio.value
+
+      // If height exceeds container (e.g. 9:16 portrait), fill height instead
+      if (cropHeight > containerHeight) {
+        cropHeight = containerHeight
         cropWidth = cropHeight * selectedRatio.value
-        // Make sure it fits width too
-        if (cropWidth > maxWidth) {
-          cropWidth = maxWidth
-          cropHeight = cropWidth / selectedRatio.value
-        }
-      } else {
-        // Landscape - constrain by width first
-        cropWidth = Math.min(maxWidth, maxHeight * selectedRatio.value)
-        cropHeight = cropWidth / selectedRatio.value
-        // Make sure it fits height too
-        if (cropHeight > maxHeight) {
-          cropHeight = maxHeight
-          cropWidth = cropHeight * selectedRatio.value
-        }
       }
 
       setCropAreaSize({ width: cropWidth, height: cropHeight })
