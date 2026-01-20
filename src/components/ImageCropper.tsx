@@ -1,14 +1,18 @@
 import { useState, useRef, useEffect, useCallback } from 'react'
 import './ImageCropper.css'
 
-// Supported aspect ratios from production (most common ones for portrait photos)
+// All supported aspect ratios from production
 const ASPECT_RATIOS = [
+  { label: '9:16', value: 9/16 },
+  { label: '2:3', value: 2/3 },
   { label: '3:4', value: 3/4 },
   { label: '4:5', value: 4/5 },
-  { label: '9:16', value: 9/16 },
   { label: '1:1', value: 1 },
+  { label: '5:4', value: 5/4 },
   { label: '4:3', value: 4/3 },
+  { label: '3:2', value: 3/2 },
   { label: '16:9', value: 16/9 },
+  { label: '21:9', value: 21/9 },
 ] as const
 
 interface ImageCropperProps {
@@ -18,7 +22,7 @@ interface ImageCropperProps {
 }
 
 export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperProps) {
-  const [selectedRatio, setSelectedRatio] = useState<typeof ASPECT_RATIOS[number]>(ASPECT_RATIOS[0])
+  const [selectedRatio, setSelectedRatio] = useState<typeof ASPECT_RATIOS[number]>(ASPECT_RATIOS[2]) // Default to 3:4
   const [scale, setScale] = useState(1)
   const [position, setPosition] = useState({ x: 0, y: 0 })
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 })
