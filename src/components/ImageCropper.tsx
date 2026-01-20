@@ -164,37 +164,29 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
     }
   }, [imageSize])
 
-  // When ratio changes, only adjust scale if needed to cover crop area
+  // When ratio changes, always reset to fill-width zoom
   useEffect(() => {
     if (cropAreaSize.width === 0 || cropAreaSize.height === 0 || imageSize.width === 0) return
     if (isFirstLoad.current) return // Skip if first load hasn't happened yet
+    if (!containerRef.current) return
 
+    // Always reset to fill container width when ratio changes
+    const containerWidth = containerRef.current.clientWidth
+    const widthFillScale = containerWidth / imageSize.width
+
+    // But ensure it still covers the crop area
     const minScaleX = cropAreaSize.width / imageSize.width
     const minScaleY = cropAreaSize.height / imageSize.height
     const minScale = Math.max(minScaleX, minScaleY)
 
-    setScale(currentScale => {
-      if (currentScale < minScale) {
-        return minScale * 1.001
-      }
-      return currentScale
-    })
+    // Use the larger of fill-width scale or minimum needed
+    const newScale = Math.max(widthFillScale, minScale * 1.001)
 
-    // Constrain position after ratio change
-    setPosition(prev => {
-      const currentScale = scale < minScale ? minScale * 1.001 : scale
-      const scaledWidth = imageSize.width * currentScale
-      const scaledHeight = imageSize.height * currentScale
-      const maxX = Math.max(0, (scaledWidth - cropAreaSize.width) / 2)
-      const maxY = Math.max(0, (scaledHeight - cropAreaSize.height) / 2)
-      return {
-        x: Math.max(-maxX, Math.min(maxX, prev.x)),
-        y: Math.max(-maxY, Math.min(maxY, prev.y))
-      }
-    })
+    setScale(newScale)
+    setPosition({ x: 0, y: 0 }) // Reset position to center
 
     setImageLoaded(true)
-  }, [cropAreaSize, imageSize, scale])
+  }, [cropAreaSize, imageSize])
 
   // Constrain position to keep crop area covered
   const constrainPosition = useCallback((pos: { x: number; y: number }, currentScale: number) => {
