@@ -61,6 +61,7 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
   const [imageSize, setImageSize] = useState({ width: 0, height: 0 })
   const [cropAreaSize, setCropAreaSize] = useState({ width: 0, height: 0 })
   const [imageLoaded, setImageLoaded] = useState(false)
+  const [isInteracting, setIsInteracting] = useState(false) // Track user interaction for transitions
 
   const containerRef = useRef<HTMLDivElement>(null)
   const imageRef = useRef<HTMLImageElement>(null)
@@ -222,6 +223,7 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
   // Handle start of drag
   const handleStart = (clientX: number, clientY: number) => {
     isDragging.current = true
+    setIsInteracting(true)
     lastPosition.current = { x: clientX - position.x, y: clientY - position.y }
   }
 
@@ -240,6 +242,7 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
   // Handle end of drag
   const handleEnd = () => {
     isDragging.current = false
+    setIsInteracting(false)
     lastTouchDistance.current = null
   }
 
@@ -249,6 +252,7 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
       handleStart(e.touches[0].clientX, e.touches[0].clientY)
     } else if (e.touches.length === 2) {
       isDragging.current = false
+      setIsInteracting(true) // Pinch zoom is also interaction
       const dist = Math.hypot(
         e.touches[0].clientX - e.touches[1].clientX,
         e.touches[0].clientY - e.touches[1].clientY
@@ -380,7 +384,7 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
               ref={imageRef}
               src={image}
               alt="Crop preview"
-              className="cropper-image"
+              className={`cropper-image ${isInteracting ? 'dragging' : ''}`}
               style={{
                 transform: `translate(calc(-50% + ${position.x}px), calc(-50% + ${position.y}px)) scale(${scale})`,
               }}
