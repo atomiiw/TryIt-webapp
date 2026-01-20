@@ -369,23 +369,27 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
           </div>
         </div>
 
-        {/* Aspect ratio selector - horizontally scrollable */}
+        {/* Aspect ratio selector - centered */}
         <div className="ratio-selector">
           <div className="ratio-options" ref={ratioSelectorRef}>
             {RATIO_BUTTONS.map((btn) => {
+              const isPair = btn.labels.length === 2
               // Check if this button contains the selected ratio
               const isActive = selectedRatio && btn.labels.includes(selectedRatio.label)
               // Get the currently displayed label (selected one if active, first one otherwise)
               const displayLabel = isActive ? selectedRatio.label : btn.labels[0]
               const displayValue = ALL_RATIOS[displayLabel]
+              // Get the opposite ratio for pairs (to show as ghost)
+              const ghostLabel = isPair ? btn.labels.find(l => l !== displayLabel) : null
+              const ghostValue = ghostLabel ? ALL_RATIOS[ghostLabel] : null
 
               const handleClick = () => {
-                if (isActive && btn.labels.length === 2) {
+                if (isActive && isPair) {
                   // Toggle to the other ratio in the pair
                   const otherLabel = btn.labels.find(l => l !== selectedRatio.label)!
                   handleRatioChange({ label: otherLabel, value: ALL_RATIOS[otherLabel] })
-                } else {
-                  // Select the first ratio in the pair
+                } else if (!isActive) {
+                  // Only change if not already active (prevents flash on singles)
                   handleRatioChange({ label: btn.labels[0], value: ALL_RATIOS[btn.labels[0]] })
                 }
               }
@@ -393,20 +397,35 @@ export default function ImageCropper({ image, onCrop, onCancel }: ImageCropperPr
               return (
                 <button
                   key={btn.labels[0]}
-                  className={`ratio-btn ${isActive ? 'active' : ''}`}
+                  className={`ratio-btn ${isActive ? 'active' : ''} ${isPair ? 'toggleable' : ''}`}
                   onClick={handleClick}
                 >
-                  <div
-                    className="ratio-icon"
-                    style={{
-                      aspectRatio: `${displayValue}`,
-                      // Portrait: fix height, Landscape: fix width
-                      ...(displayValue < 1
-                        ? { height: '24px' }
-                        : { width: '24px' }
-                      ),
-                    }}
-                  />
+                  <div className="ratio-icon-container">
+                    {/* Ghost icon for toggleable pairs */}
+                    {isPair && ghostValue && (
+                      <div
+                        className="ratio-icon ghost"
+                        style={{
+                          aspectRatio: `${ghostValue}`,
+                          ...(ghostValue < 1
+                            ? { height: '24px' }
+                            : { width: '24px' }
+                          ),
+                        }}
+                      />
+                    )}
+                    {/* Main icon */}
+                    <div
+                      className="ratio-icon"
+                      style={{
+                        aspectRatio: `${displayValue}`,
+                        ...(displayValue < 1
+                          ? { height: '24px' }
+                          : { width: '24px' }
+                        ),
+                      }}
+                    />
+                  </div>
                   <span className="ratio-label">{displayLabel}</span>
                 </button>
               )
