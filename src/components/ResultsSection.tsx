@@ -63,33 +63,7 @@ const MEASUREMENT_ORDER = ['chest', 'waist', 'hips', 'body_length', 'shoulders',
  * Abbreviate size label to single letter format (S, M, L, XL, XXL, XS, etc.)
  */
 function abbreviateSize(size: string): string {
-  const sizeMap: Record<string, string> = {
-    'extra small': 'XS',
-    'x-small': 'XS',
-    'xsmall': 'XS',
-    'small': 'S',
-    'medium': 'M',
-    'large': 'L',
-    'extra large': 'XL',
-    'x-large': 'XL',
-    'xlarge': 'XL',
-    'extra extra large': 'XXL',
-    'xx-large': 'XXL',
-    'xxlarge': 'XXL',
-    '2xl': '2XL',
-    '3xl': '3XL',
-    '4xl': '4XL',
-    '5xl': '5XL',
-    'xs': 'XS',
-    's': 'S',
-    'm': 'M',
-    'l': 'L',
-    'xl': 'XL',
-    'xxl': 'XXL'
-  }
-
-  const lower = size.toLowerCase().trim()
-  return sizeMap[lower] || size
+  return size.toUpperCase().trim()
 }
 
 /**
@@ -264,9 +238,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         userData.item.imageUrl,
         {
           name: userData.item.name || 'Clothing item',
-          type: userData.item.type || 'top',
-          color: userData.item.color || '',
-          specificType: userData.item.specificType
+          type: userData.item.type || 'tops',
+          color: userData.item.color || ''
         },
         fit as TryOnFitType
       )
@@ -276,10 +249,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         // Notify parent of generated image
         onImageGenerated?.(fit, result.imageDataUrl)
       } else {
-        console.error(`Failed to generate ${fit} fit:`, result.error)
       }
     } catch (err) {
-      console.error(`Error generating ${fit} fit:`, err)
     } finally {
       setGeneratingFits(prev => {
         const next = new Set(prev)
@@ -320,7 +291,6 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         let analysis = userData.personAnalysis
         if (!analysis) {
           // If analysis isn't ready yet, wait a bit and use default
-          console.log('⏳ Person analysis not ready, using defaults...')
           analysis = {
             gender: 'unknown' as const,
             age_range: 'adult' as const,
@@ -329,7 +299,6 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
             proportions: {}
           }
         } else {
-          console.log('✅ Using cached person analysis:', analysis)
         }
 
         // Get measurement keys from size guide
@@ -374,7 +343,6 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         })
 
       } catch (err) {
-        console.error('Analysis failed:', err)
         setError(err instanceof Error ? err.message : 'Analysis failed')
       } finally {
         setIsLoading(false)
@@ -497,9 +465,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         userData.item.imageUrl,
         {
           name: userData.item.name || 'Clothing item',
-          type: userData.item.type || 'top',
-          color: userData.item.color || '',
-          specificType: userData.item.specificType
+          type: userData.item.type || 'tops',
+          color: userData.item.color || ''
         },
         currentFit as TryOnFitType
       )
@@ -509,10 +476,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         // Notify parent of regenerated image
         onImageGenerated?.(currentFit, result.imageDataUrl)
       } else {
-        console.error(`Failed to regenerate ${currentFit} fit:`, result.error)
       }
     } catch (err) {
-      console.error(`Error regenerating ${currentFit} fit:`, err)
     } finally {
       setRegeneratingFits(prev => {
         const next = new Set(prev)
@@ -563,7 +528,6 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
       }
     } catch (err) {
       // User cancelled share or error occurred
-      console.log('Share cancelled or failed:', err)
     } finally {
       setSharingFit(null)
     }

@@ -135,14 +135,13 @@
 }
 
 .card-image {
-  height: 180px;
   width: auto;
-  max-width: 120px;
+  height: auto;
+  max-height: var(--image-height, 150px);
   position: absolute;
-  top: 0;
+  bottom: var(--image-bottom, 30px);
   left: 50%;
   transform: translateX(-50%);
-  transform-origin: top center;
   object-fit: contain;
 }
 
@@ -233,19 +232,47 @@
   object-fit: contain;
 }
 
-/* Size Badge Background - inside text-content, above name */
+/* Badge Row - contains size and gender badges */
 /* Z-ORDER: 6 */
-.card-size-badge {
-  width: 44px;
-  height: 12px;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 3px;
+.card-badge-row {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 5px;
+  transform: translateY(var(--size-badge-offset));
   z-index: 6;
+}
+
+/* Size Badge Background - inside badge row */
+.card-size-badge {
+  height: 12px;
+  padding: 0 5px;
+  background: rgba(110, 110, 115, 0.85);
+  border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 5px;
-  transform: translateY(var(--size-badge-offset));
+}
+
+/* Gender Badge Background - light grey */
+.card-gender-badge {
+  height: 12px;
+  padding: 0 5px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Gender Text - black, all caps */
+.card-gender-text {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 600;
+  font-size: 8px;
+  line-height: 10px;
+  letter-spacing: 0.02em;
+  color: #000000;
+  white-space: nowrap;
 }
 
 /* Size Text - x=12, y=128, 29x8px, Inter 600, 8px, line-height ~10px */
@@ -257,7 +284,7 @@
   font-size: 8px;
   line-height: 10px;
   letter-spacing: 0;
-  color: #000000;
+  color: #FFFFFF;
   white-space: nowrap;
 }
 

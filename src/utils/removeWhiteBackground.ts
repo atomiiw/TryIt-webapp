@@ -364,7 +364,6 @@ export async function removeWhiteBackground(
 
     return processedUrl;
   } catch (error) {
-    console.warn('Failed to remove background, returning original:', error);
     return imageUrl; // Return original if processing fails
   }
 }
@@ -473,7 +472,6 @@ export async function detectContentDimensions(
       imageHeight: canvas.height
     };
   } catch (error) {
-    console.warn('Failed to detect content dimensions:', error);
     return null;
   }
 }

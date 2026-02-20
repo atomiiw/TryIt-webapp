@@ -74,8 +74,6 @@ export class BarcodeProcessor {
     this.ocrCanvas = document.createElement('canvas')
     this.ocrCtx = this.ocrCanvas.getContext('2d')
 
-    console.log('📊 Barcode scanner initialized with formats: CODE_128, CODE_39, UPC_A, UPC_E, EAN_13, EAN_8')
-    console.log('📊 OCR fallback enabled for reading printed numbers')
   }
 
   /**
@@ -84,13 +82,11 @@ export class BarcodeProcessor {
   private async initOcrWorker(): Promise<void> {
     if (this.ocrWorker) return
 
-    console.log('🔤 Initializing OCR worker...')
     this.ocrWorker = await Tesseract.createWorker('eng')
     // Optimize for digits only
     await this.ocrWorker.setParameters({
       tessedit_char_whitelist: '0123456789',
     })
-    console.log('✅ OCR worker ready')
   }
 
   /**
@@ -135,12 +131,10 @@ export class BarcodeProcessor {
     const matches = text.match(/\b\d{12}\b/g)
     if (matches) {
       for (const match of matches) {
-        console.log(`🔤 OCR detected number: ${match}`)
 
         // Check if it looks like a valid UPC and exists in our lookup
         const lookupResult = this.lookupUPC(match)
         if (lookupResult.sku) {
-          console.log(`✅ OCR found valid UPC: ${match} -> SKU: ${lookupResult.sku}`)
 
           // Create scan result
           const scanResult: BarcodeScanResult = {
@@ -195,7 +189,6 @@ export class BarcodeProcessor {
     } = options
 
     if (this.isRunning) {
-      console.log('⚠️ Scanner already running')
       return
     }
 
@@ -203,13 +196,12 @@ export class BarcodeProcessor {
     this.videoElement = videoElement
 
     // Initialize OCR worker in background
-    this.initOcrWorker().catch(err => console.error('OCR init failed:', err))
+    this.initOcrWorker().catch(() => {})
 
     try {
       // Get camera constraints
       const constraints = this.getCameraConstraints(preferRearCamera)
 
-      console.log('📷 Starting barcode scanner...')
       const startTime = Date.now()
 
       // Start continuous scanning
@@ -218,7 +210,6 @@ export class BarcodeProcessor {
         videoElement,
         (result: Result | undefined, error: Error | undefined) => {
           if (result) {
-            console.log(`✅ Detected barcode type: ${BarcodeFormat[result.getBarcodeFormat()]}`)
             this.handleScanResult(result)
           }
           // Log all errors for debugging (NotFoundException is normal when no barcode visible)
@@ -228,9 +219,7 @@ export class BarcodeProcessor {
             if (!this.lastErrorLogTime || now - this.lastErrorLogTime > 2000) {
               this.lastErrorLogTime = now
               if (error.name.startsWith('NotFoundException')) {
-                console.log('🔍 Scanning... (no barcode detected in current frame)')
               } else {
-                console.log(`⚠️ Scanner error: ${error.name}: ${error.message}`)
                 if (onError) onError(error)
               }
             }
@@ -246,21 +235,17 @@ export class BarcodeProcessor {
       this.startOcrScanning()
 
       const initTime = Date.now() - startTime
-      console.log(`✅ Barcode scanner started in ${initTime}ms`)
 
     } catch (err) {
-      console.error('❌ Failed to start scanner:', err)
 
       // Try fallback to any camera
       if (preferRearCamera) {
-        console.log('🔄 Retrying with any available camera...')
         try {
           this.controls = await this.reader!.decodeFromConstraints(
             { video: true },
             videoElement,
             (result: Result | undefined, error: Error | undefined) => {
               if (result) {
-                console.log(`✅ Detected barcode type: ${BarcodeFormat[result.getBarcodeFormat()]}`)
                 this.handleScanResult(result)
               }
               if (error) {
@@ -268,9 +253,7 @@ export class BarcodeProcessor {
                 if (!this.lastErrorLogTime || now - this.lastErrorLogTime > 2000) {
                   this.lastErrorLogTime = now
                   if (error.name.startsWith('NotFoundException')) {
-                    console.log('🔍 Scanning... (no barcode detected in current frame)')
                   } else {
-                    console.log(`⚠️ Scanner error: ${error.name}: ${error.message}`)
                     if (onError) onError(error)
                   }
                 }
@@ -280,7 +263,6 @@ export class BarcodeProcessor {
           this.stream = videoElement.srcObject as MediaStream
           this.isRunning = true
           this.startOcrScanning()
-          console.log('✅ Scanner started with fallback camera')
         } catch (fallbackErr) {
           throw fallbackErr
         }
@@ -294,7 +276,6 @@ export class BarcodeProcessor {
    * Stop scanning and release camera
    */
   stopScanning(): void {
-    console.log('🛑 Stopping barcode scanner...')
 
     // Stop OCR scanning
     this.stopOcrScanning()
@@ -309,7 +290,6 @@ export class BarcodeProcessor {
     if (this.stream) {
       this.stream.getTracks().forEach(track => {
         track.stop()
-        console.log(`📷 Stopped track: ${track.kind}`)
       })
       this.stream = null
     }
@@ -320,7 +300,6 @@ export class BarcodeProcessor {
     this.onScanCallback = undefined
     this.videoElement = null
 
-    console.log('✅ Scanner stopped')
   }
 
   /**
@@ -358,7 +337,6 @@ export class BarcodeProcessor {
       return this.processResult(result)
 
     } catch (err) {
-      console.log('No barcode found in image')
       return null
     }
   }
@@ -372,7 +350,6 @@ export class BarcodeProcessor {
       const devices = await navigator.mediaDevices.enumerateDevices()
       return devices.filter(device => device.kind === 'videoinput')
     } catch (err) {
-      console.error('Failed to enumerate cameras:', err)
       return []
     }
   }
@@ -388,7 +365,6 @@ export class BarcodeProcessor {
     // Silently ignore 8-digit UPC-E, EAN-8, or other formats
     const cleaned = rawValue.trim().replace(/\D/g, '')
     if (cleaned.length !== 12 && cleaned.length !== 13) {
-      console.log(`🔕 Ignoring non-UPC barcode: ${cleaned} (${cleaned.length} digits)`)
       return
     }
 
@@ -401,7 +377,6 @@ export class BarcodeProcessor {
     this.lastScanTime = now
 
     const scanResult = this.processResult(result)
-    console.log(`📊 Barcode scanned: ${scanResult.sku ?? 'NOT FOUND'} (${scanResult.format})`)
 
     if (this.onScanCallback) {
       this.onScanCallback(scanResult)
@@ -440,7 +415,6 @@ export class BarcodeProcessor {
       return { sku: null, internalId: null, matchedUpc: null }
     }
 
-    console.log(`🔍 Scanned barcode: "${cleaned}" (${cleaned.length} digits)`)
 
     // Use the lookup function which already tries multiple variations
     const lookupResult = lookupSKUByUPC(cleaned)
@@ -454,7 +428,6 @@ export class BarcodeProcessor {
     }
 
     // Not found
-    console.log(`❌ UPC not found in lookup table`)
     return { sku: null, internalId: null, matchedUpc: null }
   }
 
@@ -532,7 +505,6 @@ export async function quickScan(
 
     // Set timeout
     timeoutId = setTimeout(() => {
-      console.log('⏰ Scan timeout reached')
       cleanup()
       resolve(null)
     }, timeout)
@@ -541,17 +513,14 @@ export async function quickScan(
     processor.startScanning(videoElement, {
       preferRearCamera: true,
       onScan: (result) => {
-        console.log('🎯 Quick scan result:', result)
         cleanup()
         resolve(result)
       },
       onError: (error) => {
-        console.error('❌ Scan error:', error)
         cleanup()
         resolve(null)
       }
     }).catch((err) => {
-      console.error('❌ Failed to start scanning:', err)
       cleanup()
       resolve(null)
     })

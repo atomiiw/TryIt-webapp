@@ -127,7 +127,6 @@ export async function analyzePersonPhoto(
 
   const prompt = buildAnalysisPrompt()
 
-  console.log('🔍 Analyzing person photo for body composition...')
 
   try {
     const response = await fetch(API_ENDPOINT, {
@@ -184,17 +183,10 @@ export async function analyzePersonPhoto(
       proportions: {}
     }
 
-    console.log('✅ Person analysis complete:', {
-      gender: analysis.gender,
-      age_range: analysis.age_range,
-      body_composition: analysis.body_composition,
-      confidence: analysis.confidence
-    })
 
     return analysis
 
   } catch (error) {
-    console.error('❌ Person photo analysis failed:', error)
 
     // Return default analysis on failure
     return {

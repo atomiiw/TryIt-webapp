@@ -172,29 +172,17 @@ function selectCombo(
   item: ItemData & { brand: string },
   availableCombos: ClothingCombo[]
 ): ClothingCombo {
-  // Determine target clothing type
-  let targetType = 'shirt' // default
+  // Determine target clothing type: tops, bottoms, or sweater
   const itemType = (item.type || '').toLowerCase()
-  const specificType = (item.specificType || '').toLowerCase()
-  const name = (item.name || '').toLowerCase()
+  let targetType = (itemType === 'bottoms') ? 'bottoms' : 'tops'
 
-  if (
-    itemType === 'bottom' ||
-    specificType === 'pants' ||
-    specificType === 'shorts' ||
-    name.includes('pants') ||
-    name.includes('shorts')
-  ) {
-    targetType = 'pants'
-  } else if (
-    itemType === 'outerwear' ||
-    specificType === 'jacket' ||
-    specificType === 'hoodie' ||
-    name.includes('jacket')
-  ) {
-    targetType = 'jacket'
-  } else if (name.includes('dress')) {
-    targetType = 'dress'
+  // For Duke brand, check if item name contains "sweater" to use sweater size guide
+  const brandLower = item.brand.toLowerCase()
+  if ((brandLower === 'duke' || brandLower === 'duke university') && targetType === 'tops') {
+    const nameLower = (item.name || '').toLowerCase()
+    if (nameLower.includes('sweater')) {
+      targetType = 'sweater'
+    }
   }
 
   // Determine target gender
@@ -229,14 +217,14 @@ function selectCombo(
   match = availableCombos.find(c => c.clothing_type === targetType)
   if (match) return match
 
-  // Priority 5: Match gender with shirt type
+  // Priority 5: Match gender with tops
   match = availableCombos.find(
-    c => c.clothing_type === 'shirt' && c.gender === targetGender
+    c => c.clothing_type === 'tops' && c.gender === targetGender
   )
   if (match) return match
 
-  // Priority 6: Any shirt
-  match = availableCombos.find(c => c.clothing_type === 'shirt')
+  // Priority 6: Any tops
+  match = availableCombos.find(c => c.clothing_type === 'tops')
   if (match) return match
 
   // Last resort: first available combo
@@ -256,16 +244,12 @@ export function collectSizeGuide(
   const availableCombos = getAvailableCombos(item.brand)
 
   if (availableCombos.length === 0) {
-    console.log(`No size guide found for brand: ${item.brand}`)
     return null
   }
 
   // Select the best combo using rule-based keyword matching
   const selectedCombo = selectCombo(item, availableCombos)
 
-  console.log(
-    `Selected size guide: ${item.brand} - ${selectedCombo.clothing_type}, ${selectedCombo.gender}`
-  )
 
   // Get size data from both cm and inch guides
   const cmData = sizeGuidesCm as SizeGuideData
@@ -286,7 +270,6 @@ export function collectSizeGuide(
   )
 
   if (!cmEntry && !inchEntry) {
-    console.log('No matching size guide entry found')
     return null
   }
 
@@ -301,7 +284,6 @@ export function collectSizeGuide(
   if (availableSizes.length > 0) {
     filteredCm = filterSizesByAvailability(cmSizes, availableSizes)
     filteredInch = filterSizesByAvailability(inchSizes, availableSizes)
-    console.log(`📐 Filtered sizes: ${cmSizes.length} → ${filteredCm.length} (available: ${availableSizes.join(', ')})`)
   }
 
   return {

@@ -28,7 +28,6 @@ export function chooseWatermark(imageSrc: string): Promise<WatermarkColor> {
       const ctx = canvas.getContext('2d')
 
       if (!ctx) {
-        console.warn('Could not get canvas context, defaulting to white watermark')
         resolve('white')
         return
       }
@@ -54,7 +53,6 @@ export function chooseWatermark(imageSrc: string): Promise<WatermarkColor> {
       try {
         imageData = ctx.getImageData(sampleX, sampleY, sampleWidth, sampleHeight)
       } catch {
-        console.warn('Could not read image data (CORS), defaulting to white watermark')
         resolve('white')
         return
       }
@@ -90,13 +88,11 @@ export function chooseWatermark(imageSrc: string): Promise<WatermarkColor> {
       // Only use black watermark for very light backgrounds
       const watermarkColor: WatermarkColor = avgBrightness > 180 ? 'black' : 'white'
 
-      console.log(`🎨 TryIt watermark region brightness: ${avgBrightness.toFixed(1)} -> using ${watermarkColor} logo`)
 
       resolve(watermarkColor)
     }
 
     img.onerror = () => {
-      console.warn('Could not load image for watermark analysis, defaulting to white')
       resolve('white')
     }
 

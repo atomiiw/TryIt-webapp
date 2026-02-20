@@ -5,7 +5,7 @@
  * Input:
  *   - avatarBase64: User's photo as base64
  *   - clothingImageUrl: URL of the clothing image
- *   - clothingInfo: Name, type, color, specificType of the clothing
+ *   - clothingInfo: Name, type, color of the clothing
  *   - fitType: 'tight', 'regular', or 'comfortable'
  */
 
@@ -20,9 +20,8 @@ export type FitType = 'tight' | 'regular' | 'comfortable'
 // Clothing item info
 export interface ClothingInfo {
   name: string
-  type: string        // 'top', 'bottom', etc.
+  type: string        // 'tops', 'bottoms'
   color: string
-  specificType?: string  // 'tee', 'hoodie', etc.
 }
 
 // Try-on result
@@ -74,7 +73,6 @@ function findClosestAspectRatio(width: number, height: number): { ratio: string;
     }
   }
 
-  console.log(`📐 Image ratio: ${imageRatio.toFixed(3)}, closest Gemini ratio: ${closest.ratio} (${closest.width}x${closest.height})`)
   return { ratio: closest.ratio, width: closest.width, height: closest.height }
 }
 
@@ -130,7 +128,6 @@ function cropAndResizeToTarget(dataUrl: string, targetRatio: string, targetWidth
       // Draw cropped region scaled to target size
       ctx.drawImage(img, offsetX, offsetY, cropWidth, cropHeight, 0, 0, targetWidth, targetHeight)
 
-      console.log(`✂️ Cropped & resized image from ${img.width}x${img.height} to ${targetWidth}x${targetHeight} (${targetRatio})`)
       resolve(canvas.toDataURL('image/jpeg', 0.9))
     }
     img.onerror = reject
@@ -147,7 +144,6 @@ async function processUserImage(imageData: string): Promise<{ base64: string; as
 
   // Get dimensions
   const { width, height } = await getImageDimensions(dataUrl)
-  console.log(`📷 User image dimensions: ${width}x${height}`)
 
   // Find closest aspect ratio with target dimensions
   const { ratio: aspectRatio, width: targetWidth, height: targetHeight } = findClosestAspectRatio(width, height)
@@ -250,7 +246,7 @@ async function addWatermark(imageSrc: string): Promise<string> {
  */
 function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType): string {
   const itemName = clothingInfo.name || 'clothing item'
-  const itemType = clothingInfo.specificType || clothingInfo.type || 'garment'
+  const itemType = clothingInfo.type || 'garment'
   const itemColor = clothingInfo.color && clothingInfo.color !== 'N/A' ? clothingInfo.color : ''
 
   const colorDesc = itemColor ? `${itemColor} ` : ''
@@ -342,27 +338,20 @@ export async function generateTryOnImage(
   fitType: FitType = 'regular'
 ): Promise<TryOnResult> {
   const fitLabel = ` (${fitType} fit)`
-  console.log(`🎨 Starting try-on generation for: ${clothingInfo.name}${fitLabel}...`)
 
   try {
     // Process user image: detect dimensions, find closest aspect ratio, crop if needed
-    console.log('🔄 Processing user image...')
     const { base64: avatarBase64, aspectRatio } = await processUserImage(userImage)
-    console.log(`✅ User image processed (aspect ratio: ${aspectRatio})`)
 
     // Download and convert clothing image to base64
-    console.log('🔄 Fetching clothing image...')
     const clothingBase64 = await imageUrlToBase64(clothingImageUrl)
-    console.log('✅ Clothing image fetched')
 
     // Generate fit-specific prompt
     const prompt = generateTryOnPrompt(clothingInfo, fitType)
 
     // Log the actual prompt for debugging
-    console.log(`📝 ${fitType.toUpperCase()} PROMPT:\n`, prompt)
 
     // Call the Duke try-on endpoint
-    console.log('📤 Calling Gemini try-on API (Duke endpoint)...')
     const startTime = Date.now()
 
     const response = await fetch(`${BACKEND_URL}/api/gemini-tryon-duke`, {
@@ -379,7 +368,6 @@ export async function generateTryOnImage(
     })
 
     const generationTime = Date.now() - startTime
-    console.log(`⏱️ Gemini API response time: ${generationTime}ms (${(generationTime / 1000).toFixed(2)}s)`)
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))
@@ -404,12 +392,9 @@ export async function generateTryOnImage(
       }
 
       if (imageDataUrl) {
-        console.log(`✅ Generated try-on image for: ${clothingInfo.name}${fitLabel}`)
 
         // Add watermark before returning
-        console.log('🎨 Adding watermark...')
         const watermarkedImage = await addWatermark(imageDataUrl)
-        console.log('✅ Watermark added')
 
         return {
           imageDataUrl: watermarkedImage,
@@ -422,7 +407,6 @@ export async function generateTryOnImage(
     throw new Error('No image in response')
 
   } catch (err) {
-    console.error(`❌ Try-on generation failed:`, err)
     return {
       imageDataUrl: null,
       success: false,

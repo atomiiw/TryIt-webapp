@@ -272,14 +272,12 @@ function ResultsPageTest({ userData, onBack }: ResultsPageProps) {
         }
 
         // Step 1: Analyze the person's photo
-        console.log('🔍 Starting person analysis...')
         const analysisStart = Date.now()
 
-        const clothingType = userData.item?.specificType === 'tee' ? 'shirt' : 'unknown'
+        const clothingType = userData.item?.type || 'tops'
         const analysis = await analyzePersonPhoto(userData.image, clothingType as any)
 
         const analysisTime = Date.now() - analysisStart
-        console.log(`✅ Analysis complete in ${analysisTime}ms`)
 
         setPersonAnalysis(analysis)
 
@@ -298,11 +296,9 @@ function ResultsPageTest({ userData, onBack }: ResultsPageProps) {
           analysis.body_composition
         )
         setMeasurements(calculatedMeasurements)
-        console.log('📐 Calculated measurements:', calculatedMeasurements)
 
         // Step 2: Identify brand
         const brand = userData.item ? identifyBrand(userData.item) : 'Unknown'
-        console.log('🏷️ Identified brand:', brand)
 
         // Step 3: Get size recommendation
         const recommendation = identifySize(
@@ -322,8 +318,6 @@ function ResultsPageTest({ userData, onBack }: ResultsPageProps) {
         const totalTime = Date.now() - startTime
         setTiming({ analysis: analysisTime, total: totalTime })
 
-        console.log('🎯 Size recommendation:', recommendation)
-        console.log(`⏱️ Total time: ${totalTime}ms`)
 
         // Start try-on generation for regular fit if we have item and image
         if (userData.item?.imageUrl && userData.image && recommendation.regular) {
@@ -333,9 +327,8 @@ function ResultsPageTest({ userData, onBack }: ResultsPageProps) {
             userData.item.imageUrl,
             {
               name: userData.item.name || 'Clothing item',
-              type: userData.item.type || 'top',
-              color: userData.item.color || '',
-              specificType: userData.item.specificType
+              type: userData.item.type || 'tops',
+              color: userData.item.color || ''
             }
           ).then((result) => {
             if (result.success && result.imageDataUrl) {
@@ -351,7 +344,6 @@ function ResultsPageTest({ userData, onBack }: ResultsPageProps) {
         }
 
       } catch (err) {
-        console.error('Analysis failed:', err)
         setError(err instanceof Error ? err.message : 'Analysis failed')
       } finally {
         setIsLoading(false)

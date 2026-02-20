@@ -100,7 +100,6 @@ function loadShoppingState(): TryOnStateByItem {
       return JSON.parse(stored)
     }
   } catch (e) {
-    console.warn('Failed to load shopping state:', e)
   }
   return {}
 }
@@ -146,7 +145,6 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
         }
       })
       .catch(error => {
-        console.error('❌ Person analysis failed:', error)
       })
   }, [userData.image])
 
@@ -192,7 +190,6 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
       }
       sessionStorage.setItem(SHOPPING_STATE_KEY, JSON.stringify(stateToSave))
     } catch (e) {
-      console.warn('Failed to save shopping state:', e)
     }
   }, [tryOnState])
 
@@ -232,6 +229,14 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
 
   const handleTryIt = () => {
     if (!canTryIt || !currentItemId) return
+
+    // Log size guide status for current item
+    const item = userData.item
+    if (item) {
+      const brand = item.brand || 'unknown'
+      const guide = item.sizeGuide
+      console.log(`Size guide for "${item.name}" (brand: ${brand}): ${guide ? `found — ${guide.clothing_type}, ${guide.gender}` : 'NOT FOUND'}`)
+    }
 
     // Update this item's state - clear images and analysis if data changed
     setTryOnState(prev => ({

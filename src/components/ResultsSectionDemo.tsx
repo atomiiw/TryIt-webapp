@@ -51,33 +51,7 @@ const MEASUREMENT_ORDER = ['chest', 'waist', 'hips', 'body_length', 'shoulders',
  * Abbreviate size label to single letter format (S, M, L, XL, XXL, XS, etc.)
  */
 function abbreviateSize(size: string): string {
-  const sizeMap: Record<string, string> = {
-    'extra small': 'XS',
-    'x-small': 'XS',
-    'xsmall': 'XS',
-    'small': 'S',
-    'medium': 'M',
-    'large': 'L',
-    'extra large': 'XL',
-    'x-large': 'XL',
-    'xlarge': 'XL',
-    'extra extra large': 'XXL',
-    'xx-large': 'XXL',
-    'xxlarge': 'XXL',
-    '2xl': '2XL',
-    '3xl': '3XL',
-    '4xl': '4XL',
-    '5xl': '5XL',
-    'xs': 'XS',
-    's': 'S',
-    'm': 'M',
-    'l': 'L',
-    'xl': 'XL',
-    'xxl': 'XXL'
-  }
-
-  const lower = size.toLowerCase().trim()
-  return sizeMap[lower] || size
+  return size.toUpperCase().trim()
 }
 
 /**
@@ -251,7 +225,6 @@ function ResultsSectionDemo({ userData, isVisible }: ResultsSectionDemoProps) {
   const generateFitImage = async (fit: FitType) => {
     if (!userData.image || !userData.item?.imageUrl) return
 
-    console.log(`🎨 [DEMO] Starting generation for: ${fit}`)
     setGeneratingFits(prev => new Set(prev).add(fit))
 
     try {
@@ -261,21 +234,17 @@ function ResultsSectionDemo({ userData, isVisible }: ResultsSectionDemoProps) {
         userData.item.imageUrl,
         {
           name: userData.item.name || 'Clothing item',
-          type: userData.item.type || 'top',
-          color: userData.item.color || '',
-          specificType: userData.item.specificType
+          type: userData.item.type || 'tops',
+          color: userData.item.color || ''
         },
         fit
       )
 
       if (result.success && result.imageDataUrl) {
-        console.log(`✅ [DEMO] Generation complete for: ${fit}`)
         setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))
       } else {
-        console.error(`Failed to generate ${fit} fit:`, result.error)
       }
     } catch (err) {
-      console.error(`Error generating ${fit} fit:`, err)
     } finally {
       setGeneratingFits(prev => {
         const next = new Set(prev)
@@ -313,10 +282,8 @@ function ResultsSectionDemo({ userData, isVisible }: ResultsSectionDemoProps) {
         }
 
         // Analyze the person's photo
-        console.log('🔍 [DEMO] Starting person analysis...')
-        const clothingType = userData.item?.specificType === 'tee' ? 'shirt' : 'unknown'
+        const clothingType = userData.item?.type || 'tops'
         const analysis = await analyzePersonPhoto(userData.image, clothingType as any)
-        console.log('✅ [DEMO] Analysis complete:', analysis)
 
         // Get measurement keys from size guide
         const sizeGuide = userData.item?.sizeGuide
@@ -348,7 +315,6 @@ function ResultsSectionDemo({ userData, isVisible }: ResultsSectionDemoProps) {
         )
 
         setSizeRec(recommendation)
-        console.log('🎯 [DEMO] Size recommendation:', recommendation)
 
         // Set initial selected fit to the first available
         if (recommendation.regular) {
@@ -360,7 +326,6 @@ function ResultsSectionDemo({ userData, isVisible }: ResultsSectionDemoProps) {
         }
 
       } catch (err) {
-        console.error('Analysis failed:', err)
         setError(err instanceof Error ? err.message : 'Analysis failed')
       } finally {
         setIsLoading(false)
@@ -389,8 +354,6 @@ function ResultsSectionDemo({ userData, isVisible }: ResultsSectionDemoProps) {
     if (sizeRec.regular && !generatedImages.regular) fitsToGenerate.push('regular')
     if (sizeRec.comfortable && !generatedImages.comfortable) fitsToGenerate.push('comfortable')
 
-    console.log(`🚀 [DEMO] Triggering generation for fits: ${fitsToGenerate.join(', ')}`)
-    console.log(`📦 [DEMO] Current generatedImages:`, Object.keys(generatedImages).filter(k => generatedImages[k as FitType]))
 
     // Generate all fit images in parallel
     // Service handles watermark internally, so no race conditions
@@ -464,9 +427,8 @@ function ResultsSectionDemo({ userData, isVisible }: ResultsSectionDemoProps) {
         userData.item.imageUrl,
         {
           name: userData.item.name || 'Clothing item',
-          type: userData.item.type || 'top',
-          color: userData.item.color || '',
-          specificType: userData.item.specificType
+          type: userData.item.type || 'tops',
+          color: userData.item.color || ''
         },
         currentFit
       )
@@ -474,10 +436,8 @@ function ResultsSectionDemo({ userData, isVisible }: ResultsSectionDemoProps) {
       if (result.success && result.imageDataUrl) {
         setGeneratedImages(prev => ({ ...prev, [currentFit]: result.imageDataUrl }))
       } else {
-        console.error(`Failed to regenerate ${currentFit} fit:`, result.error)
       }
     } catch (err) {
-      console.error(`Error regenerating ${currentFit} fit:`, err)
     } finally {
       setRegeneratingFits(prev => {
         const next = new Set(prev)
@@ -521,7 +481,6 @@ function ResultsSectionDemo({ userData, isVisible }: ResultsSectionDemoProps) {
       }
     } catch (err) {
       // User cancelled share or error occurred
-      console.log('Share cancelled or failed:', err)
     } finally {
       setSharingFit(null)
     }

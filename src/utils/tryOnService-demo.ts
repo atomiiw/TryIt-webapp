@@ -18,7 +18,6 @@ export interface ClothingInfo {
   name: string
   type: string
   color: string
-  specificType?: string
 }
 
 // Clothing item for API
@@ -167,7 +166,7 @@ async function imageUrlToBase64(imageUrl: string): Promise<string> {
  */
 function generateFitPrompt(clothingInfo: ClothingInfo, fitType: FitType): string {
   const itemName = clothingInfo.name || 'clothing item'
-  const itemType = clothingInfo.specificType || clothingInfo.type || 'garment'
+  const itemType = clothingInfo.type || 'garment'
   const itemColor = clothingInfo.color && clothingInfo.color !== 'N/A' ? clothingInfo.color : ''
   const colorDesc = itemColor ? `${itemColor} ` : ''
 
@@ -248,11 +247,9 @@ export async function generateTryOnImageDemo(
   clothingInfo: ClothingInfo,
   fitType: FitType = 'regular'
 ): Promise<TryOnResult> {
-  console.log(`🎨 [DEMO] Starting try-on generation for: ${clothingInfo.name} (${fitType} fit)...`)
 
   try {
     // Step 1: Process user image
-    console.log('🔄 [DEMO] Processing user image...')
     const avatarBase64 = await processImageForGemini(userImage)
 
     // Step 2: Get clothing image
@@ -261,13 +258,12 @@ export async function generateTryOnImageDemo(
     // Step 3: Build request
     const clothingItems: ClothingItemForAPI[] = [{
       name: clothingInfo.name,
-      type: clothingInfo.specificType || clothingInfo.type,
+      type: clothingInfo.type,
       color: clothingInfo.color
     }]
     const prompt = generateFitPrompt(clothingInfo, fitType)
 
     // Step 4: Call backend API
-    console.log('📤 [DEMO] Calling gemini-tryon API...')
     const startTime = Date.now()
 
     const response = await fetch(GEMINI_TRYON_API, {
@@ -282,11 +278,9 @@ export async function generateTryOnImageDemo(
     })
 
     const generationTime = Date.now() - startTime
-    console.log(`⏱️ [DEMO] API response time: ${(generationTime / 1000).toFixed(2)}s`)
 
     if (!response.ok) {
       const errorData = await response.text()
-      console.error('[DEMO] API error:', response.status, errorData)
       return { imageDataUrl: null, success: false, error: `API error: ${response.status}` }
     }
 
@@ -299,10 +293,8 @@ export async function generateTryOnImageDemo(
           const rawImageDataUrl = `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`
 
           // Step 6: Add watermark
-          console.log('🎨 [DEMO] Adding watermark...')
           const watermarkedImage = await addWatermark(rawImageDataUrl)
 
-          console.log(`✅ [DEMO] Generation complete for: ${clothingInfo.name} (${fitType} fit)`)
           return { imageDataUrl: watermarkedImage, success: true }
         }
       }
@@ -311,7 +303,6 @@ export async function generateTryOnImageDemo(
     return { imageDataUrl: null, success: false, error: 'No image in response' }
 
   } catch (err) {
-    console.error('[DEMO] Try-on generation failed:', err)
     return {
       imageDataUrl: null,
       success: false,

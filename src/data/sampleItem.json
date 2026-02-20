@@ -9,10 +9,9 @@
   "currency": "USD",
   "color": "N/A",
   "inStock": true,
-  "type": "top",
+  "type": "tops",
   "gender": "mens",
-  "specificType": "tee",
   "source": "duke",
   "purchaseUrl": "https://shop.duke.edu/Duke-Lemur-Center-Corner-Ring-tail-Logo-Shirt",
-  "availableSizes": ["Small", "Medium", "Large", "XL", "2XL"]
+  "availableSizes": ["S", "M", "L", "XL", "2XL"]
 }

@@ -173,11 +173,11 @@ function calculateMaleDimension(H: number, W: number, key: string, F: number): n
       result = (0.28 * H + 0.40 * W + 20) * (0.93 + 0.07 * F)
       formula = `(0.28×${H} + 0.40×${W} + 20) × (0.93 + 0.07×${F}) = ${result.toFixed(1)}`
       break
-    case 'body_length':
+    case 'length':
       result = 0.405 * H
       formula = `0.405 × ${H} = ${result.toFixed(1)}`
       break
-    case 'shoulders':
+    case 'shoulder':
       result = (0.45 * H + 0.30 * (W - 70) + 30) * (0.92 + 0.08 * F)
       formula = `(0.45×${H} + 0.30×(${W}-70) + 30) × (0.92 + 0.08×${F}) = ${result.toFixed(1)}`
       break
@@ -193,7 +193,6 @@ function calculateMaleDimension(H: number, W: number, key: string, F: number): n
       return null
   }
 
-  console.log(`  📐 Male ${key}: ${formula}`)
   return result
 }
 
@@ -226,11 +225,11 @@ function calculateFemaleDimension(H: number, W: number, key: string, F: number):
       result = (0.30 * H + 0.50 * W + 22) * (0.91 + 0.09 * F)
       formula = `(0.30×${H} + 0.50×${W} + 22) × (0.91 + 0.09×${F}) = ${result.toFixed(1)}`
       break
-    case 'body_length':
+    case 'length':
       result = 0.385 * H
       formula = `0.385 × ${H} = ${result.toFixed(1)}`
       break
-    case 'shoulders':
+    case 'shoulder':
       result = (0.42 * H + 0.20 * (W - 60) + 22) * (0.93 + 0.07 * F)
       formula = `(0.42×${H} + 0.20×(${W}-60) + 22) × (0.93 + 0.07×${F}) = ${result.toFixed(1)}`
       break
@@ -246,7 +245,6 @@ function calculateFemaleDimension(H: number, W: number, key: string, F: number):
       return null
   }
 
-  console.log(`  📐 Female ${key}: ${formula}`)
   return result
 }
 
@@ -262,8 +260,8 @@ function getMeasurementFit(
 ): 'in_range' | 'smaller' | 'larger' {
   const normalizedKey = measurementKey?.toLowerCase().replace(/\s+/g, '_')
 
-  // For body_length: shirt longer than person is OK (in_range), shorter is bad (larger means user needs bigger)
-  if (normalizedKey === 'body_length') {
+  // For length: shirt longer than person is OK (in_range), shorter is bad (larger means user needs bigger)
+  if (normalizedKey === 'length') {
     if (measurement.min !== undefined) {
       if (userValue <= measurement.min) return 'in_range'  // Shirt is long enough
       return 'larger'  // User body is longer than shirt - needs bigger size
@@ -314,8 +312,6 @@ export function identifySizeWithGuide(
   // Get measurement keys from size guide
   const measurementKeys = Object.keys(sizeGuide.cm[0].measurements)
   const bodyComp = user.bodyComposition || 'average'
-  console.log('📏 Size guide measurements:', measurementKeys)
-  console.log('🏋️ Body composition:', bodyComp, '(F =', BODY_COMPOSITION_FACTOR[bodyComp], ')')
 
   // Sort sizes from smallest to largest
   const sortedSizes = [...sizeGuide.cm].sort((a, b) => getSizeIndex(a.label) - getSizeIndex(b.label))
@@ -354,7 +350,6 @@ export function identifySizeWithGuide(
       else if (fit === 'larger') largerCount++
 
       const displayRange = measurement.value ?? `${measurement.min}-${measurement.max}`
-      console.log(`  ${key}: user=${userDimension.toFixed(1)}cm, size ${sizeEntry.label}=${displayRange}, fit=${fit}`)
     }
 
     sizeAnalyses.push({
@@ -370,7 +365,7 @@ export function identifySizeWithGuide(
 
   // Find best size:
   // 1. First priority: All measurements in range (optimal)
-  // 2. Second priority: No measurements where user is larger (acceptable - will be loose)
+  // 2. Second priority: Majority vote — half or fewer measurements are larger (standard fit)
   // 3. Fallback: Largest available size (user is too large for all)
 
   let bestSize = sortedSizes[sortedSizes.length - 1].label  // Default to largest
@@ -382,19 +377,16 @@ export function identifySizeWithGuide(
   if (optimalSize) {
     bestSize = optimalSize.label
     confidence = 'high'
-    console.log(`✅ Found optimal size: ${bestSize} (all measurements in range)`)
   } else {
-    // Find smallest size where user is not larger than any measurement
-    const acceptableSize = sizeAnalyses.find(s => !s.hasAnyLarger)
+    // Find smallest size where half or fewer measurements are larger (majority vote)
+    const acceptableSize = sizeAnalyses.find(s => s.largerCount * 2 <= s.totalCount)
     if (acceptableSize) {
       bestSize = acceptableSize.label
-      confidence = 'medium'
-      console.log(`👍 Found acceptable size: ${bestSize} (user in range or smaller for all)`)
+      confidence = acceptableSize.largerCount === 0 ? 'medium' : 'medium'
     } else {
       // User is larger than even the largest size
       edgeCase = 'too_large'
       confidence = 'low'
-      console.log(`⚠️ User is too large for all available sizes`)
     }
   }
 
@@ -404,7 +396,6 @@ export function identifySizeWithGuide(
     edgeCase = 'too_small'
     bestSize = smallestAnalysis.label
     confidence = 'low'
-    console.log(`⚠️ User is too small for all available sizes`)
   }
 
   // Build notes
@@ -417,7 +408,6 @@ export function identifySizeWithGuide(
 
   const { regular, comfortable, tight } = getAdjacentSizes(bestSize, availableSizes, edgeCase)
 
-  console.log(`🎯 Best match: ${bestSize}, confidence: ${confidence}, edge case: ${edgeCase}`)
 
   return {
     regular,
@@ -458,17 +448,14 @@ function lookupSizeFromChest(
     }
   }
 
-  console.log(`📏 Chest ${chest.toFixed(1)}cm → raw size: ${rawSize} (${clothingGender})`)
 
   // Handle between-sizes based on body composition
   // lean = size down, average/soft = size up
   if (rawSize.includes('-')) {
     const [smaller, larger] = rawSize.split('-')
     if (bodyComposition === 'lean') {
-      console.log(`  → Body type: lean, choosing smaller size: ${smaller}`)
       return smaller
     } else {
-      console.log(`  → Body type: ${bodyComposition || 'average'}, choosing larger size: ${larger}`)
       return larger
     }
   }
@@ -487,22 +474,18 @@ export function identifySizeWithoutGuide(
   const { height, weight, gender, bodyComposition } = user
   const comp = bodyComposition || 'average'
 
-  console.log(`📐 Input: height=${height}cm, weight=${weight}kg, gender=${gender}, build=${comp}`)
 
   // Calculate chest size using the formulas (no body type factor for chest)
   let chest: number
   if (gender === 'male') {
     chest = (weight * 240) / height
-    console.log(`  📐 Male chest: (${weight} × 240) / ${height} = ${chest.toFixed(1)}cm`)
   } else if (gender === 'female') {
     chest = (weight * 260) / height
-    console.log(`  📐 Female chest: (${weight} × 260) / ${height} = ${chest.toFixed(1)}cm`)
   } else {
     // Unknown gender: average of male and female formulas
     const maleChest = (weight * 240) / height
     const femaleChest = (weight * 260) / height
     chest = (maleChest + femaleChest) / 2
-    console.log(`  📐 Unknown gender chest: avg(${maleChest.toFixed(1)}, ${femaleChest.toFixed(1)}) = ${chest.toFixed(1)}cm`)
   }
 
   // Look up size from chest measurement
@@ -514,8 +497,6 @@ export function identifySizeWithoutGuide(
   const smallestAvailable = sortedAvailable[0]
   const largestAvailable = sortedAvailable[sortedAvailable.length - 1]
 
-  console.log(`📋 Available sizes: ${sortedAvailable.join(', ')}`)
-  console.log(`📋 Recommended size from chest lookup: ${regularSize}`)
 
   // Check if recommended size is available
   const regularIndex = getSizeIndex(regularSize)
@@ -531,14 +512,12 @@ export function identifySizeWithoutGuide(
     edgeCase = 'too_small'
     finalRegularSize = smallestAvailable
     notes = `Person is smaller than available sizes. ${smallestAvailable} will fit loosely.`
-    console.log(`⚠️ User is too small for available sizes (recommended: ${regularSize}, smallest: ${smallestAvailable})`)
   }
   // Check if user's ideal size is larger than the largest available
   else if (regularIndex > largestIndex) {
     edgeCase = 'too_large'
     finalRegularSize = largestAvailable
     notes = `Person is larger than available sizes. ${largestAvailable} will fit tightly.`
-    console.log(`⚠️ User is too large for available sizes (recommended: ${regularSize}, largest: ${largestAvailable})`)
   }
   // Normal case: find closest available size if exact match not found
   else if (availableSizes.length > 0 && !sortedAvailable.some(s => normalizeSize(s) === normalizeSize(regularSize))) {
@@ -550,12 +529,10 @@ export function identifySizeWithoutGuide(
         finalRegularSize = size
       }
     }
-    console.log(`📋 Exact size ${regularSize} not available, closest: ${finalRegularSize}`)
   }
 
   const { regular, comfortable, tight } = getAdjacentSizes(finalRegularSize, sizesToUse, edgeCase)
 
-  console.log(`🎯 Final recommendation: tight=${tight}, regular=${regular}, comfortable=${comfortable}`)
 
   return {
     regular,
@@ -577,13 +554,6 @@ export function identifySize(
   clothingGender: 'men' | 'women' | 'unisex' = 'unisex',
   availableSizes: string[] = []
 ): SizeRecommendation {
-  console.log('🎯 Identifying size:', {
-    height: user.height,
-    weight: user.weight,
-    gender: user.gender,
-    bodyComposition: user.bodyComposition,
-    hasSizeGuide: !!sizeGuide
-  })
 
   if (sizeGuide && sizeGuide.cm.length > 0) {
     return identifySizeWithGuide(user, sizeGuide)

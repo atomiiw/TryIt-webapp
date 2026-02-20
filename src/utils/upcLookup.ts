@@ -36,7 +36,6 @@ export function lookupSKUByUPC(upc: string): UPCLookupResult {
     }
   }
 
-  console.log(`🔍 Looking up UPC: ${cleaned} (${cleaned.length} digits)`)
 
   // Try multiple variations to handle check digit / leading zero differences
   const variations: string[] = [
@@ -51,7 +50,6 @@ export function lookupSKUByUPC(upc: string): UPCLookupResult {
 
     const result = upcLookup[variation]
     if (result) {
-      console.log(`✅ Found SKU: ${result.sku}, internalId: ${result.internalId} (matched UPC: ${variation})`)
       return {
         success: true,
         sku: result.sku,
@@ -62,7 +60,6 @@ export function lookupSKUByUPC(upc: string): UPCLookupResult {
   }
 
   // Not found in lookup table
-  console.log(`❌ UPC not found in lookup table: ${cleaned}`)
   return {
     success: false,
     sku: null,

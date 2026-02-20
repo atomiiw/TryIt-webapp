@@ -27,34 +27,35 @@ interface BarcodeScannerProps {
 }
 
 /**
+ * Normalize a size string to its abbreviation
+ */
+function normalizeSize(s: string): string {
+  const map: Record<string, string> = {
+    'x-small': 'XS', 'xsmall': 'XS', 'extra small': 'XS', 'x small': 'XS',
+    'small': 'S', 'sm': 'S',
+    'medium': 'M', 'med': 'M',
+    'large': 'L', 'lg': 'L',
+    'x-large': 'XL', 'xlarge': 'XL', 'extra large': 'XL', 'x large': 'XL',
+    'xx-large': '2XL', 'xxlarge': '2XL', 'xxl': '2XL', 'xx large': '2XL', '2x': '2XL',
+    'xxx-large': '3XL', 'xxxlarge': '3XL', 'xxxl': '3XL', '3x': '3XL',
+    'xxxx-large': '4XL', 'xxxxlarge': '4XL', 'xxxxl': '4XL', '4x': '4XL',
+    'youth small': 'YS', 'youth s': 'YS',
+    'youth medium': 'YM', 'youth m': 'YM',
+    'youth large': 'YL', 'youth l': 'YL',
+    'youth x-large': 'YXL', 'youth xl': 'YXL',
+  }
+  return map[s.toLowerCase().trim()] || s.toUpperCase().trim()
+}
+
+/**
  * Format availableSizes array into display string
  * e.g., ["Small", "Medium", "Large", "XL", "2XL"] => "S - 2XL"
  */
 function formatSizeRange(sizes: string[]): string {
   if (!sizes || sizes.length === 0) return 'One Size'
-  if (sizes.length === 1) return sizes[0]
-
-  // Map full names to abbreviations for display
-  const abbrev: Record<string, string> = {
-    'small': 'S',
-    'medium': 'M',
-    'large': 'L',
-    'xl': 'XL',
-    '2xl': '2XL',
-    '3xl': '3XL',
-    'youth small': 'YS',
-    'youth medium': 'YM',
-    'youth large': 'YL',
-    'youth x-large': 'YXL'
-  }
-
-  const firstSize = sizes[0]
-  const lastSize = sizes[sizes.length - 1]
-
-  const firstAbbrev = abbrev[firstSize.toLowerCase()] || firstSize
-  const lastAbbrev = abbrev[lastSize.toLowerCase()] || lastSize
-
-  return `${firstAbbrev} - ${lastAbbrev}`
+  const first = normalizeSize(sizes[0])
+  if (sizes.length === 1) return first
+  return `${first} - ${normalizeSize(sizes[sizes.length - 1])}`
 }
 
 function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeScannerProps) {
@@ -153,7 +154,6 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
       }, 3000)
 
     } catch (err) {
-      console.error('Camera error:', err)
       setError('Camera access denied')
       setIsScanning(false)
     }
@@ -173,7 +173,6 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
 
       const processor = getBarcodeProcessor()
 
-      console.log('📷 Starting production barcode scanner...')
       const startTime = Date.now()
 
       await processor.startScanning(videoRef.current, {
@@ -181,22 +180,15 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
         onScan: (result: BarcodeScanResult) => {
           // Prevent duplicate scans
           if (hasScannedRef.current) {
-            console.log('📷 Ignoring duplicate scan:', result.rawValue)
             return
           }
           hasScannedRef.current = true
 
           const scanTime = Date.now() - startTime
-          console.log(`📷 Barcode scanned in ${scanTime}ms:`, result)
-          console.log(`   Raw value: ${result.rawValue}`)
-          console.log(`   SKU: ${result.sku ?? 'NOT FOUND'}`)
-          console.log(`   Matched UPC: ${result.matchedUpc ?? 'N/A'}`)
-          console.log(`   Format: ${result.format}`)
 
           // Check if SKU was found in lookup table
           if (result.sku === null) {
             // UPC not found - show notification but keep scanning
-            console.log(`❌ UPC not found: ${result.rawValue}`)
 
             // Clear any existing timeout
             if (notAvailableTimeoutRef.current) {
@@ -233,7 +225,6 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
         onError: (err: Error) => {
           // Don't log or show NotFoundException errors (normal when no barcode visible)
           if (!err.name.startsWith('NotFoundException')) {
-            console.error('Scanner error:', err)
             setError('Scanner error')
           }
         }
@@ -243,7 +234,6 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
       streamRef.current = videoRef.current.srcObject as MediaStream
 
     } catch (err) {
-      console.error('Camera error:', err)
       setError('Camera access denied')
       setIsScanning(false)
     }
@@ -330,31 +320,42 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
    * Analyze item: identify brand and collect size guide
    */
   const analyzeItem = async (rawItem: ItemData): Promise<ItemData> => {
-    console.log('🔍 Analyzing item:', rawItem.name)
+
+    // Normalize availableSizes to abbreviations (S, M, L, XL, 2XL, etc.)
+    if (rawItem.availableSizes) {
+      const sizeMap: Record<string, string> = {
+        'x-small': 'XS', 'xsmall': 'XS', 'extra small': 'XS', 'x small': 'XS',
+        'small': 'S', 'sm': 'S',
+        'medium': 'M', 'med': 'M',
+        'large': 'L', 'lg': 'L',
+        'x-large': 'XL', 'xlarge': 'XL', 'extra large': 'XL', 'x large': 'XL',
+        'xx-large': '2XL', 'xxlarge': '2XL', 'xxl': '2XL', 'xx large': '2XL', '2x': '2XL',
+        'xxx-large': '3XL', 'xxxlarge': '3XL', 'xxxl': '3XL', '3x': '3XL',
+        'xxxx-large': '4XL', 'xxxxlarge': '4XL', 'xxxxl': '4XL', '4x': '4XL',
+        'youth small': 'YS', 'youth s': 'YS',
+        'youth medium': 'YM', 'youth m': 'YM',
+        'youth large': 'YL', 'youth l': 'YL',
+        'youth x-large': 'YXL', 'youth xl': 'YXL',
+      }
+      rawItem = {
+        ...rawItem,
+        availableSizes: rawItem.availableSizes.map(s =>
+          sizeMap[s.toLowerCase().trim()] || s.toUpperCase().trim()
+        )
+      }
+    }
 
     // Step 1: Identify brand
     let brand: string
     try {
       brand = identifyBrand(rawItem)
-      console.log('🏷️ Identified brand:', brand)
     } catch (brandErr) {
-      console.error('❌ Brand identification failed:', brandErr)
       brand = 'Duke' // fallback
     }
 
     // Step 2: Collect size guide (rule-based keyword matching)
     const itemWithBrand = { ...rawItem, brand }
     const sizeGuide = collectSizeGuide(itemWithBrand)
-
-    console.log('========== SIZE GUIDE LOOKUP ==========')
-    console.log('Brand identified:', brand)
-    console.log('Size guide found:', sizeGuide ? 'YES' : 'NO')
-    if (sizeGuide) {
-      console.log('  - Clothing type:', sizeGuide.clothing_type)
-      console.log('  - Gender:', sizeGuide.gender)
-      console.log('  - Sizes available:', sizeGuide.cm.map(s => s.label).join(', '))
-    }
-    console.log('========================================')
 
     // Return item with brand and size guide
     return {
@@ -370,12 +371,10 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
   const fetchItemData = async (sku: string, internalId: string | null, isDemo: boolean): Promise<ItemData> => {
     if (isDemo) {
       // Demo mode: use sample item data from JSON file
-      console.log('🎭 Demo mode: using sample item data')
       return sampleItemData as ItemData
     }
 
     // Production mode: fetch from backend using internalId for direct Duke API lookup
-    console.log('📡 Fetching item with internalId:', internalId)
     const response = await fetch(`https://closai-backend.vercel.app/api/duke/item?id=${internalId}`)
 
     if (response.ok) {
@@ -387,7 +386,6 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
   }
 
   const handleDetectedBarcode = async (barcode: string, internalId: string | null, isDemo: boolean = false) => {
-    console.log('🚀 handleDetectedBarcode called, barcode:', barcode, 'isDemo:', isDemo)
     stopScanner()
     setIsAnalyzing(true)
     setError(null)
@@ -396,18 +394,10 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
 
     try {
       // Step 1: Get raw item data (from sample file or API)
-      console.log('📡 Step 1: Fetching item data...')
       const rawItem = await fetchItemData(barcode, internalId, isDemo)
-      console.log('📦 Got item data:', rawItem.name)
 
       // Step 2: Analyze item (identify brand + collect size guide)
-      console.log('🔬 Step 2: Analyzing item...')
       const analyzedItem = await analyzeItem(rawItem)
-      console.log('✅ Analysis complete:', {
-        name: analyzedItem.name,
-        brand: analyzedItem.brand,
-        hasSizeGuide: !!analyzedItem.sizeGuide
-      })
 
       // Done - check for duplicates or add to items array
       setIsAnalyzing(false)
@@ -420,7 +410,6 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
 
       if (existingIndex !== -1) {
         // Item already exists - jump to it instead of adding duplicate
-        console.log('📍 Item already exists, jumping to card', existingIndex + 1)
         onItemScanned(items[existingIndex])
         setCurrentCardIndex(existingIndex)
         setNavigationTrigger(prev => prev + 1) // Force navigation even if index same
@@ -429,7 +418,6 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
         setShowDuplicateNotification(true)
       } else {
         // New item - add to array
-        console.log('📤 Adding item to items array')
 
         // Add unique id with timestamp
         const itemWithUniqueId = {
@@ -447,10 +435,7 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
       }
 
     } catch (err) {
-      console.error('❌ Failed to process item:', err)
       if (err instanceof Error) {
-        console.error('Error message:', err.message)
-        console.error('Error stack:', err.stack)
       }
       // Check if it's a "not found" error
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
@@ -526,11 +511,11 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
     brand: item.brand || 'Duke',
     imageUrl: item.imageUrl,
     price: `$${item.price.toFixed(2)}`,
-    size: formatSizeRange(item.availableSizes)
+    size: formatSizeRange(item.availableSizes),
+    gender: item.gender
   }))
 
   // Debug: log item prop on every render
-  console.log('🎨 BarcodeScanner render, item:', item ? item.name : 'null', 'isAnalyzing:', isAnalyzing, 'isScanning:', isScanning)
 
   // Get status message for display
   const getStatusMessage = () => {

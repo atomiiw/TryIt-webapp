@@ -70,7 +70,6 @@ const PhotoUpload = forwardRef<PhotoUploadHandle, PhotoUploadProps>(
             img.src = image
           })
         } catch (error) {
-          console.error('Failed to capture frame:', error)
           return null
         }
       }

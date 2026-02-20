@@ -12,6 +12,7 @@ export interface ClothingItem {
   imageUrl: string;
   price?: string;
   size?: string;
+  gender?: string;
 }
 
 interface StackedCardsProps {
@@ -55,6 +56,9 @@ const StackedCards: React.FC<StackedCardsProps> = ({
   showDuplicateNotification = false,
   onDuplicateNotificationDismiss
 }) => {
+  // Top edge position (px from container top) for images scaled down due to wide bottom half
+  const SCALED_IMAGE_TOP = 30;
+
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isDragging, setIsDragging] = useState(false);
   const [dragOffset, setDragOffset] = useState(0);
@@ -63,6 +67,9 @@ const StackedCards: React.FC<StackedCardsProps> = ({
 
   // Store processed images with white backgrounds removed
   const [processedImages, setProcessedImages] = useState<Record<string, string>>({});
+
+  // Per-image max-height: if bottom half > 120px, cap total at 240px
+  const [imageMaxHeights, setImageMaxHeights] = useState<Record<string, number>>({});
 
 
   // Store y offset for each item's name (to position size badge)
@@ -189,7 +196,6 @@ const StackedCards: React.FC<StackedCardsProps> = ({
             [item.id]: processedUrl
           }));
         } catch (error) {
-          console.warn(`Failed to process image for ${item.name}:`, error);
           // Fall back to original image
           setProcessedImages(prev => ({
             ...prev,
@@ -201,6 +207,65 @@ const StackedCards: React.FC<StackedCardsProps> = ({
 
     processImages();
   }, [items, processedImages]);
+
+  // Measure bottom-half content width and scale down if it exceeds 120px
+  useEffect(() => {
+    const DEFAULT_MAX_HEIGHT = 150;
+
+    for (const item of items) {
+      const src = processedImages[item.id];
+      if (!src || imageMaxHeights[item.id] !== undefined) continue;
+
+      const img = new Image();
+      img.onload = () => {
+        const natW = img.naturalWidth;
+        const natH = img.naturalHeight;
+
+        // Draw to canvas to read pixel data
+        const canvas = document.createElement('canvas');
+        canvas.width = natW;
+        canvas.height = natH;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          setImageMaxHeights(prev => ({ ...prev, [item.id]: DEFAULT_MAX_HEIGHT }));
+          return;
+        }
+        ctx.drawImage(img, 0, 0);
+
+        // Scan bottom half rows for max content width
+        const halfY = Math.floor(natH / 2);
+        const bottomData = ctx.getImageData(0, halfY, natW, natH - halfY);
+        let maxContentWidth = 0;
+        for (let row = 0; row < bottomData.height; row++) {
+          let leftmost = -1;
+          let rightmost = -1;
+          for (let col = 0; col < bottomData.width; col++) {
+            const alpha = bottomData.data[(row * bottomData.width + col) * 4 + 3];
+            if (alpha > 10) {
+              if (leftmost === -1) leftmost = col;
+              rightmost = col;
+            }
+          }
+          if (leftmost !== -1) {
+            maxContentWidth = Math.max(maxContentWidth, rightmost - leftmost + 1);
+          }
+        }
+
+        // Compute rendered bottom-half width at default max height
+        const renderScale = Math.min(DEFAULT_MAX_HEIGHT, natH) / natH;
+        const renderedBottomWidth = maxContentWidth * renderScale;
+
+        if (renderedBottomWidth > 135) {
+          // Scale entire image so bottom-half width = exactly 135px
+          const newMaxHeight = natH * (135 / maxContentWidth);
+          setImageMaxHeights(prev => ({ ...prev, [item.id]: newMaxHeight }));
+        } else {
+          setImageMaxHeights(prev => ({ ...prev, [item.id]: DEFAULT_MAX_HEIGHT }));
+        }
+      };
+      img.src = src;
+    }
+  }, [processedImages, items, imageMaxHeights]);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const startXRef = useRef(0);
@@ -372,15 +437,23 @@ const StackedCards: React.FC<StackedCardsProps> = ({
 
             {/* Item image - Rectangle 2 (RIGHT aligned) */}
             <div className="card-item-image">
-              <img
-                src={processedImages[item.id] || item.imageUrl}
-                alt={item.name}
-                className="card-image"
-                draggable={false}
-                style={{
-                  transform: 'translateX(-50%)'
-                }}
-              />
+              {(() => {
+                const maxH = imageMaxHeights[item.id];
+                const wasScaledDown = maxH !== undefined && maxH < 150;
+                return (
+                  <img
+                    src={processedImages[item.id] || item.imageUrl}
+                    alt={item.name}
+                    className="card-image"
+                    draggable={false}
+                    style={{
+                      transform: 'translateX(-50%)',
+                      ...(maxH ? { maxHeight: `${maxH}px` } : {}),
+                      ...(wasScaledDown ? { bottom: 'auto', top: `${SCALED_IMAGE_TOP}px` } : {})
+                    }}
+                  />
+                );
+              })()}
             </div>
 
             {/* Gradient fade on image - Rectangle 5 */}
@@ -393,15 +466,26 @@ const StackedCards: React.FC<StackedCardsProps> = ({
 
             {/* Text content - Rectangle: name & price (LEFT side, bottom) */}
             <div className="card-text-content">
-              {/* Size badge - positioned above name, translateY matches name's y position */}
-              {item.size && (
+              {/* Badge row - size and gender badges above name */}
+              {(item.size || item.gender) && (
                 <div
-                  className="card-size-badge"
+                  className="card-badge-row"
                   style={{
                     '--size-badge-offset': `${nameYOffset[item.id] ?? 14}px`
                   } as React.CSSProperties}
                 >
-                  <span className="card-size-text">{item.size}</span>
+                  {item.size && (
+                    <div className="card-size-badge">
+                      <span className="card-size-text">{item.size}</span>
+                    </div>
+                  )}
+                  {item.gender && (
+                    <div className="card-gender-badge">
+                      <span className="card-gender-text">
+                        {item.gender.replace(/s$/, '').toUpperCase()}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
               <div className="card-name-wrapper">

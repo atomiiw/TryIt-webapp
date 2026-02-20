@@ -20,7 +20,6 @@ export interface ItemData {
   inStock: boolean
   type: string
   gender: string
-  specificType: string
   source: string
   purchaseUrl: string
   availableSizes: string[]

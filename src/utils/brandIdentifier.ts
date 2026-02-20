@@ -1,112 +1,59 @@
 import type { ItemData } from '../App'
+import sizeGuidesCm from '../data/size_guides_cm.json'
 
-// Known brands to search for in descriptions (case-insensitive)
-const KNOWN_BRANDS = [
-  'Champion',
-  'Lululemon',
-  'League',
-  'Nike',
-  "'47",
-  'Johnnie-O',
-  'Cutter & Buck',
-  'Columbia',
-  'Playa Society'
+// Derive brand names dynamically from the size guide
+const SIZE_GUIDE_BRANDS = [...new Set(
+  (sizeGuidesCm as { brands: { brand: string }[] }).brands.map(entry => entry.brand)
+)]
+
+// Full search list: size guide brands + "Duke University" (normalized to Duke)
+const BRAND_SEARCH_LIST = [
+  ...SIZE_GUIDE_BRANDS,
+  'Duke University'
 ]
 
-/**
- * Extracts brand from item name by finding words followed by ®
- * @param name - The item name string
- * @returns Array of brand names found (without ®)
- */
-function extractBrandsFromName(name: string): string[] {
-  const brands: string[] = []
-
-  // Match word(s) immediately before ® symbol
-  // Handles cases like "Duke®", "Cutter & Buck®", "'47®"
-  const regex = /(['"]?\w+(?:\s*&\s*\w+)?)\s*®/g
-  let match
-
-  while ((match = regex.exec(name)) !== null) {
-    const brand = match[1].trim()
-    if (brand) {
-      brands.push(brand)
-    }
-  }
-
-  return brands
+function escapeRegex(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 /**
- * Searches for known brands in text (case-insensitive)
- * @param text - Text to search in
- * @returns First matching brand or null
- */
-function findKnownBrandInText(text: string): string | null {
-  const lowerText = text.toLowerCase()
-
-  for (const brand of KNOWN_BRANDS) {
-    if (lowerText.includes(brand.toLowerCase())) {
-      return brand
-    }
-  }
-
-  return null
-}
-
-/**
- * Identifies the brand of an item using the following logic:
- * 1. Look for ® in name to find brands
- * 2. If two brands found, return the one that's not 'Duke'
- * 3. If one brand found, return it
- * 4. If no ® brands, search descriptions for known brands
- * 5. If still no brand, default to 'Duke'
+ * Identifies the brand of an item by searching for "brand®" in the item name.
  *
- * @param item - The ItemData object
- * @returns The identified brand name
+ * 1. Search for each known brand name (from size guide) followed by ® in the item name
+ * 2. If two brands found: one is always Duke/Duke University + another → return the non-Duke one
+ * 3. If one brand found: return it
+ * 4. If none found: default to Duke
  */
 export function identifyBrand(item: ItemData): string {
-  // Step 1: Look for ® in name
-  const brandsInName = extractBrandsFromName(item.name)
+  // Normalize smart/curly quotes in item name
+  const name = item.name
+    .replace(/[\u2018\u2019`]/g, "'")
+    .replace(/[\u201C\u201D]/g, '"')
 
-  if (brandsInName.length > 0) {
-    // Step 2: If two brands, pick the non-Duke one
-    if (brandsInName.length >= 2) {
-      const nonDukeBrand = brandsInName.find(
-        brand => brand.toLowerCase() !== 'duke'
-      )
-      if (nonDukeBrand) {
-        return nonDukeBrand
+  // Search for each known brand followed by ® in the item name
+  const found: string[] = []
+
+  for (const brand of BRAND_SEARCH_LIST) {
+    const pattern = new RegExp(escapeRegex(brand) + '\\s*®', 'i')
+    if (pattern.test(name)) {
+      const normalized = (brand === 'Duke' || brand === 'Duke University') ? 'Duke' : brand
+      if (!found.includes(normalized)) {
+        found.push(normalized)
       }
     }
-
-    // Step 3: If one brand (or all are Duke), return the first
-    return brandsInName[0]
   }
 
-  // Step 4: No ® in name, search descriptions for known brands
-  const textToSearch = `${item.shortDescription} ${item.fullDescription}`
-  const foundBrand = findKnownBrandInText(textToSearch)
-
-  if (foundBrand) {
-    return foundBrand
+  // Two brands: one is Duke + another → return the non-Duke one
+  if (found.length >= 2) {
+    const nonDuke = found.find(b => b !== 'Duke')
+    if (nonDuke) return nonDuke
   }
 
-  // Step 5: Default to Duke
+  // One brand: return it
+  if (found.length === 1) {
+    return found[0]
+  }
+
+  // No brand found: default to Duke
   return 'Duke'
 }
-
-/**
- * Adds brand property to an item
- * @param item - The ItemData object
- * @returns ItemData with brand property added
- */
-export function addBrandToItem(item: ItemData): ItemData & { brand: string } {
-  const brand = identifyBrand(item)
-  return {
-    ...item,
-    brand
-  }
-}
-
-// Type for item with brand
-export type ItemDataWithBrand = ItemData & { brand: string }
