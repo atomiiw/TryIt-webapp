@@ -8,7 +8,7 @@ Virtual try-on app that lets you see how clothes look on you before buying.
 2. **Upload your photo** - Take or upload a photo of yourself
 3. **Get size recommendations** - Based on your height, weight, and body type
 4. **See virtual try-on** - AI generates images of you wearing the item in 3 fits:
-   - Tight (snug fit)
+   - Fitted (snug fit)
    - Regular (comfortable fit)
    - Comfortable (slightly oversized)
 
