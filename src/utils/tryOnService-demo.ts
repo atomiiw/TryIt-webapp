@@ -18,6 +18,7 @@ export interface ClothingInfo {
   name: string
   type: string
   color: string
+  fitSentence?: string  // Personalized fit description from fitDescriber
 }
 
 // Clothing item for API
@@ -170,18 +171,10 @@ function generateFitPrompt(clothingInfo: ClothingInfo, fitType: FitType): string
   const itemColor = clothingInfo.color && clothingInfo.color !== 'N/A' ? clothingInfo.color : ''
   const colorDesc = itemColor ? `${itemColor} ` : ''
 
-  const fitDescriptions: Record<FitType, string> = {
-    tight: 'true-to-size, following the body shape naturally without being skin-tight',
-    regular: 'slightly spacious with a little breathing room but NOT draping or baggy',
-    comfortable: 'oversized but wearable, loose and roomy like one size up'
-  }
+  const fitDetail = clothingInfo.fitSentence ? ` ${clothingInfo.fitSentence}` : ''
 
-  return `VIRTUAL TRY-ON: Replace the person's current shirt with the ${colorDesc}${itemType} "${itemName}".
-FIT: The ${itemType} should fit ${fitDescriptions[fitType]}.
-RULES:
-- REMOVE all current clothing and replace with ONLY the provided ${itemType}
-- Keep exact same color as the provided ${itemType}
-- Keep person's pose, face, and background unchanged`
+  return `Keep the garment's own design: crop top stays short and cropped, tee stays its original length, hoodie stays roomy and bulky, dress stays long and flowing, jacket keeps its structure, sweater stays cozy and thick. Put the provided ${colorDesc}${itemType} on this person. Remove whatever they are wearing underneath — bare skin, bare arms if short-sleeve. Keep bottom unchanged. Don't tuck in, hem hangs down. Don't change person's body, pose, or face.
+FIT:${fitDetail}`
 }
 
 /**

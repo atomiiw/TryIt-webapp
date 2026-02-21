@@ -4,9 +4,11 @@ import type { SizeRecommendation } from '../utils/sizeIdentifier'
 import { calculateDimension } from '../utils/sizeIdentifier'
 import type { BodyComposition } from '../utils/personAnalyzer'
 import type { SizeGuide } from '../utils/sizeCollector'
+import { convertSizeForDisplay, isBottomType } from '../utils/sizeCollector'
 // Person analysis is now done in ShoppingPage and passed via userData.personAnalysis
 import { identifySize } from '../utils/sizeIdentifier'
 import { generateTryOnImage, type FitType as TryOnFitType } from '../utils/tryOnService'
+import { describeFit } from '../utils/fitDescriber'
 import './ResultsSection.css'
 
 // Cached analysis from parent
@@ -50,6 +52,7 @@ const MEASUREMENT_LABELS: Record<string, string> = {
   'chest': 'Chest',
   'waist': 'Waist',
   'hips': 'Hips',
+  'length': 'Body Length',
   'body_length': 'Body Length',
   'shoulders': 'Shoulders',
   'inseam': 'Inseam',
@@ -225,6 +228,47 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     comfortable: 'Relaxed'
   }
 
+  // Compute personalized fit sentence for a given fit type
+  // When out of range, extrapolate from the nearest available size with amplified intensity
+  const getFitSentence = (fit: FitType): string | undefined => {
+    const sizeGuide = userData.item?.sizeGuide
+    if (!sizeGuide || !sizeRec || measurements.length === 0) return undefined
+
+    const category = isBottomType(userData.item?.type || '') ? 'bottoms' as const : 'tops' as const
+    const itemType = userData.item?.type || ''
+    const itemName = userData.item?.name || ''
+    const recSize = sizeRec[fit]
+
+    if (recSize) {
+      // Normal case: size exists, compute fit directly
+      const sizeEntry = sizeGuide.cm.find(
+        s => s.label.toLowerCase() === recSize.toLowerCase()
+      )
+      if (!sizeEntry) return undefined
+      return describeFit(measurements, sizeEntry, fit, 0, category, itemType, itemName)
+    }
+
+    // Out of range: find nearest available size and extrapolate
+    const fallbackOrder: Record<FitType, { fits: FitType[]; shift: number }> = {
+      tight:       { fits: ['regular', 'comfortable'], shift: +1 },
+      regular:     { fits: ['tight', 'comfortable'],   shift: 0 },
+      comfortable: { fits: ['regular', 'tight'],       shift: -1 },
+    }
+
+    const { fits: fallbackFits, shift } = fallbackOrder[fit]
+    for (const fallbackFit of fallbackFits) {
+      const fallbackSize = sizeRec[fallbackFit]
+      if (!fallbackSize) continue
+      const sizeEntry = sizeGuide.cm.find(
+        s => s.label.toLowerCase() === fallbackSize.toLowerCase()
+      )
+      if (!sizeEntry) continue
+      return describeFit(measurements, sizeEntry, fit, shift, category, itemType, itemName)
+    }
+
+    return undefined
+  }
+
   // Function to generate try-on image for a specific fit
   // Each fit runs completely independently
   const generateFitImage = async (fit: FitType) => {
@@ -239,7 +283,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         {
           name: userData.item.name || 'Clothing item',
           type: userData.item.type || 'tops',
-          color: userData.item.color || ''
+          color: userData.item.color || '',
+          fitSentence: getFitSentence(fit)
         },
         fit as TryOnFitType
       )
@@ -365,8 +410,10 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
   // Generate try-on images for all three fits regardless of size availability
   // Each fit is completely independent - uses ref to prevent duplicate triggers
   // Skip generation for fits that already have images from initialImages
+  // Waits for sizeRec and measurements so getFitSentence has data to work with
   useEffect(() => {
-    if (!userData.image || !userData.item?.imageUrl) return
+    if (!isVisible || !userData.image || !userData.item?.imageUrl) return
+    if (!sizeRec) return
 
     // Check each fit independently using ref to track what's already started
     const fits: FitType[] = ['tight', 'regular', 'comfortable']
@@ -379,7 +426,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         generateFitImage(fit)
       }
     })
-  }, [userData.image, userData.item?.imageUrl, generatedImages])
+  }, [userData.image, userData.item?.imageUrl, generatedImages, sizeRec, measurements])
 
   // All three fit types are always available for image generation
   const availableFits = useMemo<FitType[]>(() => {
@@ -466,7 +513,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         {
           name: userData.item.name || 'Clothing item',
           type: userData.item.type || 'tops',
-          color: userData.item.color || ''
+          color: userData.item.color || '',
+          fitSentence: getFitSentence(currentFit)
         },
         currentFit as TryOnFitType
       )
@@ -688,7 +736,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         <p className="suggested-size-subtitle">Or use as a reference when shopping for someone else.</p>
         <div className="suggested-size-row">
           {sizeRec?.[selectedFit] ? (
-            <span className="suggested-size-value">{abbreviateSize(sizeRec[selectedFit]!)}</span>
+            <span className="suggested-size-value">{convertSizeForDisplay(abbreviateSize(sizeRec[selectedFit]!), userData.item?.brand, userData.item?.gender, userData.item?.availableSizes)}</span>
           ) : (
             <span className="suggested-size-value out-of-range">Out of range</span>
           )}
@@ -715,10 +763,16 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
               {(() => {
                 const sizeMeasurements = getSizeMeasurements(selectedFit)
                 const selectedSize = sizeRec?.[selectedFit] || ''
-                const displaySelectedSize = selectedSize ? abbreviateSize(selectedSize) : ''
+                const displaySelectedSize = selectedSize ? convertSizeForDisplay(abbreviateSize(selectedSize), userData.item?.brand, userData.item?.gender, userData.item?.availableSizes) : ''
                 const unit = userData.heightUnit === 'ft' ? 'in' : 'cm'
 
-                if (measurements.length === 0) return null
+                // Only show measurements that exist in the size guide
+                const visibleMeasurements = measurements.filter((m) => {
+                  const normalizedName = m.name.toLowerCase().replace(/\s+/g, '_')
+                  return sizeMeasurements.some(sm => sm.key === normalizedName)
+                })
+
+                if (visibleMeasurements.length === 0) return null
 
                 return (
                   <div className="info-sheet-comparison">
@@ -727,19 +781,18 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
                       <span>Estimated body</span>
                       <span>Size {displaySelectedSize}</span>
                     </div>
-                    {measurements.map((m) => {
+                    {visibleMeasurements.map((m) => {
                       const userValue = userData.heightUnit === 'ft'
                         ? Math.round(m.value / 2.54 * 10) / 10
                         : m.value
                       const normalizedName = m.name.toLowerCase().replace(/\s+/g, '_')
                       const sizeM = sizeMeasurements.find(sm => sm.key === normalizedName)
-                      const sizeValue = sizeM?.display || '—'
 
                       return (
                         <div key={m.name} className="info-sheet-comparison-row">
                           <span>{m.name} ({unit})</span>
                           <span>{userValue}</span>
-                          <span>{sizeValue}</span>
+                          <span>{sizeM!.display}</span>
                         </div>
                       )
                     })}

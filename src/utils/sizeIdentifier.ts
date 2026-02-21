@@ -8,7 +8,7 @@ import type { BodyComposition } from './personAnalyzer'
 import { BODY_COMPOSITION_FACTOR } from './personAnalyzer'
 
 // Size order for standard sizing (smallest to largest)
-const SIZE_ORDER = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL']
+const SIZE_ORDER = ['XXXS', 'XXS', 'XS', 'S', 'M', 'L', 'XL', '1X', '2XL', '3XL', '4XL']
 
 // Size recommendation result
 export interface SizeRecommendation {
@@ -52,7 +52,7 @@ function normalizeSize(size: string): string {
 function getSizeIndex(size: string): number {
   const normalized = normalizeSize(size)
   const index = SIZE_ORDER.indexOf(normalized)
-  return index >= 0 ? index : 2 // Default to M
+  return index >= 0 ? index : SIZE_ORDER.indexOf('M') // Default to M
 }
 
 /**

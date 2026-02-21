@@ -4,10 +4,12 @@ import type { SizeRecommendation } from '../utils/sizeIdentifier'
 import { calculateDimension } from '../utils/sizeIdentifier'
 import type { BodyComposition } from '../utils/personAnalyzer'
 import type { SizeGuide } from '../utils/sizeCollector'
+import { convertSizeForDisplay, isBottomType } from '../utils/sizeCollector'
 import { analyzePersonPhoto } from '../utils/personAnalyzer'
 import { identifySize } from '../utils/sizeIdentifier'
 import { generateTryOnImageDemo } from '../utils/tryOnService-demo'
 import type { FitType } from '../utils/tryOnService-demo'
+import { describeFit } from '../utils/fitDescriber'
 import './ResultsSection.css'
 
 // ============================================================
@@ -38,6 +40,7 @@ const MEASUREMENT_LABELS: Record<string, string> = {
   'chest': 'Chest',
   'waist': 'Waist',
   'hips': 'Hips',
+  'length': 'Body Length',
   'body_length': 'Body Length',
   'shoulders': 'Shoulders',
   'inseam': 'Inseam',
@@ -220,6 +223,46 @@ function ResultsSectionDemo({ userData, isVisible }: ResultsSectionDemoProps) {
     comfortable: 'Comfortable'
   }
 
+  // Compute personalized fit sentence for a given fit type
+  // When out of range, extrapolate from the nearest available size with amplified intensity
+  const getFitSentence = (fit: FitType): string | undefined => {
+    const sg = userData.item?.sizeGuide
+    if (!sg || !sizeRec || measurements.length === 0) return undefined
+
+    const category = isBottomType(userData.item?.type || '') ? 'bottoms' as const : 'tops' as const
+    const itemType = userData.item?.type || ''
+    const itemName = userData.item?.name || ''
+    const recSize = sizeRec[fit]
+
+    if (recSize) {
+      const sizeEntry = sg.cm.find(
+        s => s.label.toLowerCase() === recSize.toLowerCase()
+      )
+      if (!sizeEntry) return undefined
+      return describeFit(measurements, sizeEntry, fit, 0, category, itemType, itemName)
+    }
+
+    // Out of range: find nearest available size and extrapolate
+    const fallbackOrder: Record<FitType, { fits: FitType[]; shift: number }> = {
+      tight:       { fits: ['regular', 'comfortable'], shift: +1 },
+      regular:     { fits: ['tight', 'comfortable'],   shift: 0 },
+      comfortable: { fits: ['regular', 'tight'],       shift: -1 },
+    }
+
+    const { fits: fallbackFits, shift } = fallbackOrder[fit]
+    for (const fallbackFit of fallbackFits) {
+      const fallbackSize = sizeRec[fallbackFit]
+      if (!fallbackSize) continue
+      const sizeEntry = sg.cm.find(
+        s => s.label.toLowerCase() === fallbackSize.toLowerCase()
+      )
+      if (!sizeEntry) continue
+      return describeFit(measurements, sizeEntry, fit, shift, category, itemType, itemName)
+    }
+
+    return undefined
+  }
+
   // Function to generate try-on image for a specific fit
   // Uses tryOnService-demo which returns fully processed image with watermark
   const generateFitImage = async (fit: FitType) => {
@@ -235,7 +278,8 @@ function ResultsSectionDemo({ userData, isVisible }: ResultsSectionDemoProps) {
         {
           name: userData.item.name || 'Clothing item',
           type: userData.item.type || 'tops',
-          color: userData.item.color || ''
+          color: userData.item.color || '',
+          fitSentence: getFitSentence(fit)
         },
         fit
       )
@@ -428,7 +472,8 @@ function ResultsSectionDemo({ userData, isVisible }: ResultsSectionDemoProps) {
         {
           name: userData.item.name || 'Clothing item',
           type: userData.item.type || 'tops',
-          color: userData.item.color || ''
+          color: userData.item.color || '',
+          fitSentence: getFitSentence(currentFit)
         },
         currentFit
       )
@@ -623,7 +668,7 @@ function ResultsSectionDemo({ userData, isVisible }: ResultsSectionDemoProps) {
             const size = sizeRec?.[fit]
             const isAvailable = !!size
             const isSelected = selectedFit === fit
-            const displaySize = size ? abbreviateSize(size) : '—'
+            const displaySize = size ? convertSizeForDisplay(abbreviateSize(size), userData.item?.brand, userData.item?.gender, userData.item?.availableSizes) : '—'
 
             return (
               <button
@@ -644,7 +689,7 @@ function ResultsSectionDemo({ userData, isVisible }: ResultsSectionDemoProps) {
       {(() => {
         const sizeMeasurements = getSizeMeasurements(selectedFit)
         const selectedSize = sizeRec?.[selectedFit] || ''
-        const displaySelectedSize = selectedSize ? abbreviateSize(selectedSize) : ''
+        const displaySelectedSize = selectedSize ? convertSizeForDisplay(abbreviateSize(selectedSize), userData.item?.brand, userData.item?.gender, userData.item?.availableSizes) : ''
 
         if (measurements.length === 0 && sizeMeasurements.length === 0) return null
 

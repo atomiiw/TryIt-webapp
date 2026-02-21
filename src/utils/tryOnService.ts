@@ -10,6 +10,7 @@
  */
 
 import { chooseWatermark, getWatermarkLogoPath } from './chooseWatermark'
+import { isBottomType } from './sizeCollector'
 
 // Backend API endpoint
 const BACKEND_URL = 'https://closai-backend.vercel.app'
@@ -22,6 +23,7 @@ export interface ClothingInfo {
   name: string
   type: string        // 'tops', 'bottoms'
   color: string
+  fitSentence?: string  // Personalized fit description from fitDescriber
 }
 
 // Try-on result
@@ -251,75 +253,20 @@ function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType): stri
 
   const colorDesc = itemColor ? `${itemColor} ` : ''
 
-  // Determine if clothing is top or bottom for complementary piece
-  const isTop = ['shirt', 't-shirt', 'tee', 'top', 'blouse', 'sweater', 'hoodie', 'jacket', 'coat', 'polo', 'tank'].some(
-    t => itemType.toLowerCase().includes(t)
-  )
-  const complementaryPiece = isTop
-    ? 'Add basic neutral pants or jeans as the bottom if needed.'
-    : 'Add a basic neutral top/shirt if needed.'
-  const removeJacketInstruction = isTop
-    ? ' REMOVE any jacket, hoodie, or outer layer first.'
-    : ''
+  // Determine if clothing is top or bottom
+  const isTop = !isBottomType(itemType)
 
-  // Fit-specific prompts
-  const prompts: Record<FitType, string> = {
-    tight: `VIRTUAL TRY-ON: First COMPLETELY REMOVE all existing shirts, tops, and upper body clothing from the person - strip them to bare skin on the torso. Then dress them in the ${colorDesc}${itemType} "${itemName}".${removeJacketInstruction}
+  // Personalized fit detail (e.g. "SUPER TIGHT at the chest, LOOSE at the hips.")
+  const fitDetail = clothingInfo.fitSentence || ''
 
-CRITICAL SLEEVE RULE: If the new ${itemType} is short-sleeve, it MUST remain short-sleeve regardless of what the person was originally wearing. The person's arms must be BARE from the short sleeve edge down - absolutely NO long sleeves showing underneath. Remove ALL original shirts completely before putting on the new one - never layer.
-
-FIT: The ${itemType} should be FITTED and SNUG - hugging the body closely. The fabric should gently contour to the torso, chest, and hips, showing the person's shape. The garment should look like it fits closely without being skin-tight - think fitted, not baggy. Wear in the most BASIC way - NO rolling hem, NO tucking, no rolling sleeves, no knots, just plain and simple.
-
-RULES:
-- Don't tuck shirt into pants - show full style and hem
-- If person is wearing a DRESS: remove the entire dress and ${complementaryPiece.toLowerCase()}
-- If person is wearing two pieces (top + bottom): ONLY replace the matching piece - keep their other piece unchanged
-- Do NOT put the new ${itemType} on top of existing clothes - replace, don't layer
-- NEVER show original sleeves under new sleeves - if new shirt is short-sleeve, arms are bare
-- If the new ${itemType} is shorts but the person is wearing pants, show their bare legs
-- Keep exact same color as the provided ${itemType}
-- Any text, letters, or logos on the ${itemType} must match EXACTLY - same words, same spelling, same design
-- Keep ALL colors the same including the colors of any words, letters, or graphics on the ${itemType}
-- Keep person's pose, face, and background unchanged`,
-
-    regular: `VIRTUAL TRY-ON: First COMPLETELY REMOVE all existing shirts, tops, and upper body clothing from the person - strip them to bare skin on the torso. Then dress them in the ${colorDesc}${itemType} "${itemName}".${removeJacketInstruction}
-
-CRITICAL SLEEVE RULE: If the new ${itemType} is short-sleeve, it MUST remain short-sleeve regardless of what the person was originally wearing. The person's arms must be BARE from the short sleeve edge down - absolutely NO long sleeves showing underneath. Remove ALL original shirts completely before putting on the new one - never layer.
-
-FIT: The ${itemType} should be TRUE TO SIZE - comfortable and JUST RIGHT. The garment fits the person perfectly with natural ease, neither too tight nor too loose. Standard proportions with normal sleeve and body length. This is the ideal balanced fit. Wear in the most BASIC way - NO rolling hem, NO tucking, no rolling sleeves, no knots, just plain and simple.
-
-RULES:
-- Don't tuck shirt into pants - show full style and hem
-- If person is wearing a DRESS: remove the entire dress and ${complementaryPiece.toLowerCase()}
-- If person is wearing two pieces (top + bottom): ONLY replace the matching piece - keep their other piece unchanged
-- Do NOT put the new ${itemType} on top of existing clothes - replace, don't layer
-- NEVER show original sleeves under new sleeves - if new shirt is short-sleeve, arms are bare
-- If the new ${itemType} is shorts but the person is wearing pants, show their bare legs
-- Keep exact same color as the provided ${itemType}
-- Any text, letters, or logos on the ${itemType} must match EXACTLY - same words, same spelling, same design
-- Keep ALL colors the same including the colors of any words, letters, or graphics on the ${itemType}
-- Keep person's pose, face, and background unchanged`,
-
-    comfortable: `VIRTUAL TRY-ON: First COMPLETELY REMOVE all existing shirts, tops, and upper body clothing from the person - strip them to bare skin on the torso. Then dress them in the ${colorDesc}${itemType} "${itemName}".${removeJacketInstruction}
-
-CRITICAL SLEEVE RULE: If the new ${itemType} is short-sleeve, it MUST remain short-sleeve regardless of what the person was originally wearing. The person's arms must be BARE from the short sleeve edge down - absolutely NO long sleeves showing underneath. Remove ALL original shirts completely before putting on the new one - never layer.
-
-FIT: The ${itemType} should be COMFORTABLY RELAXED - longer than regular but still looking like it naturally belongs to the person. The garment should have a relaxed, easy drape with gentle looseness around the body. The hem should be reasonably long (extending a bit past the waist/hips) but NOT excessively oversized - it should still look intentional and stylish, like a comfortable fit the person would actually choose to wear. Think "comfortably roomy" rather than "swimming in fabric". Wear in the most BASIC way - NO rolling hem, NO tucking, no rolling sleeves, no knots, just plain and simple.
-
-RULES:
-- Don't tuck shirt into pants - show full style and hem
-- If person is wearing a DRESS: remove the entire dress and ${complementaryPiece.toLowerCase()}
-- If person is wearing two pieces (top + bottom): ONLY replace the matching piece - keep their other piece unchanged
-- Do NOT put the new ${itemType} on top of existing clothes - replace, don't layer
-- NEVER show original sleeves under new sleeves - if new shirt is short-sleeve, arms are bare
-- If the new ${itemType} is shorts but the person is wearing pants, show their bare legs
-- Keep exact same color as the provided ${itemType}
-- Any text, letters, or logos on the ${itemType} must match EXACTLY - same words, same spelling, same design
-- Keep ALL colors the same including the colors of any words, letters, or graphics on the ${itemType}
-- Keep person's pose, face, and background unchanged`
+  // Base fit direction per fit type
+  if (isTop) {
+    return `Keep the garment's own design: crop top stays short and cropped, tee stays its original length, hoodie stays roomy and bulky, dress stays long and flowing, jacket keeps its structure, sweater stays cozy and thick. Put the provided ${colorDesc}${itemType} on this person. Remove whatever they are wearing underneath — bare skin, bare arms if short-sleeve. Keep bottom unchanged. Don't tuck in, hem hangs down. Don't change person's body, pose, or face.
+FIT:${fitDetail ? ' ' + fitDetail : ''}`
+  } else {
+    return `Keep the garment's own design: shorts stay short, wide pants stay wide, slim pants stay slim, joggers stay tapered, skirt stays its original length. Put the provided ${colorDesc}${itemType} on this person. Remove whatever they are wearing underneath. Tuck top in. Don't change person's body, legs, pose, or face.
+FIT:${fitDetail ? ' ' + fitDetail : ''}`
   }
-
-  return prompts[fitType]
 }
 
 /**
@@ -350,6 +297,7 @@ export async function generateTryOnImage(
     const prompt = generateTryOnPrompt(clothingInfo, fitType)
 
     // Log the actual prompt for debugging
+    console.log(`[TryOn] ${fitType} fit prompt:\n`, prompt)
 
     // Call the Duke try-on endpoint
     const startTime = Date.now()
