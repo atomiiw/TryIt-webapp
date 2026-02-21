@@ -1,0 +1,3625 @@
+{
+  "brands": [
+    {
+      "brand": "Duke",
+      "clothing_type": "tops",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "min": 80,
+              "max": 82.6
+            },
+            "waist": {
+              "min": 58.4,
+              "max": 61
+            },
+            "hips": {
+              "min": 85.1,
+              "max": 88.9
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 85.1,
+              "max": 87.6
+            },
+            "waist": {
+              "min": 63.5,
+              "max": 66
+            },
+            "hips": {
+              "min": 91.4,
+              "max": 94
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 90.2,
+              "max": 95.3
+            },
+            "waist": {
+              "min": 68.6,
+              "max": 71.1
+            },
+            "hips": {
+              "min": 96.5,
+              "max": 99.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 96.5,
+              "max": 100.3
+            },
+            "waist": {
+              "min": 74.9,
+              "max": 78.7
+            },
+            "hips": {
+              "min": 102.9,
+              "max": 106.7
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 101.6,
+              "max": 106.7
+            },
+            "waist": {
+              "min": 78.7,
+              "max": 83.8
+            },
+            "hips": {
+              "min": 106.7,
+              "max": 111.8
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "min": 111.8,
+              "max": 116.8
+            },
+            "waist": {
+              "min": 88.9,
+              "max": 94
+            },
+            "hips": {
+              "min": 116.8,
+              "max": 121.9
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Duke",
+      "clothing_type": "tops",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 94
+            },
+            "waist": {
+              "min": 71.1,
+              "max": 76.2
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 96.5,
+              "max": 101.6
+            },
+            "waist": {
+              "min": 81.3,
+              "max": 86.4
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 106.7,
+              "max": 111.8
+            },
+            "waist": {
+              "min": 91.4,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 116.8,
+              "max": 121.9
+            },
+            "waist": {
+              "min": 101.6,
+              "max": 106.7
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "min": 127,
+              "max": 132.1
+            },
+            "waist": {
+              "min": 111.8,
+              "max": 116.8
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Duke",
+      "clothing_type": "bottoms",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "value": 73.7
+            },
+            "hips": {
+              "value": 99.1
+            },
+            "length": {
+              "value": 106.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "value": 81.3
+            },
+            "hips": {
+              "value": 104.1
+            },
+            "length": {
+              "value": 110
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "value": 88.9
+            },
+            "hips": {
+              "value": 111.8
+            },
+            "length": {
+              "value": 114
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "value": 96.5
+            },
+            "hips": {
+              "value": 119.4
+            },
+            "length": {
+              "value": 115.1
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "waist": {
+              "value": 104.1
+            },
+            "hips": {
+              "value": 127
+            },
+            "length": {
+              "value": 118.9
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "waist": {
+              "value": 111.8
+            },
+            "hips": {
+              "value": 132.1
+            },
+            "length": {
+              "value": 119.9
+            }
+          }
+        },
+        {
+          "label": "4XL",
+          "measurements": {
+            "waist": {
+              "value": 119.4
+            },
+            "hips": {
+              "value": 139.7
+            },
+            "length": {
+              "value": 126.5
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Duke",
+      "clothing_type": "bottoms",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "value": 68.1
+            },
+            "hips": {
+              "value": 84.1
+            },
+            "length": {
+              "value": 91.9
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "value": 70.1
+            },
+            "hips": {
+              "value": 87.9
+            },
+            "length": {
+              "value": 95
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "value": 71.9
+            },
+            "hips": {
+              "value": 91.9
+            },
+            "length": {
+              "value": 98
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "value": 73.9
+            },
+            "hips": {
+              "value": 96
+            },
+            "length": {
+              "value": 98
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "value": 80
+            },
+            "hips": {
+              "value": 108
+            },
+            "length": {
+              "value": 100.1
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "waist": {
+              "value": 81
+            },
+            "hips": {
+              "value": 116.1
+            },
+            "length": {
+              "value": 100.1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Duke",
+      "clothing_type": "sweater",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "min": 83.8,
+              "max": 86.4
+            },
+            "waist": {
+              "min": 68.6,
+              "max": 71.1
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 94
+            },
+            "waist": {
+              "min": 73.7,
+              "max": 78.7
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 96.5,
+              "max": 101.6
+            },
+            "waist": {
+              "min": 81.3,
+              "max": 86.4
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 106.7,
+              "max": 111.8
+            },
+            "waist": {
+              "min": 91.4,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 116.8,
+              "max": 121.9
+            },
+            "waist": {
+              "min": 101.6,
+              "max": 106.7
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "min": 127,
+              "max": 132.1
+            },
+            "waist": {
+              "min": 111.8,
+              "max": 121.9
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "chest": {
+              "min": 137.2,
+              "max": 142.2
+            },
+            "waist": {
+              "min": 127,
+              "max": 132.1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Duke",
+      "clothing_type": "sweater",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "value": 80
+            },
+            "waist": {
+              "value": 58.4
+            },
+            "hips": {
+              "value": 85.1
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 82.6,
+              "max": 85.1
+            },
+            "waist": {
+              "min": 61,
+              "max": 63.5
+            },
+            "hips": {
+              "min": 88.9,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 87.6,
+              "max": 90.2
+            },
+            "waist": {
+              "min": 66,
+              "max": 68.6
+            },
+            "hips": {
+              "min": 94,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 92.7,
+              "max": 96.5
+            },
+            "waist": {
+              "min": 71.1,
+              "max": 74.9
+            },
+            "hips": {
+              "min": 99.1,
+              "max": 102.9
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 100.3,
+              "max": 106.7
+            },
+            "waist": {
+              "min": 78.7,
+              "max": 83.8
+            },
+            "hips": {
+              "min": 106.7,
+              "max": 110.5
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "value": 111.8
+            },
+            "waist": {
+              "value": 88.9
+            },
+            "hips": {
+              "value": 114.3
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "chest": {
+              "value": 116.8
+            },
+            "waist": {
+              "value": 94
+            },
+            "hips": {
+              "value": 121.9
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "'47",
+      "clothing_type": "tops",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "shoulder": {
+              "value": 41.9
+            },
+            "chest": {
+              "min": 88.9,
+              "max": 94
+            },
+            "waist": {
+              "min": 76.2,
+              "max": 78.7
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "shoulder": {
+              "value": 43.8
+            },
+            "chest": {
+              "min": 96.5,
+              "max": 101.6
+            },
+            "waist": {
+              "min": 81.3,
+              "max": 83.8
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "shoulder": {
+              "value": 45.7
+            },
+            "chest": {
+              "min": 104.1,
+              "max": 109.2
+            },
+            "waist": {
+              "min": 86.4,
+              "max": 88.9
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "shoulder": {
+              "value": 48.3
+            },
+            "chest": {
+              "min": 111.8,
+              "max": 116.8
+            },
+            "waist": {
+              "min": 91.4,
+              "max": 94
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "shoulder": {
+              "value": 50.8
+            },
+            "chest": {
+              "min": 119.4,
+              "max": 124.5
+            },
+            "waist": {
+              "min": 96.5,
+              "max": 101.6
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "'47",
+      "clothing_type": "bottoms",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 76.2,
+              "max": 78.7
+            },
+            "hips": {
+              "min": 86.4,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 81.3,
+              "max": 83.8
+            },
+            "hips": {
+              "min": 94,
+              "max": 99.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 86.4,
+              "max": 88.9
+            },
+            "hips": {
+              "min": 101.6,
+              "max": 106
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 91.4,
+              "max": 94
+            },
+            "hips": {
+              "min": 108,
+              "max": 111.8
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "waist": {
+              "min": 96.5,
+              "max": 101.6
+            },
+            "hips": {
+              "min": 114.3,
+              "max": 116.8
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "'47",
+      "clothing_type": "tops",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "shoulder": {
+              "value": 36.8
+            },
+            "chest": {
+              "min": 87.6,
+              "max": 90.2
+            },
+            "waist": {
+              "min": 68.6,
+              "max": 72.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "shoulder": {
+              "value": 38.7
+            },
+            "chest": {
+              "min": 92.7,
+              "max": 95.2
+            },
+            "waist": {
+              "min": 73.7,
+              "max": 78.7
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "shoulder": {
+              "value": 41.3
+            },
+            "chest": {
+              "min": 99.1,
+              "max": 102.9
+            },
+            "waist": {
+              "min": 80,
+              "max": 86.4
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "shoulder": {
+              "value": 43.8
+            },
+            "chest": {
+              "min": 106.7,
+              "max": 111.8
+            },
+            "waist": {
+              "min": 87.6,
+              "max": 91.4
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "'47",
+      "clothing_type": "bottoms",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 68.6,
+              "max": 71.1
+            },
+            "hips": {
+              "min": 91.4,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 73.7,
+              "max": 76.2
+            },
+            "hips": {
+              "min": 99.1,
+              "max": 102.9
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 80,
+              "max": 83.8
+            },
+            "hips": {
+              "min": 106,
+              "max": 109.9
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 87.6,
+              "max": 91.4
+            },
+            "hips": {
+              "min": 113,
+              "max": 116.8
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Champion",
+      "clothing_type": "tops",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": 81.3,
+            "waist": 66,
+            "hips": {
+              "min": 86.4,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 86.4,
+              "max": 91.4
+            },
+            "waist": {
+              "min": 71.1,
+              "max": 76.2
+            },
+            "hips": {
+              "min": 94,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 96.5,
+              "max": 101.6
+            },
+            "waist": {
+              "min": 81.3,
+              "max": 86.4
+            },
+            "hips": {
+              "min": 99.1,
+              "max": 104.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 106.7,
+              "max": 111.8
+            },
+            "waist": {
+              "min": 91.4,
+              "max": 96.5
+            },
+            "hips": {
+              "min": 106.7,
+              "max": 109.2
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 116.8,
+              "max": 121.9
+            },
+            "waist": {
+              "min": 101.6,
+              "max": 106.7
+            },
+            "hips": {
+              "min": 111.8,
+              "max": 116.8
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "min": 127,
+              "max": 132.1
+            },
+            "waist": {
+              "min": 111.8,
+              "max": 116.8
+            },
+            "hips": {
+              "min": 119.4,
+              "max": 124.5
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "chest": {
+              "min": 137.2,
+              "max": 142.2
+            },
+            "waist": {
+              "min": 121.9,
+              "max": 127
+            },
+            "hips": {
+              "min": 127,
+              "max": 132.1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Champion",
+      "clothing_type": "bottoms",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "min": 71.1,
+              "max": 76.2
+            },
+            "hips": {
+              "min": 86.4,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 76.2,
+              "max": 81.3
+            },
+            "hips": {
+              "min": 91.4,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 81.3,
+              "max": 88.9
+            },
+            "hips": {
+              "min": 96.5,
+              "max": 104.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 88.9,
+              "max": 99.1
+            },
+            "hips": {
+              "min": 104.1,
+              "max": 114.3
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 99.1,
+              "max": 111.8
+            },
+            "hips": {
+              "min": 114.3,
+              "max": 121.9
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "min": 111.8,
+              "max": 121.9
+            },
+            "hips": {
+              "min": 121.9,
+              "max": 132.1
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "waist": {
+              "min": 121.9,
+              "max": 134.6
+            },
+            "hips": {
+              "min": 132.1,
+              "max": 139.7
+            }
+          }
+        },
+        {
+          "label": "4XL",
+          "measurements": {
+            "waist": {
+              "min": 134.6,
+              "max": 144.8
+            },
+            "hips": {
+              "min": 139.7,
+              "max": 149.9
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Champion",
+      "clothing_type": "tops",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "min": 63.5,
+              "max": 68.6
+            },
+            "hips": {
+              "min": 88.9,
+              "max": 94
+            },
+            "chest": {
+              "min": 81.3,
+              "max": 86.4
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 68.6,
+              "max": 73.7
+            },
+            "hips": {
+              "min": 94,
+              "max": 99.1
+            },
+            "chest": {
+              "min": 86.4,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 73.7,
+              "max": 78.7
+            },
+            "hips": {
+              "min": 99.1,
+              "max": 104.1
+            },
+            "chest": {
+              "min": 91.4,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 78.7,
+              "max": 83.8
+            },
+            "hips": {
+              "min": 104.1,
+              "max": 109.2
+            },
+            "chest": {
+              "min": 96.5,
+              "max": 101.6
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 83.8,
+              "max": 88.9
+            },
+            "hips": {
+              "min": 109.2,
+              "max": 114.3
+            },
+            "chest": {
+              "min": 101.6,
+              "max": 106.7
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "min": 88.9,
+              "max": 96.5
+            },
+            "hips": {
+              "min": 114.3,
+              "max": 121.9
+            },
+            "chest": {
+              "min": 106.7,
+              "max": 114.3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Champion",
+      "clothing_type": "bottoms",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "min": 63.5,
+              "max": 68.6
+            },
+            "hips": {
+              "min": 88.9,
+              "max": 94
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 68.6,
+              "max": 73.7
+            },
+            "hips": {
+              "min": 94,
+              "max": 99.1
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 73.7,
+              "max": 78.7
+            },
+            "hips": {
+              "min": 99.1,
+              "max": 104.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 78.7,
+              "max": 83.8
+            },
+            "hips": {
+              "min": 104.1,
+              "max": 109.2
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 83.8,
+              "max": 88.9
+            },
+            "hips": {
+              "min": 109.2,
+              "max": 114.3
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "min": 88.9,
+              "max": 96.5
+            },
+            "hips": {
+              "min": 114.3,
+              "max": 121.9
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "League",
+      "clothing_type": "tops",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 94
+            },
+            "waist": {
+              "min": 71.1,
+              "max": 76.2
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 96.5,
+              "max": 101.6
+            },
+            "waist": {
+              "min": 78.7,
+              "max": 83.8
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 104.1,
+              "max": 109.2
+            },
+            "waist": {
+              "min": 86.4,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 111.8,
+              "max": 116.8
+            },
+            "waist": {
+              "min": 94,
+              "max": 99.1
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "min": 119.4,
+              "max": 124.5
+            },
+            "waist": {
+              "min": 101.6,
+              "max": 106.7
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "League",
+      "clothing_type": "tops",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 83.8,
+              "max": 86.4
+            },
+            "waist": {
+              "min": 67.3,
+              "max": 69.8
+            },
+            "hips": {
+              "min": 94,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 91.4
+            },
+            "waist": {
+              "min": 72.4,
+              "max": 74.9
+            },
+            "hips": {
+              "min": 99.1,
+              "max": 101.6
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 94,
+              "max": 96.5
+            },
+            "waist": {
+              "min": 77.5,
+              "max": 80
+            },
+            "hips": {
+              "min": 104.1,
+              "max": 106.7
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 99.1,
+              "max": 104.1
+            },
+            "waist": {
+              "min": 82.5,
+              "max": 87.6
+            },
+            "hips": {
+              "min": 109.2,
+              "max": 114.3
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "min": 109.2,
+              "max": 114.3
+            },
+            "waist": {
+              "min": 91.4,
+              "max": 96.5
+            },
+            "hips": {
+              "min": 116.8,
+              "max": 121.9
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "League",
+      "clothing_type": "bottoms",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "value": 73.7
+            },
+            "hips": {
+              "value": 99.1
+            },
+            "length": {
+              "value": 106.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "value": 81.3
+            },
+            "hips": {
+              "value": 104.1
+            },
+            "length": {
+              "value": 110
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "value": 88.9
+            },
+            "hips": {
+              "value": 111.8
+            },
+            "length": {
+              "value": 114
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "value": 96.5
+            },
+            "hips": {
+              "value": 119.4
+            },
+            "length": {
+              "value": 115.1
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "waist": {
+              "value": 104.1
+            },
+            "hips": {
+              "value": 127
+            },
+            "length": {
+              "value": 118.9
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "waist": {
+              "value": 111.8
+            },
+            "hips": {
+              "value": 132.1
+            },
+            "length": {
+              "value": 119.9
+            }
+          }
+        },
+        {
+          "label": "4XL",
+          "measurements": {
+            "waist": {
+              "value": 119.4
+            },
+            "hips": {
+              "value": 139.7
+            },
+            "length": {
+              "value": 126.5
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "League",
+      "clothing_type": "bottoms",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "value": 68.1
+            },
+            "hips": {
+              "value": 84.1
+            },
+            "length": {
+              "value": 91.9
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "value": 70.1
+            },
+            "hips": {
+              "value": 87.9
+            },
+            "length": {
+              "value": 95
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "value": 71.9
+            },
+            "hips": {
+              "value": 91.9
+            },
+            "length": {
+              "value": 98
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "value": 73.9
+            },
+            "hips": {
+              "value": 96
+            },
+            "length": {
+              "value": 98
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "value": 80
+            },
+            "hips": {
+              "value": 108
+            },
+            "length": {
+              "value": 100.1
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "waist": {
+              "value": 81
+            },
+            "hips": {
+              "value": 116.1
+            },
+            "length": {
+              "value": 100.1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Nike",
+      "clothing_type": "tops",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XXS",
+          "measurements": {
+            "waist": {
+              "min": 54,
+              "max": 59.7
+            },
+            "hips": {
+              "min": 77.5,
+              "max": 83.8
+            },
+            "chest": {
+              "min": 69.8,
+              "max": 74.9
+            }
+          }
+        },
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "min": 59.7,
+              "max": 66
+            },
+            "hips": {
+              "min": 83.8,
+              "max": 90.2
+            },
+            "chest": {
+              "min": 74.9,
+              "max": 82.5
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 66,
+              "max": 73.7
+            },
+            "hips": {
+              "min": 90.2,
+              "max": 97.8
+            },
+            "chest": {
+              "min": 82.5,
+              "max": 90.2
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 73.7,
+              "max": 80
+            },
+            "hips": {
+              "min": 97.8,
+              "max": 104.1
+            },
+            "chest": {
+              "min": 90.2,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 80,
+              "max": 87.6
+            },
+            "hips": {
+              "min": 104.1,
+              "max": 111.8
+            },
+            "chest": {
+              "min": 96.5,
+              "max": 104.1
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 87.6,
+              "max": 97.8
+            },
+            "hips": {
+              "min": 111.8,
+              "max": 119.4
+            },
+            "chest": {
+              "min": 104.1,
+              "max": 113
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "min": 97.8,
+              "max": 108
+            },
+            "hips": {
+              "min": 119.4,
+              "max": 127
+            },
+            "chest": {
+              "min": 113,
+              "max": 123.2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Nike",
+      "clothing_type": "bottoms",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XXS",
+          "measurements": {
+            "waist": {
+              "min": 54,
+              "max": 59.7
+            },
+            "hips": {
+              "min": 77.5,
+              "max": 83.8
+            }
+          }
+        },
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "min": 59.7,
+              "max": 66
+            },
+            "hips": {
+              "min": 83.8,
+              "max": 90.2
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 66,
+              "max": 73.7
+            },
+            "hips": {
+              "min": 90.2,
+              "max": 97.8
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 73.7,
+              "max": 80
+            },
+            "hips": {
+              "min": 97.8,
+              "max": 104.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 80,
+              "max": 87.6
+            },
+            "hips": {
+              "min": 104.1,
+              "max": 111.8
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 87.6,
+              "max": 97.8
+            },
+            "hips": {
+              "min": 111.8,
+              "max": 119.4
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "min": 97.8,
+              "max": 108
+            },
+            "hips": {
+              "min": 119.4,
+              "max": 127
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Nike",
+      "clothing_type": "tops",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XXS",
+          "measurements": {
+            "chest": {
+              "min": 71.4,
+              "max": 80
+            },
+            "waist": {
+              "min": 57.1,
+              "max": 64.8
+            },
+            "hips": {
+              "min": 72.4,
+              "max": 80
+            }
+          }
+        },
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "min": 80,
+              "max": 88.9
+            },
+            "waist": {
+              "min": 64.8,
+              "max": 73.7
+            },
+            "hips": {
+              "min": 80,
+              "max": 88.9
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 95.2
+            },
+            "waist": {
+              "min": 73.7,
+              "max": 81.3
+            },
+            "hips": {
+              "min": 88.9,
+              "max": 95.2
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 95.2,
+              "max": 104.1
+            },
+            "waist": {
+              "min": 81.3,
+              "max": 88.9
+            },
+            "hips": {
+              "min": 95.2,
+              "max": 104.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 104.1,
+              "max": 111.8
+            },
+            "waist": {
+              "min": 88.9,
+              "max": 96.5
+            },
+            "hips": {
+              "min": 104.1,
+              "max": 111.8
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 111.8,
+              "max": 123.2
+            },
+            "waist": {
+              "min": 96.5,
+              "max": 109.2
+            },
+            "hips": {
+              "min": 111.8,
+              "max": 119.4
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "min": 123.2,
+              "max": 135.9
+            },
+            "waist": {
+              "min": 109.2,
+              "max": 120.7
+            },
+            "hips": {
+              "min": 119.4,
+              "max": 128.3
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Nike",
+      "clothing_type": "bottoms",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XXS",
+          "measurements": {
+            "waist": {
+              "min": 57.1,
+              "max": 64.8
+            },
+            "hips": {
+              "min": 72.4,
+              "max": 80
+            },
+            "inseam": 80.6
+          }
+        },
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "min": 64.8,
+              "max": 73.7
+            },
+            "hips": {
+              "min": 80,
+              "max": 88.9
+            },
+            "inseam": 81.3
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 73.7,
+              "max": 81.3
+            },
+            "hips": {
+              "min": 88.9,
+              "max": 95.2
+            },
+            "inseam": 81.9
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 81.3,
+              "max": 88.9
+            },
+            "hips": {
+              "min": 95.2,
+              "max": 104.1
+            },
+            "inseam": 82.5
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 88.9,
+              "max": 96.5
+            },
+            "hips": {
+              "min": 104.1,
+              "max": 111.8
+            },
+            "inseam": 83.2
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 96.5,
+              "max": 109.2
+            },
+            "hips": {
+              "min": 111.8,
+              "max": 119.4
+            },
+            "inseam": 83.8
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "min": 109.2,
+              "max": 120.7
+            },
+            "hips": {
+              "min": 119.4,
+              "max": 128.3
+            },
+            "inseam": 84.5
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Columbia",
+      "clothing_type": "tops",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "value": 85.1
+            },
+            "waist": {
+              "value": 67.3
+            },
+            "hips": {
+              "value": 90.2
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 87.6,
+              "max": 90.2
+            },
+            "waist": {
+              "min": 71.1,
+              "max": 73.7
+            },
+            "hips": {
+              "min": 94,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 92.7,
+              "max": 95.3
+            },
+            "waist": {
+              "min": 76.2,
+              "max": 78.7
+            },
+            "hips": {
+              "min": 99.1,
+              "max": 101.6
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 99.1,
+              "max": 102.9
+            },
+            "waist": {
+              "min": 82.6,
+              "max": 86.4
+            },
+            "hips": {
+              "min": 105.4,
+              "max": 109.2
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 106.7,
+              "max": 110.5
+            },
+            "waist": {
+              "min": 90.2,
+              "max": 95.3
+            },
+            "hips": {
+              "min": 113,
+              "max": 118.1
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "chest": {
+              "min": 111.8,
+              "max": 116.8
+            },
+            "waist": {
+              "min": 96.5,
+              "max": 104.1
+            },
+            "hips": {
+              "min": 119.4,
+              "max": 127
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Columbia",
+      "clothing_type": "tops",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "value": 88.9
+            },
+            "waist": {
+              "value": 73.7
+            },
+            "hips": {
+              "value": 86.4
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 91.4,
+              "max": 94
+            },
+            "waist": {
+              "min": 76.2,
+              "max": 78.7
+            },
+            "hips": {
+              "min": 88.9,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 99.1,
+              "max": 104.1
+            },
+            "waist": {
+              "min": 83.8,
+              "max": 88.9
+            },
+            "hips": {
+              "min": 96.5,
+              "max": 101.6
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 107.9,
+              "max": 111.8
+            },
+            "waist": {
+              "min": 91.4,
+              "max": 96.5
+            },
+            "hips": {
+              "min": 105.4,
+              "max": 109.2
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 118.1,
+              "max": 121.9
+            },
+            "waist": {
+              "min": 101.6,
+              "max": 106.7
+            },
+            "hips": {
+              "min": 113,
+              "max": 119.4
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "chest": {
+              "min": 128.3,
+              "max": 132.1
+            },
+            "waist": {
+              "min": 111.8,
+              "max": 116.8
+            },
+            "hips": {
+              "min": 125.7,
+              "max": 129.5
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Columbia",
+      "clothing_type": "bottoms",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "value": 73.7
+            },
+            "hips": {
+              "value": 86.4
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 76.2,
+              "max": 78.7
+            },
+            "hips": {
+              "min": 88.9,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 83.8,
+              "max": 88.9
+            },
+            "hips": {
+              "min": 96.5,
+              "max": 101.6
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 91.4,
+              "max": 96.5
+            },
+            "hips": {
+              "min": 105.4,
+              "max": 109.2
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 101.6,
+              "max": 106.7
+            },
+            "hips": {
+              "min": 113,
+              "max": 119.4
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "waist": {
+              "min": 111.8,
+              "max": 116.8
+            },
+            "hips": {
+              "min": 125.7,
+              "max": 129.5
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Columbia",
+      "clothing_type": "bottoms",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "value": 67.3
+            },
+            "hips": {
+              "value": 90.2
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 71.1,
+              "max": 73.7
+            },
+            "hips": {
+              "min": 94,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 76.2,
+              "max": 78.7
+            },
+            "hips": {
+              "min": 99.1,
+              "max": 101.6
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 82.6,
+              "max": 86.4
+            },
+            "hips": {
+              "min": 105.4,
+              "max": 109.2
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 90.2,
+              "max": 95.3
+            },
+            "hips": {
+              "min": 113,
+              "max": 118.1
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "waist": {
+              "min": 96.5,
+              "max": 104.1
+            },
+            "hips": {
+              "min": 119.4,
+              "max": 127
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Johnnie-O",
+      "clothing_type": "tops",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 96.5,
+              "max": 101.6
+            },
+            "waist": {
+              "min": 71.1,
+              "max": 81.3
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 101.6,
+              "max": 106.7
+            },
+            "waist": {
+              "min": 81.3,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 106.7,
+              "max": 111.8
+            },
+            "waist": {
+              "min": 91.4,
+              "max": 101.6
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 111.8,
+              "max": 116.8
+            },
+            "waist": {
+              "min": 101.6,
+              "max": 111.8
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "chest": {
+              "min": 116.8,
+              "max": 121.9
+            },
+            "waist": {
+              "min": 111.8,
+              "max": 121.9
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "chest": {
+              "min": 127,
+              "max": 132.1
+            },
+            "waist": {
+              "min": 124.5,
+              "max": 132.1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Johnnie-O",
+      "clothing_type": "bottoms",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "value": 81.3
+            },
+            "hips": {
+              "min": 96.5,
+              "max": 104.1
+            },
+            "thigh": {
+              "min": 55.9,
+              "max": 58.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 81.3,
+              "max": 86.4
+            },
+            "hips": {
+              "min": 104.1,
+              "max": 109.2
+            },
+            "thigh": {
+              "min": 58.4,
+              "max": 61
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 86.4,
+              "max": 91.4
+            },
+            "hips": {
+              "min": 109.2,
+              "max": 114.3
+            },
+            "thigh": {
+              "min": 61,
+              "max": 63.5
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 91.4,
+              "max": 96.5
+            },
+            "hips": {
+              "min": 114.3,
+              "max": 119.4
+            },
+            "thigh": {
+              "min": 63.5,
+              "max": 66
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "waist": {
+              "min": 99.1,
+              "max": 106.7
+            },
+            "hips": {
+              "min": 121.9,
+              "max": 127
+            },
+            "thigh": {
+              "min": 66,
+              "max": 71.1
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Johnnie-O",
+      "clothing_type": "tops",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "min": 83.8,
+              "max": 86.4
+            },
+            "waist": {
+              "min": 66,
+              "max": 68.6
+            },
+            "hips": {
+              "min": 90.2,
+              "max": 92.7
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 91.4
+            },
+            "waist": {
+              "min": 71.1,
+              "max": 73.7
+            },
+            "hips": {
+              "min": 95.3,
+              "max": 97.8
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 94,
+              "max": 96.5
+            },
+            "waist": {
+              "min": 76.2,
+              "max": 78.7
+            },
+            "hips": {
+              "min": 100.3,
+              "max": 102.9
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 99.1,
+              "max": 101.6
+            },
+            "waist": {
+              "min": 81.3,
+              "max": 85.1
+            },
+            "hips": {
+              "min": 105.4,
+              "max": 107.9
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 104.1,
+              "max": 107.9
+            },
+            "waist": {
+              "min": 86.4,
+              "max": 88.9
+            },
+            "hips": {
+              "min": 109.2,
+              "max": 111.8
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Johnnie-O",
+      "clothing_type": "bottoms",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "min": 66,
+              "max": 68.6
+            },
+            "hips": {
+              "min": 90.2,
+              "max": 92.7
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 71.1,
+              "max": 73.7
+            },
+            "hips": {
+              "min": 95.3,
+              "max": 97.8
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 76.2,
+              "max": 78.7
+            },
+            "hips": {
+              "min": 100.3,
+              "max": 102.9
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 81.3,
+              "max": 85.1
+            },
+            "hips": {
+              "min": 105.4,
+              "max": 107.9
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 86.4,
+              "max": 88.9
+            },
+            "hips": {
+              "min": 109.2,
+              "max": 111.8
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Cutter & Buck",
+      "clothing_type": "tops",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "min": 83.8,
+              "max": 88.9
+            },
+            "waist": {
+              "min": 71.1,
+              "max": 76.2
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 91.4,
+              "max": 96.5
+            },
+            "waist": {
+              "min": 78.7,
+              "max": 81.3
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 99.1,
+              "max": 104.1
+            },
+            "waist": {
+              "min": 83.8,
+              "max": 88.9
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 106.7,
+              "max": 111.8
+            },
+            "waist": {
+              "min": 91.4,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 114.3,
+              "max": 121.9
+            },
+            "waist": {
+              "min": 99.1,
+              "max": 109.2
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "min": 124.5,
+              "max": 132.1
+            },
+            "waist": {
+              "min": 111.8,
+              "max": 121.9
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "chest": {
+              "min": 137.2,
+              "max": 142.2
+            },
+            "waist": {
+              "min": 124.5,
+              "max": 134.6
+            }
+          }
+        },
+        {
+          "label": "4XL",
+          "measurements": {
+            "chest": {
+              "min": 144.8,
+              "max": 152.4
+            },
+            "waist": {
+              "min": 137.2,
+              "max": 144.8
+            }
+          }
+        },
+        {
+          "label": "5XL",
+          "measurements": {
+            "chest": {
+              "min": 154.9,
+              "max": 162.6
+            },
+            "waist": {
+              "min": 147.3,
+              "max": 152.4
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Cutter & Buck",
+      "clothing_type": "bottoms",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "value": 76.2
+            },
+            "hips": {
+              "min": 99.1,
+              "max": 101.6
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 81.3,
+              "max": 83.8
+            },
+            "hips": {
+              "min": 101.6,
+              "max": 106.7
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 86.4,
+              "max": 88.9
+            },
+            "hips": {
+              "min": 106.7,
+              "max": 111.8
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 91.4,
+              "max": 96.5
+            },
+            "hips": {
+              "min": 111.8,
+              "max": 119.4
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 101.6,
+              "max": 106.7
+            },
+            "hips": {
+              "min": 119.4,
+              "max": 129.5
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "waist": {
+              "value": 111.8
+            },
+            "hips": {
+              "min": 129.5,
+              "max": 134.6
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Cutter & Buck",
+      "clothing_type": "tops",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "value": 86.4
+            },
+            "waist": {
+              "value": 66
+            },
+            "hips": {
+              "value": 92.7
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 91.4
+            },
+            "waist": {
+              "min": 68.6,
+              "max": 71.1
+            },
+            "hips": {
+              "min": 95.3,
+              "max": 97.8
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 94,
+              "max": 96.5
+            },
+            "waist": {
+              "min": 73.7,
+              "max": 76.2
+            },
+            "hips": {
+              "min": 100.3,
+              "max": 102.9
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 100.3,
+              "max": 104.1
+            },
+            "waist": {
+              "min": 80,
+              "max": 83.8
+            },
+            "hips": {
+              "min": 106.7,
+              "max": 110.5
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 107.9,
+              "max": 113
+            },
+            "waist": {
+              "min": 87.6,
+              "max": 92.7
+            },
+            "hips": {
+              "min": 114.3,
+              "max": 119.4
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "value": 116.8
+            },
+            "waist": {
+              "value": 96.5
+            },
+            "hips": {
+              "value": 123.2
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "chest": {
+              "value": 120.7
+            },
+            "waist": {
+              "value": 100.3
+            },
+            "hips": {
+              "value": 127
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "Peter Millar",
+      "clothing_type": "tops",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 94,
+              "max": 99.1
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 101.6,
+              "max": 106.7
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 109.2,
+              "max": 114.3
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 116.8,
+              "max": 121.9
+            }
+          }
+        },
+        {
+          "label": "2XL",
+          "measurements": {
+            "chest": {
+              "min": 124.5,
+              "max": 129.5
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "chest": {
+              "min": 132.1,
+              "max": 137.2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "lululemon",
+      "clothing_type": "bottoms",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XXS",
+          "measurements": {
+            "waist": {
+              "value": 68.6
+            },
+            "hips": {
+              "value": 85.1
+            }
+          }
+        },
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "min": 71.1,
+              "max": 73.7
+            },
+            "hips": {
+              "min": 87.6,
+              "max": 90.2
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 76.2,
+              "max": 78.7
+            },
+            "hips": {
+              "min": 92.7,
+              "max": 95.3
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 81.3,
+              "max": 83.8
+            },
+            "hips": {
+              "min": 97.8,
+              "max": 100.3
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 86.4,
+              "max": 88.9
+            },
+            "hips": {
+              "value": 102.9
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 91.4,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "waist": {
+              "min": 99.1,
+              "max": 104.1
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "waist": {
+              "min": 116.8,
+              "max": 121.9
+            }
+          }
+        },
+        {
+          "label": "4XL",
+          "measurements": {
+            "waist": {
+              "value": 127
+            }
+          }
+        },
+        {
+          "label": "5XL",
+          "measurements": {
+            "waist": {
+              "min": 132.1,
+              "max": 137.2
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "lululemon",
+      "clothing_type": "tops",
+      "gender": "men",
+      "sizes": [
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 94,
+              "max": 96.5
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 99.1,
+              "max": 101.6
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 104.1,
+              "max": 106.7
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 109.2,
+              "max": 114.3
+            }
+          }
+        },
+        {
+          "label": "XXL",
+          "measurements": {
+            "chest": {
+              "min": 116.8,
+              "max": 121.9
+            }
+          }
+        },
+        {
+          "label": "3XL",
+          "measurements": {
+            "chest": {
+              "min": 127,
+              "max": 132.1
+            }
+          }
+        },
+        {
+          "label": "4XL",
+          "measurements": {
+            "chest": {
+              "min": 134.6,
+              "max": 139.7
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "lululemon",
+      "clothing_type": "bottoms",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XXXS",
+          "measurements": {
+            "waist": {
+              "value": 54.6
+            },
+            "hips": {
+              "value": 80
+            }
+          }
+        },
+        {
+          "label": "XXS",
+          "measurements": {
+            "waist": {
+              "value": 58.4
+            },
+            "hips": {
+              "value": 83.8
+            }
+          }
+        },
+        {
+          "label": "XS",
+          "measurements": {
+            "waist": {
+              "min": 61,
+              "max": 63.5
+            },
+            "hips": {
+              "min": 86.4,
+              "max": 88.9
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "waist": {
+              "min": 66,
+              "max": 68.6
+            },
+            "hips": {
+              "min": 91.4,
+              "max": 94
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "waist": {
+              "min": 71.1,
+              "max": 73.7
+            },
+            "hips": {
+              "min": 96.5,
+              "max": 99.1
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "waist": {
+              "min": 76.2,
+              "max": 80
+            },
+            "hips": {
+              "min": 101.6,
+              "max": 105.4
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "waist": {
+              "min": 83.8,
+              "max": 88.9
+            },
+            "hips": {
+              "min": 109.2,
+              "max": 114.3
+            }
+          }
+        },
+        {
+          "label": "1X",
+          "measurements": {
+            "waist": {
+              "min": 99.1,
+              "max": 104.1
+            },
+            "hips": {
+              "min": 119.4,
+              "max": 124.5
+            }
+          }
+        },
+        {
+          "label": "2X",
+          "measurements": {
+            "waist": {
+              "value": 109.2
+            },
+            "hips": {
+              "value": 129.5
+            }
+          }
+        }
+      ]
+    },
+    {
+      "brand": "lululemon",
+      "clothing_type": "tops",
+      "gender": "women",
+      "sizes": [
+        {
+          "label": "XXXS",
+          "measurements": {
+            "chest": {
+              "value": 72.4
+            }
+          }
+        },
+        {
+          "label": "XXS",
+          "measurements": {
+            "chest": {
+              "value": 76.2
+            }
+          }
+        },
+        {
+          "label": "XS",
+          "measurements": {
+            "chest": {
+              "min": 78.7,
+              "max": 81.3
+            }
+          }
+        },
+        {
+          "label": "S",
+          "measurements": {
+            "chest": {
+              "min": 83.8,
+              "max": 86.4
+            }
+          }
+        },
+        {
+          "label": "M",
+          "measurements": {
+            "chest": {
+              "min": 88.9,
+              "max": 91.4
+            }
+          }
+        },
+        {
+          "label": "L",
+          "measurements": {
+            "chest": {
+              "min": 94,
+              "max": 97.8
+            }
+          }
+        },
+        {
+          "label": "XL",
+          "measurements": {
+            "chest": {
+              "min": 101.6,
+              "max": 106.7
+            }
+          }
+        },
+        {
+          "label": "1X",
+          "measurements": {
+            "chest": {
+              "min": 114.3,
+              "max": 119.4
+            }
+          }
+        },
+        {
+          "label": "2X",
+          "measurements": {
+            "chest": {
+              "min": 124.5,
+              "max": 129.5
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "last_updated": "2025-12-12T02:59:46.761770"
+}

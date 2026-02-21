@@ -3,8 +3,7 @@ import { getBarcodeProcessor } from '../utils/barcodeProcessor'
 import type { BarcodeScanResult } from '../utils/barcodeProcessor'
 import barcodeBackground from '../assets/Barcode.jpeg'
 import type { ItemData } from '../App'
-import { identifyBrand } from '../utils/brandIdentifier'
-import { collectSizeGuide } from '../utils/sizeCollector'
+import { analyzeItem } from '../utils/analyzeItem'
 import sampleItemData from '../data/sampleItem.json'
 import StackedCards from './StackedCards'
 import type { ClothingItem } from './StackedCards'
@@ -173,8 +172,6 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
 
       const processor = getBarcodeProcessor()
 
-      const startTime = Date.now()
-
       await processor.startScanning(videoRef.current, {
         preferRearCamera: true,
         onScan: (result: BarcodeScanResult) => {
@@ -183,8 +180,6 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
             return
           }
           hasScannedRef.current = true
-
-          const scanTime = Date.now() - startTime
 
           // Check if SKU was found in lookup table
           if (result.sku === null) {
@@ -314,55 +309,6 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
     }
 
     setIsScanning(false)
-  }
-
-  /**
-   * Analyze item: identify brand and collect size guide
-   */
-  const analyzeItem = async (rawItem: ItemData): Promise<ItemData> => {
-
-    // Normalize availableSizes to abbreviations (S, M, L, XL, 2XL, etc.)
-    if (rawItem.availableSizes) {
-      const sizeMap: Record<string, string> = {
-        'x-small': 'XS', 'xsmall': 'XS', 'extra small': 'XS', 'x small': 'XS',
-        'small': 'S', 'sm': 'S',
-        'medium': 'M', 'med': 'M',
-        'large': 'L', 'lg': 'L',
-        'x-large': 'XL', 'xlarge': 'XL', 'extra large': 'XL', 'x large': 'XL',
-        'xx-large': '2XL', 'xxlarge': '2XL', 'xxl': '2XL', 'xx large': '2XL', '2x': '2XL',
-        'xxx-large': '3XL', 'xxxlarge': '3XL', 'xxxl': '3XL', '3x': '3XL',
-        'xxxx-large': '4XL', 'xxxxlarge': '4XL', 'xxxxl': '4XL', '4x': '4XL',
-        'youth small': 'YS', 'youth s': 'YS',
-        'youth medium': 'YM', 'youth m': 'YM',
-        'youth large': 'YL', 'youth l': 'YL',
-        'youth x-large': 'YXL', 'youth xl': 'YXL',
-      }
-      rawItem = {
-        ...rawItem,
-        availableSizes: rawItem.availableSizes.map(s =>
-          sizeMap[s.toLowerCase().trim()] || s.toUpperCase().trim()
-        )
-      }
-    }
-
-    // Step 1: Identify brand
-    let brand: string
-    try {
-      brand = identifyBrand(rawItem)
-    } catch (brandErr) {
-      brand = 'Duke' // fallback
-    }
-
-    // Step 2: Collect size guide (rule-based keyword matching)
-    const itemWithBrand = { ...rawItem, brand }
-    const sizeGuide = collectSizeGuide(itemWithBrand)
-
-    // Return item with brand and size guide
-    return {
-      ...rawItem,
-      brand,
-      sizeGuide: sizeGuide || undefined
-    }
   }
 
   /**

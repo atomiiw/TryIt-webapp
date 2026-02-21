@@ -138,6 +138,7 @@
   width: auto;
   height: auto;
   max-height: var(--image-height, 150px);
+  max-width: 160px;
   position: absolute;
   bottom: var(--image-bottom, 30px);
   left: 50%;
@@ -215,7 +216,7 @@
 .card-duke-logo-wrapper {
   position: absolute;
   top:  65px;
-  left: 8px;
+  left: 9px;
   width: 40px;
   height: 24px;
   z-index: 5;
@@ -227,7 +228,7 @@
 .card-duke-logo {
   width: 30px;  /* Smaller to fit entire D without cropping */
   height: 36px;
-  margin-left: -2px;
+  margin-left: -3px;
   margin-top: -6px;
   object-fit: contain;
 }
@@ -246,22 +247,25 @@
 .card-size-badge {
   height: 12px;
   padding: 0 5px;
-  background: rgba(110, 110, 115, 0.85);
+  background: rgb(200, 200, 200);
   border-radius: 3px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-/* Gender Badge Background - light grey */
+/* Gender Badge Wrapper - positioned below Duke logo */
+.card-gender-badge-wrapper {
+  position: absolute;
+  top: 94px;
+  left: 9px;
+  z-index: 6;
+}
+
+/* Gender Badge - no background, left-aligned */
 .card-gender-badge {
-  height: 12px;
-  padding: 0 5px;
-  background: rgba(255, 255, 255, 0.6);
-  border-radius: 3px;
   display: flex;
   align-items: center;
-  justify-content: center;
 }
 
 /* Gender Text - black, all caps */
@@ -284,7 +288,7 @@
   font-size: 8px;
   line-height: 10px;
   letter-spacing: 0;
-  color: #FFFFFF;
+  color: #000000;
   white-space: nowrap;
 }
 

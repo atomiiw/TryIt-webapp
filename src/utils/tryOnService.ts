@@ -246,8 +246,7 @@ async function addWatermark(imageSrc: string): Promise<string> {
 /**
  * Generate fit-specific prompt for try-on
  */
-function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType): string {
-  const itemName = clothingInfo.name || 'clothing item'
+function generateTryOnPrompt(clothingInfo: ClothingInfo, _fitType: FitType): string {
   const itemType = clothingInfo.type || 'garment'
   const itemColor = clothingInfo.color && clothingInfo.color !== 'N/A' ? clothingInfo.color : ''
 
@@ -284,8 +283,6 @@ export async function generateTryOnImage(
   clothingInfo: ClothingInfo,
   fitType: FitType = 'regular'
 ): Promise<TryOnResult> {
-  const fitLabel = ` (${fitType} fit)`
-
   try {
     // Process user image: detect dimensions, find closest aspect ratio, crop if needed
     const { base64: avatarBase64, aspectRatio } = await processUserImage(userImage)
@@ -300,8 +297,6 @@ export async function generateTryOnImage(
     console.log(`[TryOn] ${fitType} fit prompt:\n`, prompt)
 
     // Call the Duke try-on endpoint
-    const startTime = Date.now()
-
     const response = await fetch(`${BACKEND_URL}/api/gemini-tryon-duke`, {
       method: 'POST',
       headers: {
@@ -314,8 +309,6 @@ export async function generateTryOnImage(
         aspectRatio
       })
     })
-
-    const generationTime = Date.now() - startTime
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}))

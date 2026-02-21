@@ -208,9 +208,11 @@ const StackedCards: React.FC<StackedCardsProps> = ({
     processImages();
   }, [items, processedImages]);
 
-  // Measure bottom-half content width and scale down if it exceeds 120px
+  // Measure content width in upper and lower halves, scale down if too wide
   useEffect(() => {
     const DEFAULT_MAX_HEIGHT = 150;
+    const BOTTOM_WIDTH_LIMIT = 135;
+    const UPPER_WIDTH_LIMIT = 140;
 
     for (const item of items) {
       const src = processedImages[item.id];
@@ -232,36 +234,47 @@ const StackedCards: React.FC<StackedCardsProps> = ({
         }
         ctx.drawImage(img, 0, 0);
 
-        // Scan bottom half rows for max content width
         const halfY = Math.floor(natH / 2);
-        const bottomData = ctx.getImageData(0, halfY, natW, natH - halfY);
-        let maxContentWidth = 0;
-        for (let row = 0; row < bottomData.height; row++) {
-          let leftmost = -1;
-          let rightmost = -1;
-          for (let col = 0; col < bottomData.width; col++) {
-            const alpha = bottomData.data[(row * bottomData.width + col) * 4 + 3];
-            if (alpha > 10) {
-              if (leftmost === -1) leftmost = col;
-              rightmost = col;
+
+        // Helper: scan rows for max content width
+        const measureMaxWidth = (imageData: ImageData) => {
+          let maxW = 0;
+          for (let row = 0; row < imageData.height; row++) {
+            let leftmost = -1;
+            let rightmost = -1;
+            for (let col = 0; col < imageData.width; col++) {
+              const alpha = imageData.data[(row * imageData.width + col) * 4 + 3];
+              if (alpha > 10) {
+                if (leftmost === -1) leftmost = col;
+                rightmost = col;
+              }
+            }
+            if (leftmost !== -1) {
+              maxW = Math.max(maxW, rightmost - leftmost + 1);
             }
           }
-          if (leftmost !== -1) {
-            maxContentWidth = Math.max(maxContentWidth, rightmost - leftmost + 1);
-          }
-        }
+          return maxW;
+        };
 
-        // Compute rendered bottom-half width at default max height
+        // Measure upper half and bottom half content widths
+        const upperContentWidth = measureMaxWidth(ctx.getImageData(0, 0, natW, halfY));
+        const bottomContentWidth = measureMaxWidth(ctx.getImageData(0, halfY, natW, natH - halfY));
+
+        // Compute rendered widths at default max height
         const renderScale = Math.min(DEFAULT_MAX_HEIGHT, natH) / natH;
-        const renderedBottomWidth = maxContentWidth * renderScale;
+        const renderedUpperWidth = upperContentWidth * renderScale;
+        const renderedBottomWidth = bottomContentWidth * renderScale;
 
-        if (renderedBottomWidth > 135) {
-          // Scale entire image so bottom-half width = exactly 135px
-          const newMaxHeight = natH * (135 / maxContentWidth);
-          setImageMaxHeights(prev => ({ ...prev, [item.id]: newMaxHeight }));
-        } else {
-          setImageMaxHeights(prev => ({ ...prev, [item.id]: DEFAULT_MAX_HEIGHT }));
+        // Determine max height from each constraint
+        let maxH = DEFAULT_MAX_HEIGHT;
+        if (renderedUpperWidth > UPPER_WIDTH_LIMIT) {
+          maxH = Math.min(maxH, natH * (UPPER_WIDTH_LIMIT / upperContentWidth));
         }
+        if (renderedBottomWidth > BOTTOM_WIDTH_LIMIT) {
+          maxH = Math.min(maxH, natH * (BOTTOM_WIDTH_LIMIT / bottomContentWidth));
+        }
+
+        setImageMaxHeights(prev => ({ ...prev, [item.id]: maxH }));
       };
       img.src = src;
     }
@@ -464,28 +477,30 @@ const StackedCards: React.FC<StackedCardsProps> = ({
               <img src={DukeLogo} alt="Duke" className="card-duke-logo" />
             </div>
 
+            {/* Gender badge - below Duke logo */}
+            {item.gender && (
+              <div className="card-gender-badge-wrapper">
+                <div className="card-gender-badge">
+                  <span className="card-gender-text">
+                    {item.gender.replace(/s$/, '').toUpperCase()}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Text content - Rectangle: name & price (LEFT side, bottom) */}
             <div className="card-text-content">
-              {/* Badge row - size and gender badges above name */}
-              {(item.size || item.gender) && (
+              {/* Size badge above name */}
+              {item.size && (
                 <div
                   className="card-badge-row"
                   style={{
                     '--size-badge-offset': `${nameYOffset[item.id] ?? 14}px`
                   } as React.CSSProperties}
                 >
-                  {item.size && (
-                    <div className="card-size-badge">
-                      <span className="card-size-text">{item.size}</span>
-                    </div>
-                  )}
-                  {item.gender && (
-                    <div className="card-gender-badge">
-                      <span className="card-gender-text">
-                        {item.gender.replace(/s$/, '').toUpperCase()}
-                      </span>
-                    </div>
-                  )}
+                  <div className="card-size-badge">
+                    <span className="card-size-text">{item.size}</span>
+                  </div>
                 </div>
               )}
               <div className="card-name-wrapper">

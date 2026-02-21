@@ -298,7 +298,7 @@ function ResultsPageTest({ userData, onBack }: ResultsPageProps) {
         setMeasurements(calculatedMeasurements)
 
         // Step 2: Identify brand
-        const brand = userData.item ? identifyBrand(userData.item) : 'Unknown'
+        if (userData.item) identifyBrand(userData.item)
 
         // Step 3: Get size recommendation
         const recommendation = identifySize(

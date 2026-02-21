@@ -155,45 +155,24 @@ export function calculateDimension(
  * - Height adjustment: 0.18cm per cm above/below 175cm average
  */
 function calculateMaleDimension(H: number, W: number, key: string, F: number): number | null {
-  let result: number | null = null
-  let formula = ''
-
   switch (key) {
     case 'chest':
-      // C_m = 0.24*H + 0.76*W (no body composition adjustment for male chest)
-      result = 0.24 * H + 0.76 * W
-      formula = `0.24×${H} + 0.76×${W} = ${result.toFixed(1)}`
-      break
+      return 0.24 * H + 0.76 * W
     case 'waist':
-      // Waist = 0.16*H + 0.68*W - linear formula based on height and weight
-      result = 0.16 * H + 0.68 * W
-      formula = `0.16×${H} + 0.68×${W} = ${result.toFixed(1)}`
-      break
+      return 0.16 * H + 0.68 * W
     case 'hips':
-      result = (0.28 * H + 0.40 * W + 20) * (0.93 + 0.07 * F)
-      formula = `(0.28×${H} + 0.40×${W} + 20) × (0.93 + 0.07×${F}) = ${result.toFixed(1)}`
-      break
+      return (0.28 * H + 0.40 * W + 20) * (0.93 + 0.07 * F)
     case 'length':
-      result = 0.405 * H
-      formula = `0.405 × ${H} = ${result.toFixed(1)}`
-      break
+      return 0.405 * H
     case 'shoulder':
-      result = (0.45 * H + 0.30 * (W - 70) + 30) * (0.92 + 0.08 * F)
-      formula = `(0.45×${H} + 0.30×(${W}-70) + 30) × (0.92 + 0.08×${F}) = ${result.toFixed(1)}`
-      break
+      return (0.45 * H + 0.30 * (W - 70) + 30) * (0.92 + 0.08 * F)
     case 'inseam':
-      result = 0.45 * H * (0.99 + 0.01 * F)
-      formula = `0.45 × ${H} × (0.99 + 0.01×${F}) = ${result.toFixed(1)}`
-      break
+      return 0.45 * H * (0.99 + 0.01 * F)
     case 'thigh':
-      result = (0.25 * H + 0.12 * (W - 70) + 10) * (0.90 + 0.10 * F)
-      formula = `(0.25×${H} + 0.12×(${W}-70) + 10) × (0.90 + 0.10×${F}) = ${result.toFixed(1)}`
-      break
+      return (0.25 * H + 0.12 * (W - 70) + 10) * (0.90 + 0.10 * F)
     default:
       return null
   }
-
-  return result
 }
 
 /**
@@ -206,46 +185,26 @@ function calculateMaleDimension(H: number, W: number, key: string, F: number): n
  * - Height adjustment: 0.15cm per cm above/below 163cm average
  */
 function calculateFemaleDimension(H: number, W: number, key: string, F: number): number | null {
-  let result: number | null = null
-  let formula = ''
-
   switch (key) {
-    case 'chest':
-      // C_f = 0.16*H + 1.08*W + 1 + Δ(F) where Δ: lean=-5, normal=0, soft=+1
+    case 'chest': {
       const femaleChestDelta = F === 0.85 ? -5 : F === 1.25 ? 1 : 0
-      result = 0.16 * H + 1.08 * W + 1 + femaleChestDelta
-      formula = `0.16×${H} + 1.08×${W} + 1 + ${femaleChestDelta} = ${result.toFixed(1)}`
-      break
+      return 0.16 * H + 1.08 * W + 1 + femaleChestDelta
+    }
     case 'waist':
-      // Waist = 0.225*H + 0.61*W - linear formula based on height and weight
-      result = 0.225 * H + 0.61 * W
-      formula = `0.225×${H} + 0.61×${W} = ${result.toFixed(1)}`
-      break
+      return 0.225 * H + 0.61 * W
     case 'hips':
-      result = (0.30 * H + 0.50 * W + 22) * (0.91 + 0.09 * F)
-      formula = `(0.30×${H} + 0.50×${W} + 22) × (0.91 + 0.09×${F}) = ${result.toFixed(1)}`
-      break
+      return (0.30 * H + 0.50 * W + 22) * (0.91 + 0.09 * F)
     case 'length':
-      result = 0.385 * H
-      formula = `0.385 × ${H} = ${result.toFixed(1)}`
-      break
+      return 0.385 * H
     case 'shoulder':
-      result = (0.42 * H + 0.20 * (W - 60) + 22) * (0.93 + 0.07 * F)
-      formula = `(0.42×${H} + 0.20×(${W}-60) + 22) × (0.93 + 0.07×${F}) = ${result.toFixed(1)}`
-      break
+      return (0.42 * H + 0.20 * (W - 60) + 22) * (0.93 + 0.07 * F)
     case 'inseam':
-      result = 0.46 * H * (0.99 + 0.01 * F)
-      formula = `0.46 × ${H} × (0.99 + 0.01×${F}) = ${result.toFixed(1)}`
-      break
+      return 0.46 * H * (0.99 + 0.01 * F)
     case 'thigh':
-      result = (0.24 * H + 0.15 * (W - 60) + 12) * (0.88 + 0.12 * F)
-      formula = `(0.24×${H} + 0.15×(${W}-60) + 12) × (0.88 + 0.12×${F}) = ${result.toFixed(1)}`
-      break
+      return (0.24 * H + 0.15 * (W - 60) + 12) * (0.88 + 0.12 * F)
     default:
       return null
   }
-
-  return result
 }
 
 
@@ -349,7 +308,6 @@ export function identifySizeWithGuide(
       else if (fit === 'smaller') smallerCount++
       else if (fit === 'larger') largerCount++
 
-      const displayRange = measurement.value ?? `${measurement.min}-${measurement.max}`
     }
 
     sizeAnalyses.push({

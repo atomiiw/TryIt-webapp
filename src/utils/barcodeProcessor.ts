@@ -202,8 +202,6 @@ export class BarcodeProcessor {
       // Get camera constraints
       const constraints = this.getCameraConstraints(preferRearCamera)
 
-      const startTime = Date.now()
-
       // Start continuous scanning
       this.controls = await this.reader!.decodeFromConstraints(
         constraints,
@@ -233,8 +231,6 @@ export class BarcodeProcessor {
 
       // Start OCR fallback scanning
       this.startOcrScanning()
-
-      const initTime = Date.now() - startTime
 
     } catch (err) {
 
@@ -516,11 +512,11 @@ export async function quickScan(
         cleanup()
         resolve(result)
       },
-      onError: (error) => {
+      onError: (_error) => {
         cleanup()
         resolve(null)
       }
-    }).catch((err) => {
+    }).catch((_err) => {
       cleanup()
       resolve(null)
     })

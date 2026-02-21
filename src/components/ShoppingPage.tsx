@@ -144,7 +144,7 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
           onUpdate({ personAnalysis: analysis })
         }
       })
-      .catch(error => {
+      .catch(_error => {
       })
   }, [userData.image])
 

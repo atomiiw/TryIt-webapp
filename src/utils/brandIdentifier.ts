@@ -1,5 +1,5 @@
 import type { ItemData } from '../App'
-import sizeGuidesCm from '../data/size_guides_cm.json'
+import sizeGuidesCm from '../../size_guides/size_guides_cm.json'
 
 // Derive brand names dynamically from the size guide
 const SIZE_GUIDE_BRANDS = [...new Set(

@@ -165,8 +165,7 @@ async function imageUrlToBase64(imageUrl: string): Promise<string> {
 /**
  * Generate fit-specific prompt
  */
-function generateFitPrompt(clothingInfo: ClothingInfo, fitType: FitType): string {
-  const itemName = clothingInfo.name || 'clothing item'
+function generateFitPrompt(clothingInfo: ClothingInfo, _fitType: FitType): string {
   const itemType = clothingInfo.type || 'garment'
   const itemColor = clothingInfo.color && clothingInfo.color !== 'N/A' ? clothingInfo.color : ''
   const colorDesc = itemColor ? `${itemColor} ` : ''
@@ -257,8 +256,6 @@ export async function generateTryOnImageDemo(
     const prompt = generateFitPrompt(clothingInfo, fitType)
 
     // Step 4: Call backend API
-    const startTime = Date.now()
-
     const response = await fetch(GEMINI_TRYON_API, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -270,10 +267,7 @@ export async function generateTryOnImageDemo(
       })
     })
 
-    const generationTime = Date.now() - startTime
-
     if (!response.ok) {
-      const errorData = await response.text()
       return { imageDataUrl: null, success: false, error: `API error: ${response.status}` }
     }
 
