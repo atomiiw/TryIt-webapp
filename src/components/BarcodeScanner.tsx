@@ -352,9 +352,11 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
       setIsAnalyzing(false)
       setScanStatus('detected')
 
-      // Analytics: scan succeeded and product found
-      track('scan_success', { sku: barcode })
-      track('product_found', { brand: analyzedItem.brand || 'unknown', name: analyzedItem.name })
+      // Analytics: scan succeeded and product found (skip demo scans)
+      if (!isDemo) {
+        track('scan_success', { sku: barcode })
+        track('product_found', { brand: analyzedItem.brand || 'unknown', name: analyzedItem.name })
+      }
 
       // Check if item already exists (by matching base ID)
       const existingIndex = items.findIndex(existingItem =>
