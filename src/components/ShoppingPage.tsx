@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { track } from '@vercel/analytics'
 import type { UserData } from '../App'
 import PhotoUpload from './PhotoUpload'
 import MeasurementPickers from './MeasurementPickers'
@@ -229,6 +230,11 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
 
   const handleTryIt = () => {
     if (!canTryIt || !currentItemId) return
+
+    track('tryon_click', {
+      itemName: userData.item?.name || 'unknown',
+      brand: userData.item?.brand || 'unknown'
+    })
 
     // Log size guide status for current item
     const item = userData.item

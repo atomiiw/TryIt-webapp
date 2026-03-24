@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import ShoppingPage from './components/ShoppingPage'
 import logo from './assets/TryIt_Logo.png'
 import './App.css'
 import type { SizeGuide } from './utils/sizeCollector'
 import type { PersonAnalysis } from './utils/personAnalyzer'
 import { analyzeItem } from './utils/analyzeItem'
+import { useTimeOnPage } from './hooks/useTimeOnPage'
 
 const SESSION_STORAGE_KEY = 'tryit_session'
 const TEST_MODE = window.location.pathname === '/test-mode'
@@ -44,6 +46,8 @@ export interface UserData {
 }
 
 function App() {
+  useTimeOnPage('main')
+
   const defaultUserData: UserData = {
     image: null,
     croppedImage: null,
@@ -163,6 +167,8 @@ function App() {
           onUpdate={updateUserData}
         />
       </main>
+
+      <Analytics />
     </div>
   )
 }

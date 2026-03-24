@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { track } from '@vercel/analytics'
 import { getBarcodeProcessor } from '../utils/barcodeProcessor'
 import type { BarcodeScanResult } from '../utils/barcodeProcessor'
 import barcodeBackground from '../assets/Barcode.jpeg'
@@ -153,6 +154,7 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
       }, 3000)
 
     } catch (err) {
+      track('camera_permission_denied', { mode: 'demo' })
       setError('Camera access denied')
       setIsScanning(false)
     }
@@ -229,6 +231,7 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
       streamRef.current = videoRef.current.srcObject as MediaStream
 
     } catch (err) {
+      track('camera_permission_denied', { mode: 'production' })
       setError('Camera access denied')
       setIsScanning(false)
     }
@@ -348,6 +351,10 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
       // Done - check for duplicates or add to items array
       setIsAnalyzing(false)
       setScanStatus('detected')
+
+      // Analytics: scan succeeded and product found
+      track('scan_success', { sku: barcode })
+      track('product_found', { brand: analyzedItem.brand || 'unknown', name: analyzedItem.name })
 
       // Check if item already exists (by matching base ID)
       const existingIndex = items.findIndex(existingItem =>

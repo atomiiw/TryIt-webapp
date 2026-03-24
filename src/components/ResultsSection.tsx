@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
+import { track } from '@vercel/analytics'
 import type { UserData } from '../App'
 import type { SizeRecommendation } from '../utils/sizeIdentifier'
 import { calculateDimension } from '../utils/sizeIdentifier'
@@ -496,6 +497,9 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
   }
 
   const handleCardClick = (fit: FitType) => {
+    if (fit !== selectedFit) {
+      track('fit_toggle', { fit: fitLabels[fit] })
+    }
     setSelectedFit(fit)
     scrollToFit(fit)
   }
@@ -740,7 +744,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
           ) : (
             <span className="suggested-size-value out-of-range">Out of range</span>
           )}
-          <button className="info-icon-button" onClick={() => setShowInfoSheet(true)} aria-label="Size info">
+          <button className="info-icon-button" onClick={() => { track('size_guide_view', { brand: userData.item?.brand || 'unknown' }); setShowInfoSheet(true) }} aria-label="Size info">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="1.5"/>
               <path d="M10 9V14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
