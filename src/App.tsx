@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import ShoppingPage from './components/ShoppingPage'
 import logo from './assets/TryIt_Logo.png'
 import './App.css'
@@ -163,6 +164,7 @@ function App() {
           onUpdate={updateUserData}
         />
       </main>
+      <Analytics />
     </div>
   )
 }
