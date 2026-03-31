@@ -1,4 +1,5 @@
 import { useState, useRef, forwardRef, useImperativeHandle } from 'react'
+import { track } from '@vercel/analytics'
 import sampleBackground from '../assets/Simple_upload.jpg'
 import ImageCropper from './ImageCropper'
 import './PhotoUpload.css'
@@ -77,6 +78,7 @@ const PhotoUpload = forwardRef<PhotoUploadHandle, PhotoUploadProps>(
 
     const handleClick = () => {
       if (!image) {
+        track('picture_upload_attempt')
         fileInputRef.current?.click()
       }
     }
@@ -95,6 +97,7 @@ const PhotoUpload = forwardRef<PhotoUploadHandle, PhotoUploadProps>(
     }
 
     const handleCropComplete = (croppedImage: string) => {
+      track('picture_upload_success')
       setShowCropper(false)
       setRawImage(null)
       onImageChange(croppedImage)

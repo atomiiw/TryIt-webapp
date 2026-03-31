@@ -291,12 +291,15 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
       )
 
       if (result.success && result.imageDataUrl) {
+        track('tryon_success', { fit })
         setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))
         // Notify parent of generated image
         onImageGenerated?.(fit, result.imageDataUrl)
       } else {
+        track('tryon_failure', { fit, reason: 'no_image_returned' })
       }
     } catch (err) {
+      track('tryon_failure', { fit, reason: err instanceof Error ? err.message : 'unknown' })
     } finally {
       setGeneratingFits(prev => {
         const next = new Set(prev)
@@ -508,6 +511,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     const currentFit = selectedFit
     if (!userData.image || !userData.item?.imageUrl) return
 
+    track('tryon_retry', { fit: currentFit })
     setRegeneratingFits(prev => new Set(prev).add(currentFit))
 
     try {
@@ -557,6 +561,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     const imageSrc = generatedImages[fit]
     if (!imageSrc) return
 
+    track('share_attempt', { fit })
     setSharingFit(fit)
     try {
       // Image already has watermark from tryOnService, just convert to blob

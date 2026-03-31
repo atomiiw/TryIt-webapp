@@ -154,7 +154,6 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
       }, 3000)
 
     } catch (err) {
-      track('camera_permission_denied', { mode: 'demo' })
       setError('Camera access denied')
       setIsScanning(false)
     }
@@ -164,6 +163,8 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
    * Production mode scanner - uses barcodeProcessor for real barcode detection
    */
   const startProductionScanner = async () => {
+    track('scan_attempt')
+
     try {
       // Wait for video element to be in DOM
       await new Promise(resolve => setTimeout(resolve, 100))
@@ -186,6 +187,7 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
           // Check if SKU was found in lookup table
           if (result.sku === null) {
             // UPC not found - show notification but keep scanning
+            track('scan_failure', { upc: result.matchedUpc || 'unknown' })
 
             // Clear any existing timeout
             if (notAvailableTimeoutRef.current) {
@@ -231,7 +233,7 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
       streamRef.current = videoRef.current.srcObject as MediaStream
 
     } catch (err) {
-      track('camera_permission_denied', { mode: 'production' })
+      track('scan_failure', { reason: 'camera_denied' })
       setError('Camera access denied')
       setIsScanning(false)
     }
@@ -261,7 +263,11 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
   /**
    * Stop scanner - handles both demo and production modes
    */
-  const stopScanner = () => {
+  const stopScanner = (userCancelled = false) => {
+    if (userCancelled && !hasScannedRef.current) {
+      track('scan_give_up')
+    }
+
     // Clear error state when user manually closes scanner
     setError(null)
     setScanStatus(null)
@@ -395,9 +401,11 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
       // Check if it's a "not found" error
       const errorMessage = err instanceof Error ? err.message : 'Unknown error'
       if (errorMessage.includes('not found') || errorMessage.includes('Item not found')) {
+        track('product_not_found', { sku: barcode })
         setScanStatus('not_found')
         setError(`Item not found for SKU: ${barcode}`)
       } else {
+        track('product_not_found', { sku: barcode, reason: errorMessage })
         setScanStatus('error')
         setError(`Failed to process item: ${errorMessage}`)
       }
@@ -516,7 +524,7 @@ function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeSc
           </div>
         </div>
       ) : isScanning ? (
-        <div className="scanner-window camera-active" onClick={stopScanner}>
+        <div className="scanner-window camera-active" onClick={() => stopScanner(true)}>
           <video
             ref={videoRef}
             autoPlay
