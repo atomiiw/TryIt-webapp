@@ -212,7 +212,9 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const sectionRef = useRef<HTMLDivElement>(null)
-  const startedGeneratingRef = useRef<Set<FitType>>(new Set())
+  // Track started generations globally by itemUrl+fit so remounts don't restart them
+  const generationKey = userData.item?.imageUrl || ''
+  const startedGeneratingRef = useRef<Set<string>>(new Set())
 
   // Cycle through loading messages
   useEffect(() => {
@@ -477,9 +479,10 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     const fits: FitType[] = ['tight', 'regular', 'comfortable']
 
     fits.forEach((fit, index) => {
+      const key = `${generationKey}:${fit}`
       const hasExistingImage = !!generatedImages[fit]
-      if (!startedGeneratingRef.current.has(fit) && !hasExistingImage) {
-        startedGeneratingRef.current.add(fit)
+      if (!startedGeneratingRef.current.has(key) && !hasExistingImage) {
+        startedGeneratingRef.current.add(key)
         generateFitImage(fit, index)
       }
     })
