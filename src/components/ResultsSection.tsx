@@ -28,6 +28,7 @@ interface ResultsSectionProps {
   initialImages?: Partial<Record<FitType, string>>
   cachedAnalysis?: CachedAnalysis | null
   shouldAutoScroll?: boolean
+  untuckedImage?: string | null
   onImageGenerated?: (fit: FitType, imageDataUrl: string) => void
   onAnalysisComplete?: (analysis: CachedAnalysis) => void
   onScrollComplete?: () => void
@@ -181,7 +182,7 @@ const LOADING_MESSAGES = [
 // Type for generated images state
 type GeneratedImages = Record<FitType, string | null>
 
-function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, shouldAutoScroll, onImageGenerated, onAnalysisComplete, onScrollComplete }: ResultsSectionProps) {
+function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, shouldAutoScroll, untuckedImage, onImageGenerated, onAnalysisComplete, onScrollComplete }: ResultsSectionProps) {
   // If we have cached analysis, skip loading state
   const hasCachedData = !!cachedAnalysis
   const [isLoading, setIsLoading] = useState(!hasCachedData)
@@ -305,7 +306,9 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
           fitSentence: getFitSentence(fit)
         },
         fit as TryOnFitType,
-        keyIndex
+        keyIndex,
+        untuckedImage || undefined,
+        userData.personAnalysis?.gender || 'unknown'
       )
 
       if (result.success && result.imageDataUrl) {
@@ -329,7 +332,9 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
           fitSentence: getFitSentence(fit)
         },
         fit as TryOnFitType,
-        keyIndex
+        keyIndex,
+        untuckedImage || undefined,
+        userData.personAnalysis?.gender || 'unknown'
       )
 
       if (result.success && result.imageDataUrl) {
@@ -380,6 +385,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
             gender: 'unknown' as const,
             age_range: 'adult' as const,
             body_composition: 'average' as const,
+            shirt_tucked: false,
             confidence: 'low' as const,
             proportions: {}
           }
@@ -560,7 +566,9 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
           fitSentence: getFitSentence(currentFit)
         },
         currentFit as TryOnFitType,
-        fitKeyIndex[currentFit]
+        fitKeyIndex[currentFit],
+        untuckedImage || undefined,
+        userData.personAnalysis?.gender || 'unknown'
       )
 
       if (result.success && result.imageDataUrl) {

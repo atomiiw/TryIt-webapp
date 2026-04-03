@@ -7,6 +7,7 @@ import BarcodeScanner from './BarcodeScanner'
 import ResultsSection from './ResultsSection'
 import ResultsSectionDemo from './ResultsSectionDemo'
 import { analyzePersonPhoto } from '../utils/personAnalyzer'
+import { generateUntuckedImage } from '../utils/tryOnService'
 import './ShoppingPage.css'
 
 /**
@@ -112,6 +113,10 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
   // Per-item try-on state
   const [tryOnState, setTryOnState] = useState<TryOnStateByItem>(initialShoppingState)
 
+  // Cached untucked image — generated when shirt_tucked detected
+  const [untuckedImage, setUntuckedImage] = useState<string | null>(null)
+  const untuckedImageRef = useRef<string | null>(null)
+
 
 
   // Track which image we've already analyzed
@@ -133,18 +138,35 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
     const imageToAnalyze = userData.image
     analyzedImageRef.current = imageToAnalyze
 
-    // Clear old analysis when image changes
+    // Clear old analysis and untucked image when image changes
     if (userData.personAnalysis) {
       onUpdate({ personAnalysis: null })
     }
+    setUntuckedImage(null)
+    untuckedImageRef.current = null
 
     // Compress image first to avoid 413 errors
     compressImageForAnalysis(imageToAnalyze)
       .then(compressedImage => analyzePersonPhoto(compressedImage, 'unknown'))
       .then(analysis => {
         // Only update if this is still the current image
-        if (analyzedImageRef.current === imageToAnalyze) {
-          onUpdate({ personAnalysis: analysis })
+        if (analyzedImageRef.current !== imageToAnalyze) return
+        onUpdate({ personAnalysis: analysis })
+
+        // If shirt is tucked, generate untucked version
+        if (analysis.shirt_tucked) {
+          console.log('[Untuck] Shirt is tucked — generating untucked image...')
+          untuckedImageRef.current = imageToAnalyze
+          generateUntuckedImage(imageToAnalyze).then(result => {
+            if (untuckedImageRef.current === imageToAnalyze && result.success && result.imageDataUrl) {
+              setUntuckedImage(result.imageDataUrl)
+              console.log('[Untuck] Untucked image ready')
+            } else {
+              console.warn('[Untuck] Failed, will use original photo')
+            }
+          })
+        } else {
+          console.log('[Untuck] Shirt is not tucked — using original photo')
         }
       })
       .catch(_error => {
@@ -367,6 +389,7 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
             initialImages={currentItemState.generatedImages}
             cachedAnalysis={currentItemState.cachedAnalysis}
             shouldAutoScroll={currentItemState.shouldAutoScroll}
+            untuckedImage={untuckedImage}
             onImageGenerated={handleImageGenerated}
             onAnalysisComplete={handleAnalysisComplete}
             onScrollComplete={handleScrollComplete}

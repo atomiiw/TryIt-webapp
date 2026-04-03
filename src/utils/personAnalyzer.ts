@@ -38,6 +38,7 @@ export interface PersonAnalysis {
   gender: Gender
   age_range: AgeRange
   body_composition: BodyComposition
+  shirt_tucked: boolean
   confidence: 'high' | 'medium' | 'low'
   notes?: string
   // Legacy field for backwards compatibility
@@ -96,11 +97,14 @@ Determine:
 
 Be decisive - most people lean toward either "lean" or "soft" rather than perfectly "average". Look at arm thickness, face shape, and midsection to decide.
 
+4. Shirt tucked: Is the person's shirt/top tucked into their pants or waistband? Look for: shirt fabric disappearing into the waistband, no visible hem hanging over the pants, belt visible with shirt above it going into the pants. Answer true or false.
+
 Respond ONLY with valid JSON in this exact format:
 {
   "gender": "male" | "female" | "unknown",
   "age_range": "children" | "teenager" | "adult" | "elderly",
   "body_composition": "lean" | "average" | "soft",
+  "shirt_tucked": true | false,
   "confidence": "high" | "medium" | "low",
   "notes": "optional brief note about analysis"
 }`
@@ -177,9 +181,9 @@ export async function analyzePersonPhoto(
       gender,
       age_range: rawAnalysis.age_range,
       body_composition: bodyComposition,
+      shirt_tucked: rawAnalysis.shirt_tucked === true,
       confidence: rawAnalysis.confidence || 'medium',
       notes: rawAnalysis.notes,
-      // Legacy field - empty since we no longer use individual proportions
       proportions: {}
     }
 
@@ -193,6 +197,7 @@ export async function analyzePersonPhoto(
       gender: 'unknown',
       age_range: 'adult',
       body_composition: 'average',
+      shirt_tucked: false,
       proportions: {},
       confidence: 'low',
       notes: `Analysis failed: ${error instanceof Error ? error.message : 'Unknown error'}`

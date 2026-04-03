@@ -244,9 +244,69 @@ async function addWatermark(imageSrc: string): Promise<string> {
 }
 
 /**
+ * Generate an untucked version of the user's photo.
+ * Only called when shirt_tucked is detected. Cached and used as avatar for all try-ons.
+ */
+export async function generateUntuckedImage(userImage: string): Promise<TryOnResult> {
+  try {
+    const { base64: avatarBase64, aspectRatio } = await processUserImage(userImage)
+
+    const prompt = `Edit this photo. The person's shirt is currently tucked into their pants. Pull the shirt out so it hangs freely over and outside the waistband. The full hem of the shirt must be visible below the waistband. Keep everything else exactly the same — same shirt, same color, same pattern, same person, same face, same body, same pose, same background, same lighting. The only change is the shirt is now untucked and hanging freely. Prohibitions: Changed shirt color, changed shirt style, changed face, changed body shape, changed background, changed pose, any new clothing.`
+
+    const MAX_RETRIES = 5
+    const TIMEOUT_MS = 35_000
+
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
+
+      try {
+        const response = await fetch(`${BACKEND_URL}/api/gemini-tryon-duke`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({ avatarBase64, prompt, aspectRatio, keyIndex: 0 })
+        })
+
+        clearTimeout(timeout)
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error((errorData as { error?: string }).error || `API error: ${response.status}`)
+        }
+
+        const data = await response.json() as Record<string, unknown>
+        const candidate = (data.candidates as Array<Record<string, unknown>>)?.[0]
+        if (!candidate || candidate.finishReason === 'PROHIBITED_CONTENT' || candidate.finishReason === 'IMAGE_OTHER') {
+          if (attempt < MAX_RETRIES - 1) continue
+          throw new Error('Blocked by content filter after all retries')
+        }
+
+        const content = candidate.content as { parts: Array<Record<string, unknown>> }
+        for (const part of content.parts) {
+          const inlineData = part.inlineData as { mimeType?: string; data?: string } | undefined
+          if (inlineData?.mimeType?.includes('image')) {
+            return { imageDataUrl: `data:${inlineData.mimeType};base64,${inlineData.data}`, success: true }
+          }
+        }
+
+        throw new Error('No image in response')
+      } catch (e) {
+        clearTimeout(timeout)
+        if (attempt === MAX_RETRIES - 1) throw e
+      }
+    }
+
+    throw new Error('All retries failed')
+  } catch (err) {
+    return { imageDataUrl: null, success: false, error: err instanceof Error ? err.message : 'Unknown error' }
+  }
+}
+
+/**
  * Generate fit-specific prompt for try-on
  */
-function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType): string {
+function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType, gender: string = 'unknown'): string {
   const itemType = clothingInfo.type || 'garment'
   const isTop = !isBottomType(itemType)
 
@@ -257,6 +317,9 @@ function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType): stri
     const mandatory = `Mandatory: The sleeve style, sleeve cut, and sleeve length come only from Image 2. Hem hanging freely over and outside the pants waistband. All body parts in correct anatomical proportion. The garment length — measured from shoulder to hem — is exactly as shown in Image 2. 100% garment length accuracy from Image 2.`
     switch (fitType) {
       case 'tight':
+        if (gender === 'male') {
+          return `${first} Virtual try-on. The person in Image 1 is wearing the ${itemType} from Image 2. ${style} Subject: The exact same person from Image 1 — identical face, body shape, body size, chest size, belly size, skin tone, hair, pose. The person's chest, belly, and overall body shape are exactly as in Image 1 with zero modification. Completely remove all original upper body clothing and replace with the ${itemType} from Image 2. ${sleeves} Composition: Straight-on mid-body framing. The virtual camera is pulled back far enough to show the person's full head, full torso, and the complete hem of the garment in frame. All body parts scale equally and uniformly. Fit: This man bought a shirt one size too small. The fabric pulls across the chest and shoulders with visible tension lines radiating from the armpits and across the upper back. The sleeves grip the upper arms tightly with the fabric stretched around the biceps. The shirt sides hug close to the ribcage with zero gap. The overall look is like a man who gained weight but is wearing his old shirt. The garment length remains exactly as shown in Image 2. Prohibitions: Added chest or breast volume, added belly volume, altered body shape, loose fabric, any original upper body clothing visible, jacket, hoodie, sweater, layering, disproportionate body parts, cropped or shortened shirt, shorter hemline than Image 2, tucked-in shirt, any part of shirt tucked into pants, sleeves from Image 1, any slack or excess fabric. ${mandatory} The tightness affects width only.`
+        }
         return `${first} Virtual try-on. The person in Image 1 is wearing the ${itemType} from Image 2. ${style} Subject: The exact same person from Image 1 — identical face, body shape, body size, chest size, belly size, skin tone, hair, pose. The person's chest, belly, and overall body shape are exactly as in Image 1 with zero modification. Completely remove all original upper body clothing and replace with the ${itemType} from Image 2. ${sleeves} Composition: Straight-on mid-body framing. The virtual camera is pulled back far enough to show the person's full head, full torso, and the complete hem of the garment in frame. All body parts scale equally and uniformly. Fit: Only the width changes — the fabric is stretched taut against the skin with 0mm air gap. The shape of the shoulders and hip bones is visible pressing through the material. Zero wrinkles, zero folds, zero bunching. Chest area lays flat and smooth. The garment is tight in width only. The garment length remains exactly as shown in Image 2. Prohibitions: Added chest or breast volume, added belly volume, altered body shape, loose fabric, any original upper body clothing visible, jacket, hoodie, sweater, layering, disproportionate body parts, cropped or shortened shirt, shorter hemline than Image 2, tucked-in shirt, any part of shirt tucked into pants, sleeves from Image 1. ${mandatory} The tightness affects width only.`
       case 'comfortable':
         return `${first} Virtual try-on. The person in Image 1 is wearing the ${itemType} from Image 2. ${style} Subject: The exact same person from Image 1 — identical face, body shape, body size, skin tone, hair, pose. The person's chest, belly, and overall body shape are exactly as in Image 1 with zero modification. Completely remove all original upper body clothing and replace with the ${itemType} from Image 2. ${sleeves} Composition: Keep the exact same framing and camera distance as Image 1. The person's head and body remain the exact same size in the frame as in Image 1. If the garment hem extends beyond the bottom of the frame, let it be cropped off. Cutting off the bottom of the shirt is acceptable. Shrinking the person is not acceptable. Fit: Only the width is larger — the shirt is one full size wider than the person's body. 50mm of visible air gap between fabric and torso on each side. Shoulder seams drop 30mm past the natural shoulder bone. Sleeves visibly wider than the arms. 5-7 prominent vertical folds down the front. Body shape hidden by excess width. The shirt is wider, not longer. Prohibitions: Added chest or breast volume, added belly volume, altered body shape, fitted fabric, fabric touching torso sides, any original upper body clothing visible, jacket, hoodie, sweater, layering, shrinking torso independently of head, shrinking the person, disproportionate body parts, dress-like length, shorter hemline than Image 2, longer hemline than Image 2, tucked-in shirt, any part of shirt tucked into pants, sleeves from Image 1. Mandatory: The sleeve style, sleeve cut, and sleeve length come only from Image 2. Hem hanging freely over and outside the pants waistband. All body parts in correct anatomical proportion. The shirt is wider, not longer. Body size in the frame is identical to Image 1. Preserving body proportion is more important than showing the full garment length.`
@@ -291,12 +354,15 @@ export async function generateTryOnImage(
   clothingImageUrl: string,
   clothingInfo: ClothingInfo,
   fitType: FitType = 'regular',
-  keyIndex: number = 0
+  keyIndex: number = 0,
+  untuckedImage?: string,
+  gender: string = 'unknown'
 ): Promise<TryOnResult> {
   try {
-    const { base64: avatarBase64, aspectRatio } = await processUserImage(userImage)
+    const avatar = untuckedImage || userImage
+    const { base64: avatarBase64, aspectRatio } = await processUserImage(avatar)
     const clothingBase64 = await imageUrlToBase64(clothingImageUrl)
-    const prompt = generateTryOnPrompt(clothingInfo, fitType)
+    const prompt = generateTryOnPrompt(clothingInfo, fitType, gender)
 
 
     // Call the Duke try-on endpoint with timeout and retry
