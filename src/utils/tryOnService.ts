@@ -261,27 +261,34 @@ function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType, gende
   const itemType = clothingInfo.type || 'garment'
   const isTop = !isBottomType(itemType)
   const isMale = gender === 'male'
+  const nameLC = (clothingInfo.name || '').toLowerCase()
+  const isStructured = /jacket|coat|blazer|hoodie|fleece|windbreaker|parka|vest|quarter.zip|half.zip|pullover|shell|anorak/.test(nameLC)
 
   if (isTop) {
-    const base = `The person's original top does not exist. Start from bare torso, dress in the ${itemType} from Image 2.
+    const base = `Image 1: person (source for face, body, pose, background). Image 2: garment (source for color, fit, sleeves, length).
 
-Virtual try-on. The person in Image 1 wears the ${itemType} from Image 2.
+Virtual try-on. The person in Image 1 has bare arms and bare torso. Dress them in the ${itemType} from Image 2.
 
-Style: Photorealistic, lighting and background identical to Image 1.
+Style: Photorealistic, 85mm lens, natural soft-box lighting and background identical to Image 1.
 
-Subject: Same person from Image 1 — identical face, body shape, body size, chest size, belly size, skin tone, hair, pose. Zero body modification. All original upper body clothing fully replaced by ${itemType} from Image 2.
+Subject: Same person from Image 1 — identical face, body shape, body size, chest size, belly size, skin tone, hair, pose. Zero body modification. The ${itemType} from Image 2 is the only clothing on the upper body.
 
 Color: Pixel-accurate to Image 2 — exact hue, saturation, brightness.
 
-Sleeves: Exactly as Image 2. Ignore sleeves from Image 1 entirely.`
+Sleeves: Exactly as Image 2. Uncovered arms show bare skin.`
 
-    const sharedProhibitions = `original clothing visible, layering, tucked-in shirt, sleeves from Image 1, original shirt blending through, color shift from Image 2, added chest/breast volume, added belly volume, altered body shape, disproportionate body parts`
+    const sharedProhibitions = `original clothing visible, layering, tucked-in shirt, sleeves from Image 1, second sleeve layer beneath new sleeve, fabric visible under short sleeves, original shirt blending through, color shift from Image 2, added chest/breast volume, added belly volume, altered body shape, disproportionate body parts`
 
     switch (fitType) {
       case 'tight': {
-        const fitDesc = isMale
-          ? `Fit: One size too small. Visible horizontal tension creases across chest. Sleeves compress biceps like a compression sleeve. Shirt clings to ribcage, 0mm air gap everywhere. Shoulder seams pulled inward past natural shoulder. Looks like he outgrew this shirt.`
-          : `Fit: 0mm air gap everywhere. Fabric taut against skin. Shoulders and hip bones press through material. Zero wrinkles, zero folds. Chest flat and smooth. Tight in width only.`
+        let fitDesc: string
+        if (isStructured) {
+          fitDesc = `Fit: The ${nameLC} is one size too small. The zipper or buttons strain to close. The garment cannot fully close at the chest — visible pulling and gapping. Sleeves end above the wrist, too short for the arms. The torso section is visibly too narrow — the sides pull tight and restrict movement. The overall silhouette is noticeably smaller than the person's frame.`
+        } else if (isMale) {
+          fitDesc = `Fit: One size too small. Visible horizontal tension creases across chest. Sleeves compress biceps like a compression sleeve. Shirt clings to ribcage, 0mm air gap everywhere. Shoulder seams pulled inward past natural shoulder. Looks like he outgrew this shirt.`
+        } else {
+          fitDesc = `Fit: 0mm air gap everywhere. Fabric taut against skin. Shoulders and hip bones press through material. Zero wrinkles, zero folds. Chest flat and smooth. Tight in width only.`
+        }
 
         return `${base}
 
@@ -293,26 +300,36 @@ Prohibitions: Loose or slack fabric, ${sharedProhibitions}, cropped shirt, short
 
 Mandatory: Sleeves from Image 2 only. Hem outside pants. Garment length shoulder-to-hem exactly as Image 2. Tightness in width only. 100% length and color accuracy from Image 2.`
       }
-      case 'comfortable':
+      case 'comfortable': {
+        const comfortFit = isStructured
+          ? `Fit: The ${nameLC} is one full size too large. The shoulders drop 40mm past the natural shoulder bone. The sleeves extend well past the wrists, partially covering the hands. The torso section is boxy and wide with 60mm of air gap on each side. The garment hangs like a borrowed ${nameLC} from someone much bigger. The zipper or front closure has excessive overlap. Wider, not longer.`
+          : `Fit: One full size wider. 60mm air gap between fabric and torso each side. Shoulder seams 35mm past shoulder bone. Sleeves loose around arms. 5-7 vertical folds down front. Body shape hidden. Wider, not longer.`
+
         return `${base}
 
-Composition: Same framing and camera distance as Image 1. Person stays same size in frame. If hem goes below frame, crop the shirt — acceptable. Shrinking the person — not acceptable.
+Composition: Same framing and camera distance as Image 1. Person stays same size in frame. Crop garment hem at frame edge rather than shrinking person.
 
-Fit: One full size wider. 60mm air gap between fabric and torso each side. Shoulder seams 35mm past shoulder bone. Sleeves loose around arms. 5-7 vertical folds down front. Body shape hidden. Wider, not longer.
+${comfortFit}
 
 Prohibitions: Fitted fabric, fabric touching torso, shrinking person, shrinking torso independently, dress-like length, ${sharedProhibitions}, shorter hemline than Image 2, longer hemline than Image 2.
 
 Mandatory: Sleeves from Image 2 only. Hem outside pants. Wider not longer. Body size in frame identical to Image 1. Body proportion more important than showing full garment. 100% length and color accuracy from Image 2.`
-      default: // regular
+      }
+      default: { // regular
+        const regularFit = isStructured
+          ? `Fit: Standard retail fit. The ${nameLC} closes comfortably with no strain. Shoulder seams sit on the shoulder bone. Sleeves end at the wrist. 15mm of space between the torso and the garment shell. The garment holds its structured shape without pulling or excess bulk.`
+          : `Fit: Standard retail. 15mm air gap between skin and fabric. Shoulder seams on the shoulder bone. Few creases at waist. Body shape suggested, not defined. Not clinging, not baggy.`
+
         return `${base}
 
 Composition: Camera pulled back enough to show full head, torso, and garment hem. All body parts scale uniformly.
 
-Fit: Standard retail. 15mm air gap between skin and fabric. Shoulder seams on the shoulder bone. Few creases at waist. Body shape suggested, not defined. Not clinging, not baggy.
+${regularFit}
 
 Prohibitions: Skin-tight fabric, oversized look, ${sharedProhibitions}, shorter hemline than Image 2, longer hemline than Image 2.
 
 Mandatory: Sleeves from Image 2 only. Hem outside pants. Garment length shoulder-to-hem exactly as Image 2. 100% length and color accuracy from Image 2.`
+      }
     }
   } else {
     const base = `The person's original bottom does not exist. Start from bare legs, dress in the ${itemType} from Image 2.
