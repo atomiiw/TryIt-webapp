@@ -305,43 +305,13 @@ export async function generateBaseImage(userImage: string): Promise<TryOnResult>
 }
 
 /**
- * Describe a clothing item from its image using text-only Gemini.
- * Returns a short phrase like "navy blue short-sleeve crew-neck t-shirt, hip length"
- */
-export async function describeGarment(clothingImageUrl: string): Promise<string | null> {
-  try {
-    const clothingBase64 = await imageUrlToBase64(clothingImageUrl)
-    const prompt = 'Describe this clothing item in one short phrase. Include the type, color, pattern, sleeve style, sleeve length, and approximate shirt length relative to the waist.'
-
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 15_000)
-
-    const response = await fetch(`${BACKEND_URL}/api/gemini-describe`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: controller.signal,
-      body: JSON.stringify({ clothingBase64, prompt })
-    })
-
-    clearTimeout(timeout)
-
-    if (!response.ok) return null
-
-    const data = await response.json() as { description?: string }
-    return data.description || null
-  } catch {
-    return null
-  }
-}
-
-/**
  * Generate fit-specific prompt for try-on
  * When clothingDescription is provided, uses it instead of generic itemType
  * When useBaseImage is true, references "plain grey t-shirt" instead of "original clothing"
  */
-function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType, clothingDescription?: string, useBaseImage?: boolean): string {
-  const itemType = clothingDescription || clothingInfo.type || 'garment'
-  const isTop = !isBottomType(clothingInfo.type || 'garment')
+function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType, useBaseImage?: boolean): string {
+  const itemType = clothingInfo.type || 'garment'
+  const isTop = !isBottomType(itemType)
 
   // What to replace — grey t-shirt (base image) or original clothing (fallback)
   const replaceTarget = useBaseImage ? 'plain grey t-shirt' : 'original clothing on the upper body'
@@ -387,8 +357,7 @@ export async function generateTryOnImage(
   clothingInfo: ClothingInfo,
   fitType: FitType = 'regular',
   keyIndex: number = 0,
-  baseImage?: string,
-  clothingDescription?: string
+  baseImage?: string
 ): Promise<TryOnResult> {
   try {
     // Use base image if available, otherwise process user's original photo
@@ -408,7 +377,7 @@ export async function generateTryOnImage(
     const clothingBase64 = await imageUrlToBase64(clothingImageUrl)
 
     // Generate fit-specific prompt
-    const prompt = generateTryOnPrompt(clothingInfo, fitType, clothingDescription || undefined, !!baseImage)
+    const prompt = generateTryOnPrompt(clothingInfo, fitType, !!baseImage)
 
     // Log the actual prompt for debugging
 

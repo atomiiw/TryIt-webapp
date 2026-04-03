@@ -7,7 +7,7 @@ import BarcodeScanner from './BarcodeScanner'
 import ResultsSection from './ResultsSection'
 import ResultsSectionDemo from './ResultsSectionDemo'
 import { analyzePersonPhoto } from '../utils/personAnalyzer'
-import { generateBaseImage, describeGarment } from '../utils/tryOnService'
+import { generateBaseImage } from '../utils/tryOnService'
 import './ShoppingPage.css'
 
 /**
@@ -117,8 +117,6 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
   const [baseImage, setBaseImage] = useState<string | null>(null)
   const baseImageRef = useRef<string | null>(null) // tracks which photo was used
 
-  // Cached clothing descriptions — per item ID
-  const [clothingDescriptions, setClothingDescriptions] = useState<Record<string, string>>({})
 
   // Track which image we've already analyzed
   const analyzedImageRef = useRef<string | null>(null)
@@ -181,21 +179,6 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
         console.warn('[BaseImage] Failed, will use original photo as fallback')
       })
   }, [userData.image])
-
-  // Describe garment when item changes
-  useEffect(() => {
-    const itemId = userData.item?.id
-    const imageUrl = userData.item?.imageUrl
-    if (!itemId || !imageUrl) return
-    if (clothingDescriptions[itemId]) return // already cached
-
-    describeGarment(imageUrl).then(desc => {
-      if (desc) {
-        setClothingDescriptions(prev => ({ ...prev, [itemId]: desc }))
-        console.log(`[Describe] ${itemId}: ${desc}`)
-      }
-    })
-  }, [userData.item?.id, userData.item?.imageUrl])
 
   // Get current item's state (or default)
   const currentItemId = userData.item?.id || ''
@@ -414,7 +397,6 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
             cachedAnalysis={currentItemState.cachedAnalysis}
             shouldAutoScroll={currentItemState.shouldAutoScroll}
             baseImage={baseImage}
-            clothingDescription={clothingDescriptions[displayItemId]}
             onImageGenerated={handleImageGenerated}
             onAnalysisComplete={handleAnalysisComplete}
             onScrollComplete={handleScrollComplete}

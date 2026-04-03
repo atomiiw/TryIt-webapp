@@ -29,7 +29,6 @@ interface ResultsSectionProps {
   cachedAnalysis?: CachedAnalysis | null
   shouldAutoScroll?: boolean
   baseImage?: string | null       // Pre-generated base image (grey t-shirt)
-  clothingDescription?: string    // Pre-generated garment description
   onImageGenerated?: (fit: FitType, imageDataUrl: string) => void
   onAnalysisComplete?: (analysis: CachedAnalysis) => void
   onScrollComplete?: () => void
@@ -183,7 +182,7 @@ const LOADING_MESSAGES = [
 // Type for generated images state
 type GeneratedImages = Record<FitType, string | null>
 
-function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, shouldAutoScroll, baseImage, clothingDescription, onImageGenerated, onAnalysisComplete, onScrollComplete }: ResultsSectionProps) {
+function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, shouldAutoScroll, baseImage, onImageGenerated, onAnalysisComplete, onScrollComplete }: ResultsSectionProps) {
   // If we have cached analysis, skip loading state
   const hasCachedData = !!cachedAnalysis
   const [isLoading, setIsLoading] = useState(!hasCachedData)
@@ -308,8 +307,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         },
         fit as TryOnFitType,
         keyIndex,
-        baseImage || undefined,
-        clothingDescription
+        baseImage || undefined
       )
 
       if (result.success && result.imageDataUrl) {
@@ -334,8 +332,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         },
         fit as TryOnFitType,
         keyIndex,
-        baseImage || undefined,
-        clothingDescription
+        baseImage || undefined
       )
 
       if (result.success && result.imageDataUrl) {
@@ -567,8 +564,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         },
         currentFit as TryOnFitType,
         fitKeyIndex[currentFit],
-        baseImage || undefined,
-        clothingDescription
+        baseImage || undefined
       )
 
       if (result.success && result.imageDataUrl) {
