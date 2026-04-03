@@ -203,6 +203,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     comfortable: initialImages?.comfortable || null
   })
   const [generatingFits, setGeneratingFits] = useState<Set<FitType>>(new Set())
+  const isMountedRef = useRef(true)
+  useEffect(() => { return () => { isMountedRef.current = false } }, [])
   const currentItemUrlRef = useRef(userData.item?.imageUrl)
   currentItemUrlRef.current = userData.item?.imageUrl // always up to date
   const [showShareModal, setShowShareModal] = useState(false)
@@ -287,7 +289,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     const itemUrl = userData.item.imageUrl
 
     const handleSuccess = (result: { imageDataUrl: string | null; analysisText?: string }) => {
-      // Only update UI if still on the same item (use ref for fresh value)
+      // Don't update if component unmounted or item changed
+      if (!isMountedRef.current) return
       if (currentItemUrlRef.current !== itemUrl) return
       track('tryon_success', { fit })
       setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))

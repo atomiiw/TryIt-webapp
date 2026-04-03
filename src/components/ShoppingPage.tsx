@@ -290,14 +290,20 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
   }
 
   // Handler for when ResultsSection generates an image
+  // Captures displayItemId at render time via ref for freshness
+  const displayItemIdRef = useRef(displayItemId)
+  displayItemIdRef.current = displayItemId
+
   const handleImageGenerated = (fit: FitType, imageDataUrl: string) => {
-    if (!currentItemId) return
+    // Only save if we're still on the same item that generated this image
+    const targetItemId = displayItemIdRef.current
+    if (!targetItemId) return
     setTryOnState(prev => ({
       ...prev,
-      [currentItemId]: {
-        ...prev[currentItemId],
+      [targetItemId]: {
+        ...prev[targetItemId],
         generatedImages: {
-          ...prev[currentItemId]?.generatedImages,
+          ...prev[targetItemId]?.generatedImages,
           [fit]: imageDataUrl
         }
       }
