@@ -328,13 +328,13 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
       <div className={`results-transition-wrapper ${isTransitioning ? 'transitioning' : ''}`}>
         {USE_DEMO_MODE ? (
           <ResultsSectionDemo
-            key={`${displayItemId}-${currentItemState.resultsKey}`}
+
             userData={userData}
             isVisible={currentItemState.showResults}
           />
         ) : (
           <ResultsSection
-            key={`${displayItemId}-${currentItemState.resultsKey}`}
+
             userData={userData}
             isVisible={currentItemState.showResults}
             initialImages={currentItemState.generatedImages}
