@@ -509,11 +509,14 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     }
   }
 
-  // Smooth scroll to a fit card. Updates selectedFit after scroll completes.
+  // Smooth scroll to a fit card.
   const scrollToFit = (fit: FitType) => {
     if (!scrollContainerRef.current || availableFits.length <= 1) return
     const index = availableFits.indexOf(fit)
     if (index < 0) return
+
+    // Update selectedFit immediately so buttons/dots respond instantly
+    setSelectedFit(fit)
 
     const cardWidth = scrollContainerRef.current.offsetWidth
     const targetLeft = index * (cardWidth + GAP)
@@ -526,9 +529,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
       behavior: 'smooth'
     })
 
-    // After smooth scroll completes (~350ms), update selectedFit and unblock
+    // Unblock after smooth scroll completes
     setTimeout(() => {
-      setSelectedFit(fit)
       isScrollingProgrammatically.current = false
     }, 350)
   }
