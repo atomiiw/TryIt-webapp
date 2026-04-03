@@ -7,7 +7,6 @@ import BarcodeScanner from './BarcodeScanner'
 import ResultsSection from './ResultsSection'
 import ResultsSectionDemo from './ResultsSectionDemo'
 import { analyzePersonPhoto } from '../utils/personAnalyzer'
-import { generateUntuckedImage } from '../utils/tryOnService'
 import './ShoppingPage.css'
 
 /**
@@ -113,9 +112,6 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
   // Per-item try-on state
   const [tryOnState, setTryOnState] = useState<TryOnStateByItem>(initialShoppingState)
 
-  // Cached untucked image (not passed to ResultsSection yet — for preview only)
-  const untuckedImageRef = useRef<string | null>(null)
-
 
 
 
@@ -142,29 +138,13 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
     if (userData.personAnalysis) {
       onUpdate({ personAnalysis: null })
     }
-    untuckedImageRef.current = null
 
     // Compress image first to avoid 413 errors
     compressImageForAnalysis(imageToAnalyze)
       .then(compressedImage => analyzePersonPhoto(compressedImage, 'unknown'))
       .then(analysis => {
-        if (analyzedImageRef.current !== imageToAnalyze) return
-        onUpdate({ personAnalysis: analysis })
-
-        // If shirt is tucked, generate untucked version (preview only — not used for try-on yet)
-        if (analysis.shirt_tucked) {
-          console.log('[Untuck] Shirt is tucked — generating untucked image for preview...')
-          generateUntuckedImage(imageToAnalyze).then(result => {
-            if (analyzedImageRef.current === imageToAnalyze && result.success && result.imageDataUrl) {
-              untuckedImageRef.current = result.imageDataUrl
-              console.log('[Untuck] Untucked image ready — opening in new tab')
-              window.open(result.imageDataUrl, '_blank')
-            } else {
-              console.warn('[Untuck] Failed')
-            }
-          })
-        } else {
-          console.log('[Untuck] Shirt is not tucked')
+        if (analyzedImageRef.current === imageToAnalyze) {
+          onUpdate({ personAnalysis: analysis })
         }
       })
       .catch(_error => {

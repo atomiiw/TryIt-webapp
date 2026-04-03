@@ -255,66 +255,6 @@ async function addWatermark(imageSrc: string): Promise<string> {
 }
 
 /**
- * Generate an untucked version of the user's photo.
- * Only called when shirt_tucked is detected. Cached and used as avatar for all try-ons.
- */
-export async function generateUntuckedImage(userImage: string): Promise<TryOnResult> {
-  try {
-    const { base64: avatarBase64, aspectRatio } = await processUserImage(userImage)
-
-    const prompt = `Untuck this shirt.`
-
-    const MAX_RETRIES = 5
-    const TIMEOUT_MS = 35_000
-
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
-
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/gemini-tryon-duke`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: controller.signal,
-          body: JSON.stringify({ avatarBase64, prompt, aspectRatio, keyIndex: 0 })
-        })
-
-        clearTimeout(timeout)
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}))
-          throw new Error((errorData as { error?: string }).error || `API error: ${response.status}`)
-        }
-
-        const data = await response.json() as Record<string, unknown>
-        const candidate = (data.candidates as Array<Record<string, unknown>>)?.[0]
-        if (!candidate || candidate.finishReason === 'PROHIBITED_CONTENT' || candidate.finishReason === 'IMAGE_OTHER') {
-          if (attempt < MAX_RETRIES - 1) continue
-          throw new Error('Blocked by content filter after all retries')
-        }
-
-        const content = candidate.content as { parts: Array<Record<string, unknown>> }
-        for (const part of content.parts) {
-          const inlineData = part.inlineData as { mimeType?: string; data?: string } | undefined
-          if (inlineData?.mimeType?.includes('image')) {
-            return { imageDataUrl: `data:${inlineData.mimeType};base64,${inlineData.data}`, success: true }
-          }
-        }
-
-        throw new Error('No image in response')
-      } catch (e) {
-        clearTimeout(timeout)
-        if (attempt === MAX_RETRIES - 1) throw e
-      }
-    }
-
-    throw new Error('All retries failed')
-  } catch (err) {
-    return { imageDataUrl: null, success: false, error: err instanceof Error ? err.message : 'Unknown error' }
-  }
-}
-
-/**
  * Generate fit-specific prompt for try-on
  */
 function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType, gender: string = 'unknown'): string {
@@ -366,13 +306,11 @@ export async function generateTryOnImage(
   clothingInfo: ClothingInfo,
   fitType: FitType = 'regular',
   keyIndex: number = 0,
-  untuckedImage?: string,
+  _untuckedImage?: string,
   gender: string = 'unknown'
 ): Promise<TryOnResult> {
-  // Prepare images and prompt outside the queue (can run in parallel)
   try {
-    const avatar = untuckedImage || userImage
-    const { base64: avatarBase64, aspectRatio } = await processUserImage(avatar)
+    const { base64: avatarBase64, aspectRatio } = await processUserImage(userImage)
     const clothingBase64 = await imageUrlToBase64(clothingImageUrl)
     const prompt = generateTryOnPrompt(clothingInfo, fitType, gender)
 
