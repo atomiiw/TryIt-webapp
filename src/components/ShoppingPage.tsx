@@ -224,7 +224,7 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
       [currentItemId]: {
         showResults: true,
         resultsKey: (prev[currentItemId]?.resultsKey || 0) + 1,
-        generatedImages: prev[currentItemId]?.generatedImages || {},
+        generatedImages: {},
         cachedAnalysis: null,
         shouldAutoScroll: true,
         generatedData: {
