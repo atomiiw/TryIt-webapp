@@ -28,6 +28,7 @@ interface ResultsSectionProps {
   initialImages?: Partial<Record<FitType, string>>
   cachedAnalysis?: CachedAnalysis | null
   shouldAutoScroll?: boolean
+  resultsKey?: number
   onImageGenerated?: (fit: FitType, imageDataUrl: string) => void
   onAnalysisComplete?: (analysis: CachedAnalysis) => void
   onScrollComplete?: () => void
@@ -184,7 +185,7 @@ type GeneratedImages = Record<FitType, string | null>
 // exported for ShoppingPage compatibility
 export function clearGenerationTracking(_itemUrl: string) { /* no-op */ }
 
-function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, shouldAutoScroll, onImageGenerated, onAnalysisComplete, onScrollComplete }: ResultsSectionProps) {
+function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, shouldAutoScroll, resultsKey, onImageGenerated, onAnalysisComplete, onScrollComplete }: ResultsSectionProps) {
   // If we have cached analysis, skip loading state
   const hasCachedData = !!cachedAnalysis
   const [isLoading, setIsLoading] = useState(!hasCachedData)
@@ -454,14 +455,20 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     })
   }, [userData.image, userData.item?.imageUrl, generatedImages, sizeRec, measurements])
 
-  // Reset generation tracking when user photo changes (allows regeneration with new photo)
-  const lastImageRef = useRef(userData.image)
+  // When resultsKey changes ("Try it on" clicked), clear old state and restart generation
+  const lastResultsKeyRef = useRef(resultsKey)
   useEffect(() => {
-    if (userData.image && userData.image !== lastImageRef.current) {
-      lastImageRef.current = userData.image
+    if (resultsKey !== undefined && resultsKey !== lastResultsKeyRef.current) {
+      lastResultsKeyRef.current = resultsKey
       startedGeneratingRef.current.clear()
+      setGeneratedImages({ tight: null, regular: null, comfortable: null })
+      setGeneratingFits(new Set())
+      setIsLoading(false)
+      setHasStarted(false)
+      setSizeRec(null)
+      setMeasurements([])
     }
-  }, [userData.image])
+  }, [resultsKey])
 
   // All three fit types are always available for image generation
   const availableFits = useMemo<FitType[]>(() => {

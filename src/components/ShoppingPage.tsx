@@ -346,6 +346,7 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
                 initialImages={itemState.generatedImages}
                 cachedAnalysis={itemState.cachedAnalysis}
                 shouldAutoScroll={isActive && itemState.shouldAutoScroll}
+                resultsKey={itemState.resultsKey}
                 onImageGenerated={handleImageGenerated}
                 onAnalysisComplete={handleAnalysisComplete}
                 onScrollComplete={handleScrollComplete}
