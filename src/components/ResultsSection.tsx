@@ -316,7 +316,6 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         },
         fit as TryOnFitType,
         keyIndex,
-        undefined,
         userData.personAnalysis?.gender || 'unknown'
       )
 
@@ -343,7 +342,6 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         },
         fit as TryOnFitType,
         keyIndex,
-        undefined,
         userData.personAnalysis?.gender || 'unknown'
       )
 
