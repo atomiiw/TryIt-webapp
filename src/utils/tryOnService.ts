@@ -244,78 +244,14 @@ async function addWatermark(imageSrc: string): Promise<string> {
 }
 
 /**
- * Generate a clean base image: user photo with upper body clothing replaced by plain black t-shirt.
- * This is called once per photo and cached. All subsequent try-ons use this as the avatar.
- */
-export async function generateBaseImage(userImage: string): Promise<TryOnResult> {
-  try {
-    const { base64: avatarBase64, aspectRatio } = await processUserImage(userImage)
-
-    const prompt = `Replace all clothing on this person's upper body with a plain fitted black crew-neck t-shirt. The black t-shirt has a standard regular length that extends well past the waistband, with the hem resting at mid-hip level. The t-shirt is a relaxed standard retail fit — not tight, not oversized. Preserve the exact face, skin tone, hair, body shape, body size, chest size, belly size, pose, and background with zero modification. Style: Photorealistic, matching the lighting and quality of the original image exactly. Mandatory: The black t-shirt must be long enough that there is visible shirt fabric below the waistband. The hem hangs freely over and outside the pants. Prohibitions: Altered face, altered body shape, altered body size, added chest or breast volume, added belly volume, altered background, altered pose, any original upper body clothing visible, cropped t-shirt, short t-shirt, t-shirt ending at or above the waistband.`
-
-    const MAX_RETRIES = 5
-    const TIMEOUT_MS = 35_000
-
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
-
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/gemini-tryon-duke`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          signal: controller.signal,
-          body: JSON.stringify({ avatarBase64, prompt, aspectRatio, keyIndex: 0 })
-        })
-
-        clearTimeout(timeout)
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({}))
-          throw new Error((errorData as { error?: string }).error || `API error: ${response.status}`)
-        }
-
-        const data = await response.json() as Record<string, unknown>
-        const candidate = (data.candidates as Array<Record<string, unknown>>)?.[0]
-        if (!candidate || candidate.finishReason === 'PROHIBITED_CONTENT' || candidate.finishReason === 'IMAGE_OTHER') {
-          if (attempt < MAX_RETRIES - 1) continue
-          throw new Error('Blocked by content filter after all retries')
-        }
-
-        const content = candidate.content as { parts: Array<Record<string, unknown>> }
-        for (const part of content.parts) {
-          const inlineData = part.inlineData as { mimeType?: string; data?: string } | undefined
-          if (inlineData?.mimeType?.includes('image')) {
-            // No watermark on base image — it's an intermediate artifact
-            return { imageDataUrl: `data:${inlineData.mimeType};base64,${inlineData.data}`, success: true }
-          }
-        }
-
-        throw new Error('No image in response')
-      } catch (e) {
-        clearTimeout(timeout)
-        if (attempt === MAX_RETRIES - 1) throw e
-      }
-    }
-
-    throw new Error('All retries failed')
-  } catch (err) {
-    return { imageDataUrl: null, success: false, error: err instanceof Error ? err.message : 'Unknown error' }
-  }
-}
-
-/**
  * Generate fit-specific prompt for try-on
- * When clothingDescription is provided, uses it instead of generic itemType
- * When useBaseImage is true, references "plain black t-shirt" instead of "original clothing"
  */
-function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType, useBaseImage?: boolean): string {
+function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType): string {
   const itemType = clothingInfo.type || 'garment'
   const isTop = !isBottomType(itemType)
 
-  // What to replace — black t-shirt (base image) or original clothing (fallback)
-  const replaceTarget = useBaseImage ? 'plain black t-shirt' : 'original clothing on the upper body'
-  const prohibitOriginal = useBaseImage ? 'any trace of black t-shirt visible' : 'original upper body clothing visible, jacket, hoodie, sweater'
+  const replaceTarget = 'original clothing on the upper body'
+  const prohibitOriginal = 'original upper body clothing visible, jacket, hoodie, sweater'
 
   if (isTop) {
     const style = `Style: Photorealistic e-commerce product photography, natural soft-box lighting, clean background matching Image 1.`
@@ -356,30 +292,12 @@ export async function generateTryOnImage(
   clothingImageUrl: string,
   clothingInfo: ClothingInfo,
   fitType: FitType = 'regular',
-  keyIndex: number = 0,
-  baseImage?: string
+  keyIndex: number = 0
 ): Promise<TryOnResult> {
   try {
-    // Use base image if available, otherwise process user's original photo
-    let avatarBase64: string
-    let aspectRatio: string
-    if (baseImage) {
-      const processed = await processUserImage(baseImage)
-      avatarBase64 = processed.base64
-      aspectRatio = processed.aspectRatio
-    } else {
-      const processed = await processUserImage(userImage)
-      avatarBase64 = processed.base64
-      aspectRatio = processed.aspectRatio
-    }
-
-    // Download and convert clothing image to base64
+    const { base64: avatarBase64, aspectRatio } = await processUserImage(userImage)
     const clothingBase64 = await imageUrlToBase64(clothingImageUrl)
-
-    // Generate fit-specific prompt
-    const prompt = generateTryOnPrompt(clothingInfo, fitType, !!baseImage)
-
-    console.log(`[TryOn] ${fitType}: using ${baseImage ? 'BASE IMAGE (black t-shirt)' : 'ORIGINAL PHOTO (no base image)'}`)
+    const prompt = generateTryOnPrompt(clothingInfo, fitType)
 
 
     // Call the Duke try-on endpoint with timeout and retry

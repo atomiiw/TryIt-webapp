@@ -7,7 +7,6 @@ import BarcodeScanner from './BarcodeScanner'
 import ResultsSection from './ResultsSection'
 import ResultsSectionDemo from './ResultsSectionDemo'
 import { analyzePersonPhoto } from '../utils/personAnalyzer'
-import { generateBaseImage } from '../utils/tryOnService'
 import './ShoppingPage.css'
 
 /**
@@ -113,9 +112,6 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
   // Per-item try-on state
   const [tryOnState, setTryOnState] = useState<TryOnStateByItem>(initialShoppingState)
 
-  // Cached base image (user photo with grey t-shirt) — one per photo
-  const [baseImage, setBaseImage] = useState<string | null>(null)
-  const baseImageRef = useRef<string | null>(null) // tracks which photo was used
 
 
   // Track which image we've already analyzed
@@ -152,31 +148,6 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
         }
       })
       .catch(_error => {
-      })
-  }, [userData.image])
-
-  // Generate base image (grey t-shirt) in background when photo changes
-  useEffect(() => {
-    if (!userData.image || userData.image === baseImageRef.current) return
-
-    const imageToProcess = userData.image
-    baseImageRef.current = imageToProcess
-
-    // Clear old base image
-    setBaseImage(null)
-
-    console.log('[BaseImage] Generating clean base image...')
-    generateBaseImage(imageToProcess)
-      .then(result => {
-        if (baseImageRef.current === imageToProcess && result.success && result.imageDataUrl) {
-          setBaseImage(result.imageDataUrl)
-          console.log('[BaseImage] Base image ready')
-        } else if (!result.success) {
-          console.warn('[BaseImage] Failed, will use original photo as fallback')
-        }
-      })
-      .catch(() => {
-        console.warn('[BaseImage] Failed, will use original photo as fallback')
       })
   }, [userData.image])
 
@@ -396,7 +367,6 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
             initialImages={currentItemState.generatedImages}
             cachedAnalysis={currentItemState.cachedAnalysis}
             shouldAutoScroll={currentItemState.shouldAutoScroll}
-            baseImage={baseImage}
             onImageGenerated={handleImageGenerated}
             onAnalysisComplete={handleAnalysisComplete}
             onScrollComplete={handleScrollComplete}

@@ -28,7 +28,6 @@ interface ResultsSectionProps {
   initialImages?: Partial<Record<FitType, string>>
   cachedAnalysis?: CachedAnalysis | null
   shouldAutoScroll?: boolean
-  baseImage?: string | null       // Pre-generated base image (grey t-shirt)
   onImageGenerated?: (fit: FitType, imageDataUrl: string) => void
   onAnalysisComplete?: (analysis: CachedAnalysis) => void
   onScrollComplete?: () => void
@@ -182,7 +181,7 @@ const LOADING_MESSAGES = [
 // Type for generated images state
 type GeneratedImages = Record<FitType, string | null>
 
-function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, shouldAutoScroll, baseImage, onImageGenerated, onAnalysisComplete, onScrollComplete }: ResultsSectionProps) {
+function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, shouldAutoScroll, onImageGenerated, onAnalysisComplete, onScrollComplete }: ResultsSectionProps) {
   // If we have cached analysis, skip loading state
   const hasCachedData = !!cachedAnalysis
   const [isLoading, setIsLoading] = useState(!hasCachedData)
@@ -306,8 +305,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
           fitSentence: getFitSentence(fit)
         },
         fit as TryOnFitType,
-        keyIndex,
-        baseImage || undefined
+        keyIndex
       )
 
       if (result.success && result.imageDataUrl) {
@@ -331,8 +329,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
           fitSentence: getFitSentence(fit)
         },
         fit as TryOnFitType,
-        keyIndex,
-        baseImage || undefined
+        keyIndex
       )
 
       if (result.success && result.imageDataUrl) {
@@ -563,8 +560,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
           fitSentence: getFitSentence(currentFit)
         },
         currentFit as TryOnFitType,
-        fitKeyIndex[currentFit],
-        baseImage || undefined
+        fitKeyIndex[currentFit]
       )
 
       if (result.success && result.imageDataUrl) {
