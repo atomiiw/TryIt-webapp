@@ -270,25 +270,9 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     return undefined
   }
 
-  // Swipe to the newly generated fit's card
+  // Jump to the newly generated fit's card
   const flipToFit = (_currentFit: FitType, destFit: FitType) => {
-    // Smooth scroll to the card, then update selectedFit after animation
-    // so the sync useEffect doesn't fight the smooth scroll
-    if (!scrollContainerRef.current) return
-    const index = availableFits.indexOf(destFit)
-    if (index < 0) return
-
-    isScrollingProgrammatically.current = true
-    const cardWidth = scrollContainerRef.current.offsetWidth
-    scrollContainerRef.current.scrollTo({
-      left: index * (cardWidth + GAP),
-      behavior: 'smooth'
-    })
-    // Update selectedFit and reset flag after smooth scroll completes
-    setTimeout(() => {
-      setSelectedFit(destFit)
-      isScrollingProgrammatically.current = false
-    }, 400)
+    scrollToFit(destFit)
   }
 
   // Function to generate try-on image for a specific fit
@@ -489,32 +473,27 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
   const GAP = 16
   const isScrollingProgrammatically = useRef(false)
 
-  // Sync carousel scroll position to selectedFit on initial load
+  // Tracks whether we're in the middle of a programmatic scroll
+  // When true, handleScroll won't update selectedFit (avoids flicker)
+  // When true, sync useEffect won't fire instant scroll (avoids fighting)
+
+  // Sync carousel scroll position to selectedFit (initial load only)
+  const hasInitialSynced = useRef(false)
   useEffect(() => {
+    if (hasInitialSynced.current) return
     if (!scrollContainerRef.current || availableFits.length <= 1) return
     const index = availableFits.indexOf(selectedFit)
     if (index < 0) return
 
+    hasInitialSynced.current = true
     const cardWidth = scrollContainerRef.current.offsetWidth
-    const targetScrollLeft = index * (cardWidth + GAP)
-
-    // Only sync if scroll position doesn't match (avoids interfering with user scroll)
-    const currentScrollLeft = scrollContainerRef.current.scrollLeft
-    const tolerance = 10 // Allow small tolerance for rounding
-    if (Math.abs(currentScrollLeft - targetScrollLeft) > tolerance) {
-      isScrollingProgrammatically.current = true
-      scrollContainerRef.current.scrollTo({
-        left: targetScrollLeft,
-        behavior: 'instant'
-      })
-      // Reset flag after scroll completes
-      requestAnimationFrame(() => {
-        isScrollingProgrammatically.current = false
-      })
-    }
+    scrollContainerRef.current.scrollTo({
+      left: index * (cardWidth + GAP),
+      behavior: 'instant'
+    })
   }, [selectedFit, availableFits])
 
-  // Handle scroll to update selected fit (manual scroll only)
+  // Handle scroll to update selected fit (fires on manual swipe AND after smooth scroll lands)
   const handleScroll = () => {
     if (!scrollContainerRef.current || availableFits.length <= 1) return
     if (isScrollingProgrammatically.current) return
@@ -530,29 +509,34 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     }
   }
 
-  // Scroll to fit when user clicks dot or size card
+  // Smooth scroll to a fit card. Updates selectedFit after scroll completes.
   const scrollToFit = (fit: FitType) => {
     if (!scrollContainerRef.current || availableFits.length <= 1) return
     const index = availableFits.indexOf(fit)
-    if (index >= 0) {
-      isScrollingProgrammatically.current = true
-      const cardWidth = scrollContainerRef.current.offsetWidth
-      scrollContainerRef.current.scrollTo({
-        left: index * (cardWidth + GAP),
-        behavior: 'smooth'
-      })
-      // Reset after animation completes
-      setTimeout(() => {
-        isScrollingProgrammatically.current = false
-      }, 350)
-    }
+    if (index < 0) return
+
+    const cardWidth = scrollContainerRef.current.offsetWidth
+    const targetLeft = index * (cardWidth + GAP)
+
+    // Block handleScroll during animation so it doesn't set intermediate fits
+    isScrollingProgrammatically.current = true
+
+    scrollContainerRef.current.scrollTo({
+      left: targetLeft,
+      behavior: 'smooth'
+    })
+
+    // After smooth scroll completes (~350ms), update selectedFit and unblock
+    setTimeout(() => {
+      setSelectedFit(fit)
+      isScrollingProgrammatically.current = false
+    }, 350)
   }
 
   const handleCardClick = (fit: FitType) => {
     if (fit !== selectedFit) {
       track('fit_toggle', { fit: fitLabels[fit] })
     }
-    setSelectedFit(fit)
     scrollToFit(fit)
   }
 
