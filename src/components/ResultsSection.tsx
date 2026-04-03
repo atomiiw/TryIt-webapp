@@ -295,7 +295,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
       )
 
       if (result.success && result.imageDataUrl) {
-        console.log(`[TryOn] ${fit} SUCCESS`)
+        console.log(`[TryOn] ${userData.item?.name || 'unknown'} — ${fit} applied to UI`)
         setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))
         onImageGenerated?.(fit, result.imageDataUrl!)
         setGeneratingFits(prev => { const next = new Set(prev); next.delete(fit); return next })
@@ -321,7 +321,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
       )
 
       if (result.success && result.imageDataUrl) {
-        console.log(`[TryOn] ${fit} SUCCESS (second round)`)
+        console.log(`[TryOn] ${userData.item?.name || 'unknown'} — ${fit} applied to UI (second round)`)
         setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))
         onImageGenerated?.(fit, result.imageDataUrl!)
       }
