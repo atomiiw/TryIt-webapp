@@ -577,7 +577,6 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         },
         currentFit as TryOnFitType,
         fitKeyIndex[currentFit],
-        undefined,
         userData.personAnalysis?.gender || 'unknown'
       )
 
