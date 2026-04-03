@@ -515,27 +515,17 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     const index = availableFits.indexOf(fit)
     if (index < 0) return
 
-    // Update selectedFit immediately so buttons/dots respond instantly
     setSelectedFit(fit)
 
     const container = scrollContainerRef.current
     const cardWidth = container.offsetWidth
     const targetLeft = index * (cardWidth + GAP)
 
-    // Disable scroll-snap during programmatic scroll to prevent fighting
-    container.style.scrollSnapType = 'none'
     isScrollingProgrammatically.current = true
-
-    container.scrollTo({
-      left: targetLeft,
-      behavior: 'smooth'
-    })
-
-    // Re-enable scroll-snap after scroll completes
-    setTimeout(() => {
-      container.style.scrollSnapType = ''
+    container.scrollTo({ left: targetLeft, behavior: 'instant' })
+    requestAnimationFrame(() => {
       isScrollingProgrammatically.current = false
-    }, 400)
+    })
   }
 
   const handleCardClick = (fit: FitType) => {
