@@ -157,8 +157,8 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
           generateUntuckedImage(imageToAnalyze).then(result => {
             if (analyzedImageRef.current === imageToAnalyze && result.success && result.imageDataUrl) {
               untuckedImageRef.current = result.imageDataUrl
-              console.log('[Untuck] Untucked image ready. Download it:')
-              console.log(result.imageDataUrl)
+              console.log('[Untuck] Untucked image ready — opening in new tab')
+              window.open(result.imageDataUrl, '_blank')
             } else {
               console.warn('[Untuck] Failed')
             }
