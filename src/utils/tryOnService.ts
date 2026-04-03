@@ -304,7 +304,7 @@ export async function generateTryOnImage(
     const prompt = generateTryOnPrompt(clothingInfo, fitType)
 
     // Log the actual prompt for debugging
-    console.log(`[TryOn] ${fitType} fit prompt:\n`, prompt)
+
 
     // Call the Duke try-on endpoint with timeout and retry
     // Retries on network errors, timeouts, AND content blocks (which are random)
@@ -316,7 +316,7 @@ export async function generateTryOnImage(
       const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
 
       try {
-        console.log(`[TryOn] ${fitType} attempt ${attempt + 1}/${MAX_RETRIES}`)
+
         const response = await fetch(`${BACKEND_URL}/api/gemini-tryon-duke`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -338,12 +338,12 @@ export async function generateTryOnImage(
         }
 
         const data = await response.json() as Record<string, unknown>
-        console.log(`[TryOn] ${fitType} response:`, JSON.stringify(data).slice(0, 500))
+
 
         // Check for content block — retry if so
         const candidate = (data.candidates as Array<Record<string, unknown>>)?.[0]
         if (!candidate || candidate.finishReason === 'PROHIBITED_CONTENT' || candidate.finishReason === 'IMAGE_OTHER') {
-          console.warn(`[TryOn] ${fitType} attempt ${attempt + 1} blocked (${candidate?.finishReason || 'no candidate'}), retrying immediately...`)
+
           if (attempt < MAX_RETRIES - 1) continue
           throw new Error('Blocked by content filter after all retries')
         }
@@ -365,7 +365,7 @@ export async function generateTryOnImage(
 
         if (imageDataUrl) {
           const watermarkedImage = await addWatermark(imageDataUrl)
-          console.log(`[TryOn] ${fitType} SUCCESS on attempt ${attempt + 1}`)
+
           return { imageDataUrl: watermarkedImage, analysisText, success: true }
         }
 
@@ -373,7 +373,7 @@ export async function generateTryOnImage(
       } catch (e) {
         clearTimeout(timeout)
         const isTimeout = e instanceof DOMException && e.name === 'AbortError'
-        console.warn(`[TryOn] ${fitType} attempt ${attempt + 1} ${isTimeout ? 'timed out' : 'failed'}:`, e)
+        // silently retry
         if (attempt === MAX_RETRIES - 1) throw e
       }
     }

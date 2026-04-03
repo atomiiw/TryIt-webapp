@@ -329,14 +329,11 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         setGeneratingFits(prev => { const next = new Set(prev); next.delete(fit); return next })
         return
       }
-      console.warn(`[TryOn] FAILURE for ${fit}: no image returned`)
-    } catch (err) {
-      console.warn(`[TryOn] FAILURE for ${fit}:`, err instanceof Error ? err.message : 'unknown')
+    } catch {
     }
 
     // First 5 attempts failed, give it 5 more
     if (userData.item?.imageUrl !== itemUrl) return // user switched items, abort
-    console.log(`[TryOn] ${fit}: retrying with second round of attempts...`)
     try {
       const result = await generateTryOnImage(
         userData.image!,
@@ -353,11 +350,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
 
       if (result.success && result.imageDataUrl) {
         handleSuccess(result)
-      } else {
-        console.warn(`[TryOn] FINAL FAILURE for ${fit}: gave up after 10 total attempts`)
       }
-    } catch (err) {
-      console.warn(`[TryOn] FINAL FAILURE for ${fit}:`, err instanceof Error ? err.message : 'unknown')
+    } catch {
     } finally {
       setGeneratingFits(prev => {
         const next = new Set(prev)
