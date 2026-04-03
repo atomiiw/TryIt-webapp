@@ -168,7 +168,7 @@ function App() {
         />
       </main>
 
-      <Analytics />
+      <Analytics debug={false} />
     </div>
   )
 }

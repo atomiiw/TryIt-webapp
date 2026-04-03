@@ -246,25 +246,34 @@ async function addWatermark(imageSrc: string): Promise<string> {
 /**
  * Generate fit-specific prompt for try-on
  */
-function generateTryOnPrompt(clothingInfo: ClothingInfo, _fitType: FitType): string {
+function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType): string {
   const itemType = clothingInfo.type || 'garment'
-  const itemColor = clothingInfo.color && clothingInfo.color !== 'N/A' ? clothingInfo.color : ''
 
-  const colorDesc = itemColor ? `${itemColor} ` : ''
-
-  // Determine if clothing is top or bottom
   const isTop = !isBottomType(itemType)
 
-  // Personalized fit detail (e.g. "SUPER TIGHT at the chest, LOOSE at the hips.")
-  const fitDetail = clothingInfo.fitSentence || ''
-
-  // Base fit direction per fit type
   if (isTop) {
-    return `Keep the garment's own design: crop top stays short and cropped, tee stays its original length, hoodie stays roomy and bulky, dress stays long and flowing, jacket keeps its structure, sweater stays cozy and thick. Put the provided ${colorDesc}${itemType} on this person. Remove whatever they are wearing underneath — bare skin, bare arms if short-sleeve. Keep bottom unchanged. Don't tuck in, hem hangs down. Don't change person's body, pose, or face.
-FIT:${fitDetail ? ' ' + fitDetail : ''}`
+    const style = `Style: Photorealistic e-commerce product photography, natural soft-box lighting, clean background matching Image 1.`
+    const composition = `Composition: Straight-on mid-body framing. The virtual camera is pulled back far enough to show the person's full head, full torso, and the complete hem of the garment in frame. All body parts scale equally and uniformly.`
+    const mandatory = `Mandatory: Garment length matches Image 2 exactly. Hem hanging freely over and outside the pants waistband. All body parts in correct anatomical proportion to each other. 100% garment length accuracy from Image 2.`
+    switch (fitType) {
+      case 'tight':
+        return `Virtual try-on. The person in Image 1 is wearing the ${itemType} from Image 2. ${style} Subject: The exact same person from Image 1 — identical face, body shape, body size, chest size, skin tone, hair, pose. ALL original clothing on the upper body is completely removed and replaced by the ${itemType} from Image 2. The ${itemType} matches the exact color, pattern, sleeve style, sleeve cut, sleeve length, and shirt length from Image 2. ${composition} Fit: Only the width is tighter — the garment width looks one size too small for this body. The fabric is stretched taut against the skin with 0mm air gap. The shape of the shoulders and hip bones is visible pressing through the material. Zero wrinkles, zero folds, zero bunching. Chest area lays flat and smooth. ${mandatory} Prohibitions: Added chest volume, loose fabric, tucked-in shirt, original upper body clothing visible, jacket, hoodie, sweater, layering, cropped or shortened shirt, longer hemline than Image 2, shorter hemline than Image 2, change to body size or proportions, disproportionate body parts.`
+      case 'comfortable':
+        return `Virtual try-on. The person in Image 1 is wearing the ${itemType} from Image 2. ${style} Subject: The exact same person from Image 1 — identical face, body shape, body size, skin tone, hair, pose. ALL original clothing on the upper body is completely removed and replaced by the ${itemType} from Image 2. The ${itemType} matches the exact color, pattern, sleeve style, sleeve cut, sleeve length, and shirt length from Image 2. ${composition} Fit: Only the width is larger — the shirt is one full size wider than the person's body. 50mm of visible air gap between the fabric and the torso on each side. The shoulder seams drop 30mm past the natural shoulder bone. The sleeves are visibly wider than the arms. 5-7 prominent vertical folds run down the front. The body shape is hidden by excess material in the width. ${mandatory} The shirt is wider, not longer. Prohibitions: Fitted look, fabric touching the torso sides, tucked-in shirt, original upper body clothing visible, jacket, hoodie, sweater, layering, longer hemline than Image 2, shorter hemline than Image 2, dress-like length, change to body size or proportions, disproportionate body parts.`
+      default:
+        return `Virtual try-on. The person in Image 1 is wearing the ${itemType} from Image 2. ${style} Subject: The exact same person from Image 1 — identical face, body shape, body size, skin tone, hair, pose. ALL original clothing on the upper body is completely removed and replaced by the ${itemType} from Image 2. The ${itemType} matches the exact color, pattern, sleeve style, sleeve cut, sleeve length, and shirt length from Image 2. ${composition} Fit: Standard retail fit. The fabric skims the body with approximately 10mm of space between skin and fabric. Shoulder seams sit exactly on the shoulder bone. A few natural creases at the waist. Body shape suggested but not defined through the fabric. ${mandatory} Prohibitions: Skin-tight fabric, oversized look, tucked-in shirt, original upper body clothing visible, jacket, hoodie, sweater, layering, longer hemline than Image 2, shorter hemline than Image 2, change to body size or proportions, disproportionate body parts.`
+    }
   } else {
-    return `Keep the garment's own design: shorts stay short, wide pants stay wide, slim pants stay slim, joggers stay tapered, skirt stays its original length. Put the provided ${colorDesc}${itemType} on this person. Remove whatever they are wearing underneath. Tuck top in. Don't change person's body, legs, pose, or face.
-FIT:${fitDetail ? ' ' + fitDetail : ''}`
+    const base = `Virtual try-on. The person in Image 1 is wearing the ${itemType} from Image 2. The person has the exact same face, body shape, body size, skin tone, hair, pose, and top garment as in Image 1. The background and lighting are identical to Image 1. The ${itemType} matches the exact color, pattern, and leg length from Image 2.`
+    const photo = 'Captured with natural soft-box lighting, full-body framing, clean e-commerce product photography style.'
+    switch (fitType) {
+      case 'tight':
+        return `${base} The fabric wraps closely around the hips, thighs, and calves with zero loose material, following the natural contour of the legs. ${photo}`
+      case 'comfortable':
+        return `${base} The fabric drapes with generous room around the hips and legs, creating visible soft folds at the knees and thighs. The pant silhouette is noticeably wider than the legs. ${photo}`
+      default:
+        return `${base} The fabric lightly follows the leg shape with a slight air gap between skin and fabric. A few natural soft creases appear at the knees. ${photo}`
+    }
   }
 }
 
@@ -281,7 +290,8 @@ export async function generateTryOnImage(
   userImage: string,
   clothingImageUrl: string,
   clothingInfo: ClothingInfo,
-  fitType: FitType = 'regular'
+  fitType: FitType = 'regular',
+  keyIndex: number = 0
 ): Promise<TryOnResult> {
   try {
     // Process user image: detect dimensions, find closest aspect ratio, crop if needed
@@ -296,56 +306,79 @@ export async function generateTryOnImage(
     // Log the actual prompt for debugging
     console.log(`[TryOn] ${fitType} fit prompt:\n`, prompt)
 
-    // Call the Duke try-on endpoint
-    const response = await fetch(`${BACKEND_URL}/api/gemini-tryon-duke`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        avatarBase64,
-        clothingBase64Images: [clothingBase64],
-        prompt,
-        aspectRatio
-      })
-    })
+    // Call the Duke try-on endpoint with timeout and retry
+    // Retries on network errors, timeouts, AND content blocks (which are random)
+    const MAX_RETRIES = 5
+    const TIMEOUT_MS = 35_000
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}))
-      throw new Error(errorData.error || `API error: ${response.status}`)
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      const controller = new AbortController()
+      const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
+
+      try {
+        console.log(`[TryOn] ${fitType} attempt ${attempt + 1}/${MAX_RETRIES}`)
+        const response = await fetch(`${BACKEND_URL}/api/gemini-tryon-duke`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          signal: controller.signal,
+          body: JSON.stringify({
+            avatarBase64,
+            clothingBase64Images: [clothingBase64],
+            prompt,
+            aspectRatio,
+            keyIndex
+          })
+        })
+
+        clearTimeout(timeout)
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          throw new Error((errorData as { error?: string }).error || `API error: ${response.status}`)
+        }
+
+        const data = await response.json() as Record<string, unknown>
+        console.log(`[TryOn] ${fitType} response:`, JSON.stringify(data).slice(0, 500))
+
+        // Check for content block — retry if so
+        const candidate = (data.candidates as Array<Record<string, unknown>>)?.[0]
+        if (!candidate || candidate.finishReason === 'PROHIBITED_CONTENT' || candidate.finishReason === 'IMAGE_OTHER') {
+          console.warn(`[TryOn] ${fitType} attempt ${attempt + 1} blocked (${candidate?.finishReason || 'no candidate'}), retrying immediately...`)
+          if (attempt < MAX_RETRIES - 1) continue
+          throw new Error('Blocked by content filter after all retries')
+        }
+
+        // Parse image from response
+        let imageDataUrl: string | null = null
+        let analysisText: string | undefined
+        const content = candidate.content as { parts: Array<Record<string, unknown>> }
+
+        for (const part of content.parts) {
+          const inlineData = part.inlineData as { mimeType?: string; data?: string } | undefined
+          if (inlineData?.mimeType?.includes('image')) {
+            imageDataUrl = `data:${inlineData.mimeType};base64,${inlineData.data}`
+          }
+          if (part.text) {
+            analysisText = part.text as string
+          }
+        }
+
+        if (imageDataUrl) {
+          const watermarkedImage = await addWatermark(imageDataUrl)
+          console.log(`[TryOn] ${fitType} SUCCESS on attempt ${attempt + 1}`)
+          return { imageDataUrl: watermarkedImage, analysisText, success: true }
+        }
+
+        throw new Error('No image in response')
+      } catch (e) {
+        clearTimeout(timeout)
+        const isTimeout = e instanceof DOMException && e.name === 'AbortError'
+        console.warn(`[TryOn] ${fitType} attempt ${attempt + 1} ${isTimeout ? 'timed out' : 'failed'}:`, e)
+        if (attempt === MAX_RETRIES - 1) throw e
+      }
     }
 
-    const data = await response.json()
-
-    // Parse Gemini response
-    const candidate = data.candidates?.[0]
-    if (candidate) {
-      let imageDataUrl: string | null = null
-      let analysisText: string | undefined
-
-      for (const part of candidate.content.parts) {
-        if (part.inlineData && part.inlineData.mimeType?.includes('image')) {
-          imageDataUrl = `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`
-        }
-        if (part.text) {
-          analysisText = part.text
-        }
-      }
-
-      if (imageDataUrl) {
-
-        // Add watermark before returning
-        const watermarkedImage = await addWatermark(imageDataUrl)
-
-        return {
-          imageDataUrl: watermarkedImage,
-          analysisText,
-          success: true
-        }
-      }
-    }
-
-    throw new Error('No image in response')
+    throw new Error('All retries failed')
 
   } catch (err) {
     return {

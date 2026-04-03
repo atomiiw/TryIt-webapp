@@ -270,36 +270,94 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     return undefined
   }
 
+  // Swipe to the newly generated fit's card
+  const flipToFit = (_currentFit: FitType, destFit: FitType) => {
+    // Smooth scroll to the card, then update selectedFit after animation
+    // so the sync useEffect doesn't fight the smooth scroll
+    if (!scrollContainerRef.current) return
+    const index = availableFits.indexOf(destFit)
+    if (index < 0) return
+
+    isScrollingProgrammatically.current = true
+    const cardWidth = scrollContainerRef.current.offsetWidth
+    scrollContainerRef.current.scrollTo({
+      left: index * (cardWidth + GAP),
+      behavior: 'smooth'
+    })
+    // Update selectedFit and reset flag after smooth scroll completes
+    setTimeout(() => {
+      setSelectedFit(destFit)
+      isScrollingProgrammatically.current = false
+    }, 400)
+  }
+
   // Function to generate try-on image for a specific fit
-  // Each fit runs completely independently
-  const generateFitImage = async (fit: FitType) => {
+  // Each fit uses a different API key (keyIndex) to run in parallel
+  const generateFitImage = async (fit: FitType, keyIndex: number = 0) => {
     if (!userData.image || !userData.item?.imageUrl) return
+
+    // Capture current item so we can check if user switched items mid-generation
+    const itemUrl = userData.item.imageUrl
+
+    const handleSuccess = (result: { imageDataUrl: string | null; analysisText?: string }) => {
+      // Only update UI if still on the same item
+      if (userData.item?.imageUrl !== itemUrl) return
+      track('tryon_success', { fit })
+      setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))
+      flipToFit(selectedFit, fit)
+      onImageGenerated?.(fit, result.imageDataUrl!)
+    }
 
     setGeneratingFits(prev => new Set(prev).add(fit))
 
     try {
       const result = await generateTryOnImage(
         userData.image,
-        userData.item.imageUrl,
+        itemUrl,
         {
           name: userData.item.name || 'Clothing item',
           type: userData.item.type || 'tops',
           color: userData.item.color || '',
           fitSentence: getFitSentence(fit)
         },
-        fit as TryOnFitType
+        fit as TryOnFitType,
+        keyIndex
       )
 
       if (result.success && result.imageDataUrl) {
-        track('tryon_success', { fit })
-        setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))
-        // Notify parent of generated image
-        onImageGenerated?.(fit, result.imageDataUrl)
+        handleSuccess(result)
+        setGeneratingFits(prev => { const next = new Set(prev); next.delete(fit); return next })
+        return
+      }
+      console.warn(`[TryOn] FAILURE for ${fit}: no image returned`)
+    } catch (err) {
+      console.warn(`[TryOn] FAILURE for ${fit}:`, err instanceof Error ? err.message : 'unknown')
+    }
+
+    // First 5 attempts failed, give it 5 more
+    if (userData.item?.imageUrl !== itemUrl) return // user switched items, abort
+    console.log(`[TryOn] ${fit}: retrying with second round of attempts...`)
+    try {
+      const result = await generateTryOnImage(
+        userData.image!,
+        itemUrl,
+        {
+          name: userData.item!.name || 'Clothing item',
+          type: userData.item!.type || 'tops',
+          color: userData.item!.color || '',
+          fitSentence: getFitSentence(fit)
+        },
+        fit as TryOnFitType,
+        keyIndex
+      )
+
+      if (result.success && result.imageDataUrl) {
+        handleSuccess(result)
       } else {
-        track('tryon_failure', { fit, reason: 'no_image_returned' })
+        console.warn(`[TryOn] FINAL FAILURE for ${fit}: gave up after 10 total attempts`)
       }
     } catch (err) {
-      track('tryon_failure', { fit, reason: err instanceof Error ? err.message : 'unknown' })
+      console.warn(`[TryOn] FINAL FAILURE for ${fit}:`, err instanceof Error ? err.message : 'unknown')
     } finally {
       setGeneratingFits(prev => {
         const next = new Set(prev)
@@ -411,23 +469,20 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     }
   }, [isVisible, shouldAutoScroll, onScrollComplete])
 
-  // Generate try-on images for all three fits regardless of size availability
-  // Each fit is completely independent - uses ref to prevent duplicate triggers
+  // Generate try-on images in parallel (each uses a different API key via keyIndex)
   // Skip generation for fits that already have images from initialImages
   // Waits for sizeRec and measurements so getFitSentence has data to work with
   useEffect(() => {
     if (!isVisible || !userData.image || !userData.item?.imageUrl) return
     if (!sizeRec) return
 
-    // Check each fit independently using ref to track what's already started
     const fits: FitType[] = ['tight', 'regular', 'comfortable']
 
-    fits.forEach(fit => {
-      // Generate for all fits, not just those with size recommendations
+    fits.forEach((fit, index) => {
       const hasExistingImage = !!generatedImages[fit]
       if (!startedGeneratingRef.current.has(fit) && !hasExistingImage) {
         startedGeneratingRef.current.add(fit)
-        generateFitImage(fit)
+        generateFitImage(fit, index)
       }
     })
   }, [userData.image, userData.item?.imageUrl, generatedImages, sizeRec, measurements])
@@ -507,11 +562,12 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     scrollToFit(fit)
   }
 
+  const fitKeyIndex: Record<FitType, number> = { tight: 0, regular: 1, comfortable: 2 }
+
   const handleRegenerate = async () => {
     const currentFit = selectedFit
     if (!userData.image || !userData.item?.imageUrl) return
 
-    track('tryon_retry', { fit: currentFit })
     setRegeneratingFits(prev => new Set(prev).add(currentFit))
 
     try {
@@ -524,7 +580,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
           color: userData.item.color || '',
           fitSentence: getFitSentence(currentFit)
         },
-        currentFit as TryOnFitType
+        currentFit as TryOnFitType,
+        fitKeyIndex[currentFit]
       )
 
       if (result.success && result.imageDataUrl) {
