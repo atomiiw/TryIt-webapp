@@ -27,10 +27,12 @@ interface ResultsSectionProps {
   isVisible: boolean
   initialImages?: Partial<Record<FitType, string>>
   cachedAnalysis?: CachedAnalysis | null
-  shouldAutoScroll?: boolean  // Only scroll when this is true (first time "Try it on" is clicked)
+  shouldAutoScroll?: boolean
+  baseImage?: string | null       // Pre-generated base image (grey t-shirt)
+  clothingDescription?: string    // Pre-generated garment description
   onImageGenerated?: (fit: FitType, imageDataUrl: string) => void
   onAnalysisComplete?: (analysis: CachedAnalysis) => void
-  onScrollComplete?: () => void  // Called after scrolling to clear the flag
+  onScrollComplete?: () => void
 }
 
 type FitType = 'tight' | 'regular' | 'comfortable'
@@ -181,7 +183,7 @@ const LOADING_MESSAGES = [
 // Type for generated images state
 type GeneratedImages = Record<FitType, string | null>
 
-function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, shouldAutoScroll, onImageGenerated, onAnalysisComplete, onScrollComplete }: ResultsSectionProps) {
+function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, shouldAutoScroll, baseImage, clothingDescription, onImageGenerated, onAnalysisComplete, onScrollComplete }: ResultsSectionProps) {
   // If we have cached analysis, skip loading state
   const hasCachedData = !!cachedAnalysis
   const [isLoading, setIsLoading] = useState(!hasCachedData)
@@ -305,7 +307,9 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
           fitSentence: getFitSentence(fit)
         },
         fit as TryOnFitType,
-        keyIndex
+        keyIndex,
+        baseImage || undefined,
+        clothingDescription
       )
 
       if (result.success && result.imageDataUrl) {
@@ -329,7 +333,9 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
           fitSentence: getFitSentence(fit)
         },
         fit as TryOnFitType,
-        keyIndex
+        keyIndex,
+        baseImage || undefined,
+        clothingDescription
       )
 
       if (result.success && result.imageDataUrl) {
@@ -560,7 +566,9 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
           fitSentence: getFitSentence(currentFit)
         },
         currentFit as TryOnFitType,
-        fitKeyIndex[currentFit]
+        fitKeyIndex[currentFit],
+        baseImage || undefined,
+        clothingDescription
       )
 
       if (result.success && result.imageDataUrl) {
