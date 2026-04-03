@@ -57,8 +57,6 @@ const BUTTON_SPACING = {
 // Toggle this to switch between Normal and Demo results
 const USE_DEMO_MODE = false
 
-// Session storage keys
-const SHOPPING_STATE_KEY = 'tryit_shopping_state'
 
 // Generated images by fit type
 type FitType = 'tight' | 'regular' | 'comfortable'
@@ -94,19 +92,8 @@ interface ItemTryOnState {
 // State is now keyed by item ID
 type TryOnStateByItem = Record<string, ItemTryOnState>
 
-function loadShoppingState(): TryOnStateByItem {
-  try {
-    const stored = sessionStorage.getItem(SHOPPING_STATE_KEY)
-    if (stored) {
-      return JSON.parse(stored)
-    }
-  } catch (e) {
-  }
-  return {}
-}
-
-// Load initial state once (outside component to avoid re-running on each render)
-const initialShoppingState = loadShoppingState()
+// Start fresh on every page load — no persisted try-on state
+const initialShoppingState: TryOnStateByItem = {}
 
 function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
   // Per-item try-on state
@@ -180,21 +167,6 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
     generatedData: null
   }
 
-  // Persist shopping state to sessionStorage (excluding large image data)
-  useEffect(() => {
-    try {
-      // Strip out generatedImages before saving - they're too large for sessionStorage
-      const stateToSave: TryOnStateByItem = {}
-      for (const [itemId, state] of Object.entries(tryOnState)) {
-        stateToSave[itemId] = {
-          ...state,
-          generatedImages: {} // Don't persist images - they'll regenerate if needed
-        }
-      }
-      sessionStorage.setItem(SHOPPING_STATE_KEY, JSON.stringify(stateToSave))
-    } catch (e) {
-    }
-  }, [tryOnState])
 
   // Check if we have enough data to try on
   const hasRequiredData = userData.image && userData.item
