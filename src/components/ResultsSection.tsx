@@ -289,9 +289,15 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     const itemUrl = userData.item.imageUrl
 
     const handleSuccess = (result: { imageDataUrl: string | null; analysisText?: string }) => {
-      // Don't update if component unmounted or item changed
-      if (!isMountedRef.current) return
-      if (currentItemUrlRef.current !== itemUrl) return
+      if (!isMountedRef.current) {
+        console.warn(`[TryOn] ${fit} success DISCARDED — component unmounted`)
+        return
+      }
+      if (currentItemUrlRef.current !== itemUrl) {
+        console.warn(`[TryOn] ${fit} success DISCARDED — item changed (was ${itemUrl?.slice(-10)}, now ${currentItemUrlRef.current?.slice(-10)})`)
+        return
+      }
+      console.log(`[TryOn] ${fit} image applied to UI`)
       track('tryon_success', { fit })
       setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))
       flipToFit(selectedFit, fit)
