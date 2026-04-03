@@ -459,6 +459,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
   const lastResultsKeyRef = useRef(resultsKey)
   useEffect(() => {
     if (resultsKey !== undefined && resultsKey !== lastResultsKeyRef.current) {
+      console.log(`[ResultsSection] ${userData.item?.name} — resultsKey changed ${lastResultsKeyRef.current} → ${resultsKey}, resetting`)
       lastResultsKeyRef.current = resultsKey
       startedGeneratingRef.current.clear()
       setGeneratedImages({ tight: null, regular: null, comfortable: null })
