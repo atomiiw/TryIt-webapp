@@ -298,6 +298,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         console.log(`[TryOn] ${fit} SUCCESS`)
         setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))
         onImageGenerated?.(fit, result.imageDataUrl!)
+        setGeneratingFits(prev => { const next = new Set(prev); next.delete(fit); return next })
+        return // done, skip second round
       }
     } catch {
     }
