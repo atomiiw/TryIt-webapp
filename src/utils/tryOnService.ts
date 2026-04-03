@@ -262,7 +262,7 @@ export async function generateUntuckedImage(userImage: string): Promise<TryOnRes
   try {
     const { base64: avatarBase64, aspectRatio } = await processUserImage(userImage)
 
-    const prompt = `Regenerate this exact photo but with one change: the shirt is NOT tucked in. The shirt hangs loosely OVER and OUTSIDE the pants. The bottom hem of the shirt is visible — it drapes down over the waistband. There is no fabric tucked inside the pants at all. Everything else is identical — same shirt, same color, same pattern, same person, same face, same body, same pose, same background, same lighting. Prohibitions: Tucked-in shirt, any fabric inside the waistband, changed shirt color, changed shirt style, changed face, changed body shape, changed background, changed pose, any new clothing.`
+    const prompt = `Untuck this shirt.`
 
     const MAX_RETRIES = 5
     const TIMEOUT_MS = 35_000
