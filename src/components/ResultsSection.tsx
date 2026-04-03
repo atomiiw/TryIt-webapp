@@ -558,6 +558,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     const currentFit = selectedFit
     if (!userData.image || !userData.item?.imageUrl) return
 
+    console.log(`[TryOn] Regenerating ${currentFit}...`)
     setRegeneratingFits(prev => new Set(prev).add(currentFit))
 
     try {
