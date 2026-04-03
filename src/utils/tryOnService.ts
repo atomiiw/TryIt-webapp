@@ -372,8 +372,6 @@ export async function generateTryOnImage(
         throw new Error('No image in response')
       } catch (e) {
         clearTimeout(timeout)
-        const isTimeout = e instanceof DOMException && e.name === 'AbortError'
-        // silently retry
         if (attempt === MAX_RETRIES - 1) throw e
       }
     }
