@@ -509,7 +509,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     }
   }
 
-  // Smooth scroll to a fit card.
+  // Scroll to a fit card.
   const scrollToFit = (fit: FitType) => {
     if (!scrollContainerRef.current || availableFits.length <= 1) return
     const index = availableFits.indexOf(fit)
@@ -518,21 +518,24 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     // Update selectedFit immediately so buttons/dots respond instantly
     setSelectedFit(fit)
 
-    const cardWidth = scrollContainerRef.current.offsetWidth
+    const container = scrollContainerRef.current
+    const cardWidth = container.offsetWidth
     const targetLeft = index * (cardWidth + GAP)
 
-    // Block handleScroll during animation so it doesn't set intermediate fits
+    // Disable scroll-snap during programmatic scroll to prevent fighting
+    container.style.scrollSnapType = 'none'
     isScrollingProgrammatically.current = true
 
-    scrollContainerRef.current.scrollTo({
+    container.scrollTo({
       left: targetLeft,
       behavior: 'smooth'
     })
 
-    // Unblock after smooth scroll completes
+    // Re-enable scroll-snap after scroll completes
     setTimeout(() => {
+      container.style.scrollSnapType = ''
       isScrollingProgrammatically.current = false
-    }, 350)
+    }, 400)
   }
 
   const handleCardClick = (fit: FitType) => {
