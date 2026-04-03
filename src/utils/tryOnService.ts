@@ -439,14 +439,14 @@ export async function generateTryOnImage(
 
         if (imageDataUrl) {
           const watermarkedImage = await addWatermark(imageDataUrl)
-          console.log(`[TryOn] ${fitType} SUCCESS (attempt ${attempt + 1}/${MAX_RETRIES})`)
+          console.log(`[TryOn] ${clothingInfo.name} — ${fitType} SUCCESS (attempt ${attempt + 1}/${MAX_RETRIES})`)
           return { imageDataUrl: watermarkedImage, analysisText, success: true }
         }
 
         throw new Error('No image in response')
       } catch (e) {
         clearTimeout(timeout)
-        console.warn(`[TryOn] ${fitType} attempt ${attempt + 1}/${MAX_RETRIES} failed`)
+        console.warn(`[TryOn] ${clothingInfo.name} — ${fitType} attempt ${attempt + 1}/${MAX_RETRIES} failed`)
         if (attempt === MAX_RETRIES - 1) throw e
       }
     }
@@ -455,7 +455,7 @@ export async function generateTryOnImage(
     }) // end enqueueForKey
 
   } catch (err) {
-    console.error(`[TryOn] ${fitType} FAILED after all attempts: ${err instanceof Error ? err.message : 'Unknown'}`)
+    console.error(`[TryOn] ${clothingInfo.name} — ${fitType} FAILED after all attempts: ${err instanceof Error ? err.message : 'Unknown'}`)
     return {
       imageDataUrl: null,
       success: false,
