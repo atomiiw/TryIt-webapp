@@ -251,7 +251,7 @@ function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType): stri
   const isTop = !isBottomType(itemType)
 
   if (isTop) {
-    const first = `First: untuck all clothing. The shirt must hang freely outside the pants.`
+    const first = `First: the person's original top is gone. It does not exist. Start from bare torso, then dress the person in the ${itemType} from Image 2. The shirt hangs freely over the pants with the full hem visible.`
     const style = `Style: Photorealistic, natural lighting matching Image 1, background identical to Image 1.`
     const sleeves = `Sleeves: The sleeves are exactly as shown in Image 2. Completely ignore the sleeve style, sleeve length, and sleeve type from Image 1. If Image 2 shows short sleeves, the person wears short sleeves. If Image 2 shows long sleeves, the person wears long sleeves.`
     const mandatory = `Mandatory: The sleeve style, sleeve cut, and sleeve length come only from Image 2. Hem hanging freely over and outside the pants waistband. All body parts in correct anatomical proportion. The garment length — measured from shoulder to hem — is exactly as shown in Image 2. 100% garment length accuracy from Image 2.`
