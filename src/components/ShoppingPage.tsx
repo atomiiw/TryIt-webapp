@@ -267,46 +267,41 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
     }))
   }
 
-  // Handler for when ResultsSection generates an image
-  // Captures displayItemId at render time via ref for freshness
-  const displayItemIdRef = useRef(displayItemId)
-  displayItemIdRef.current = displayItemId
+  // All handlers are bound to displayItemId so they save to the correct item
+  // even if the user switches items while generation is in progress
+  const boundItemId = displayItemId
 
   const handleImageGenerated = (fit: FitType, imageDataUrl: string) => {
-    // Only save if we're still on the same item that generated this image
-    const targetItemId = displayItemIdRef.current
-    if (!targetItemId) return
+    if (!boundItemId) return
     setTryOnState(prev => ({
       ...prev,
-      [targetItemId]: {
-        ...prev[targetItemId],
+      [boundItemId]: {
+        ...prev[boundItemId],
         generatedImages: {
-          ...prev[targetItemId]?.generatedImages,
+          ...prev[boundItemId]?.generatedImages,
           [fit]: imageDataUrl
         }
       }
     }))
   }
 
-  // Handler for when ResultsSection completes analysis
   const handleAnalysisComplete = (analysis: CachedAnalysis) => {
-    if (!currentItemId) return
+    if (!boundItemId) return
     setTryOnState(prev => ({
       ...prev,
-      [currentItemId]: {
-        ...prev[currentItemId],
+      [boundItemId]: {
+        ...prev[boundItemId],
         cachedAnalysis: analysis
       }
     }))
   }
 
-  // Handler to clear auto-scroll flag after scrolling
   const handleScrollComplete = () => {
-    if (!currentItemId) return
+    if (!boundItemId) return
     setTryOnState(prev => ({
       ...prev,
-      [currentItemId]: {
-        ...prev[currentItemId],
+      [boundItemId]: {
+        ...prev[boundItemId],
         shouldAutoScroll: false
       }
     }))
