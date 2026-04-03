@@ -28,7 +28,7 @@ interface ResultsSectionProps {
   initialImages?: Partial<Record<FitType, string>>
   cachedAnalysis?: CachedAnalysis | null
   shouldAutoScroll?: boolean
-  onImageGenerated?: (fit: FitType, imageDataUrl: string) => void
+  onImageGenerated?: (fit: FitType, imageDataUrl: string, itemId?: string) => void
   onAnalysisComplete?: (analysis: CachedAnalysis) => void
   onScrollComplete?: () => void
 }
@@ -284,12 +284,13 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
   const generateFitImage = async (fit: FitType, keyIndex: number = 0) => {
     if (!userData.image || !userData.item?.imageUrl) return
 
-    // Capture current item so we can check if user switched items mid-generation
+    // Capture current item at generation start — this is the item we're generating for
     const itemUrl = userData.item.imageUrl
+    const itemId = userData.item.id
 
     const handleSuccess = (result: { imageDataUrl: string | null; analysisText?: string }): boolean => {
-      // Always save to parent state (bound to correct item via onImageGenerated)
-      onImageGenerated?.(fit, result.imageDataUrl!)
+      // Always save to parent state with the correct item ID
+      onImageGenerated?.(fit, result.imageDataUrl!, itemId)
       // Only update local UI if still on the same item
       if (currentItemUrlRef.current === itemUrl) {
         console.log(`[TryOn] ${fit} image applied to UI`)

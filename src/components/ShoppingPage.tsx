@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { track } from '@vercel/analytics'
 import type { UserData } from '../App'
 import PhotoUpload from './PhotoUpload'
@@ -239,46 +239,46 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
     }))
   }
 
-  // All handlers are bound to displayItemId so they save to the correct item
-  // even if the user switches items while generation is in progress
-  const boundItemId = displayItemId
-
-  const handleImageGenerated = (fit: FitType, imageDataUrl: string) => {
-    if (!boundItemId) return
-    console.log(`[ShoppingPage] Saving ${fit} image to item: ${boundItemId.slice(-8)}`)
+  // Handlers accept itemId so they always save to the correct item
+  const handleImageGenerated = useCallback((fit: FitType, imageDataUrl: string, itemId?: string) => {
+    const targetId = itemId || displayItemId
+    if (!targetId) return
+    console.log(`[ShoppingPage] Saving ${fit} image to item: ${targetId.slice(-8)}`)
     setTryOnState(prev => ({
       ...prev,
-      [boundItemId]: {
-        ...prev[boundItemId],
+      [targetId]: {
+        ...prev[targetId],
         generatedImages: {
-          ...prev[boundItemId]?.generatedImages,
+          ...prev[targetId]?.generatedImages,
           [fit]: imageDataUrl
         }
       }
     }))
-  }
+  }, [displayItemId])
 
-  const handleAnalysisComplete = (analysis: CachedAnalysis) => {
-    if (!boundItemId) return
+  const handleAnalysisComplete = useCallback((analysis: CachedAnalysis) => {
+    const targetId = displayItemId
+    if (!targetId) return
     setTryOnState(prev => ({
       ...prev,
-      [boundItemId]: {
-        ...prev[boundItemId],
+      [targetId]: {
+        ...prev[targetId],
         cachedAnalysis: analysis
       }
     }))
-  }
+  }, [displayItemId])
 
-  const handleScrollComplete = () => {
-    if (!boundItemId) return
+  const handleScrollComplete = useCallback(() => {
+    const targetId = displayItemId
+    if (!targetId) return
     setTryOnState(prev => ({
       ...prev,
-      [boundItemId]: {
-        ...prev[boundItemId],
+      [targetId]: {
+        ...prev[targetId],
         shouldAutoScroll: false
       }
     }))
-  }
+  }, [displayItemId])
 
   return (
     <div className="tryit-container">
