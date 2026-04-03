@@ -245,6 +245,7 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
 
   const handleImageGenerated = (fit: FitType, imageDataUrl: string) => {
     if (!boundItemId) return
+    console.log(`[ShoppingPage] Saving ${fit} image to item: ${boundItemId.slice(-8)}`)
     setTryOnState(prev => ({
       ...prev,
       [boundItemId]: {
