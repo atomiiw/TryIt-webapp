@@ -59,7 +59,15 @@ function formatSizeRange(sizes: string[]): string {
 }
 
 function BarcodeScanner({ item, items, onItemScanned, onItemsChange }: BarcodeScannerProps) {
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  // Initialize card index to match the restored item (e.g. after page reload)
+  const getInitialIndex = () => {
+    if (item && items.length > 0) {
+      const idx = items.findIndex(i => i.id === item.id)
+      if (idx !== -1) return idx
+    }
+    return 0
+  }
+  const [currentCardIndex, setCurrentCardIndex] = useState(getInitialIndex);
   const [navigationTrigger, setNavigationTrigger] = useState(0);
   const [showDuplicateNotification, setShowDuplicateNotification] = useState(false);
   const [showNotAvailableNotification, setShowNotAvailableNotification] = useState(false);
