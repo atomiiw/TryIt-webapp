@@ -267,11 +267,11 @@ function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType, gende
   if (isTop) {
     const base = `Image 1: person (source for face, body, pose, background). Image 2: garment (source for color, fit, sleeves, length).
 
-Virtual try-on. The person in Image 1 has bare arms and bare torso. Dress them in the ${itemType} from Image 2.
+Virtual try-on. Completely replace all upper body clothing on the person in Image 1 with the ${itemType} from Image 2.
 
 Style: Photorealistic, 85mm lens, natural soft-box lighting and background identical to Image 1.
 
-Subject: Same person from Image 1 — identical face, body shape, body size, chest size, belly size, skin tone, hair, pose. Zero body modification. The ${itemType} from Image 2 is the only clothing on the upper body.
+Subject: Same person from Image 1 — identical face, body shape, body size, chest size, belly size, skin tone, hair, pose. Zero body modification.
 
 Color: Pixel-accurate to Image 2 — exact hue, saturation, brightness.
 
