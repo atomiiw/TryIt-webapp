@@ -181,6 +181,14 @@ const LOADING_MESSAGES = [
 // Type for generated images state
 type GeneratedImages = Record<FitType, string | null>
 
+// Module-level: tracks which item+fit combos have started generating (survives remounts)
+const globalStartedGenerations = new Set<string>()
+export function clearGenerationTracking(itemUrl: string) {
+  for (const key of [...globalStartedGenerations]) {
+    if (key.startsWith(itemUrl + ':')) globalStartedGenerations.delete(key)
+  }
+}
+
 function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, shouldAutoScroll, onImageGenerated, onAnalysisComplete, onScrollComplete }: ResultsSectionProps) {
   // If we have cached analysis, skip loading state
   const hasCachedData = !!cachedAnalysis
@@ -210,9 +218,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
 
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const sectionRef = useRef<HTMLDivElement>(null)
-  // Track started generations globally by itemUrl+fit so remounts don't restart them
   const generationKey = userData.item?.imageUrl || ''
-  const startedGeneratingRef = useRef<Set<string>>(new Set())
 
   // Cycle through loading messages
   useEffect(() => {
@@ -274,19 +280,22 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     return undefined
   }
 
-  // Jump to the newly generated fit's card
-  const flipToFit = (_currentFit: FitType, destFit: FitType) => {
-    scrollToFit(destFit)
-  }
-
   // Function to generate try-on image for a specific fit
   // Each fit uses a different API key (keyIndex) to run in parallel
   const generateFitImage = async (fit: FitType, keyIndex: number = 0) => {
     if (!userData.image || !userData.item?.imageUrl) return
 
-    // Capture current item at generation start — this is the item we're generating for
+    // Capture ALL values at generation start — closures may be stale by the time async completes
     const itemUrl = userData.item.imageUrl
     const itemId = userData.item.id
+    const userImage = userData.image
+    const clothingInfo = {
+      name: userData.item.name || 'Clothing item',
+      type: userData.item.type || 'tops',
+      color: userData.item.color || '',
+      fitSentence: getFitSentence(fit)
+    }
+    const gender = userData.personAnalysis?.gender || 'unknown'
 
     const handleSuccess = (result: { imageDataUrl: string | null; analysisText?: string }): boolean => {
       // Always save to parent state with the correct item ID
@@ -296,7 +305,6 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         console.log(`[TryOn] ${fit} image applied to UI`)
         setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))
         setGeneratingFits(prev => { const next = new Set(prev); next.delete(fit); return next })
-        flipToFit(selectedFit, fit)
       } else {
         console.log(`[TryOn] ${fit} image cached (item switched)`)
       }
@@ -308,21 +316,11 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
 
     try {
       const result = await generateTryOnImage(
-        userData.image,
-        itemUrl,
-        {
-          name: userData.item.name || 'Clothing item',
-          type: userData.item.type || 'tops',
-          color: userData.item.color || '',
-          fitSentence: getFitSentence(fit)
-        },
-        fit as TryOnFitType,
-        keyIndex,
-        userData.personAnalysis?.gender || 'unknown'
+        userImage, itemUrl, clothingInfo, fit as TryOnFitType, keyIndex, gender
       )
 
       if (result.success && result.imageDataUrl && handleSuccess(result)) {
-        return // applied successfully, done
+        return
       }
     } catch {
     }
@@ -330,17 +328,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     // First 5 attempts failed, give it 5 more
     try {
       const result = await generateTryOnImage(
-        userData.image!,
-        itemUrl,
-        {
-          name: userData.item!.name || 'Clothing item',
-          type: userData.item!.type || 'tops',
-          color: userData.item!.color || '',
-          fitSentence: getFitSentence(fit)
-        },
-        fit as TryOnFitType,
-        keyIndex,
-        userData.personAnalysis?.gender || 'unknown'
+        userImage, itemUrl, clothingInfo, fit as TryOnFitType, keyIndex, gender
       )
 
       if (result.success && result.imageDataUrl) {
@@ -471,12 +459,13 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     fits.forEach((fit, index) => {
       const key = `${generationKey}:${fit}`
       const hasExistingImage = !!generatedImages[fit]
-      if (!startedGeneratingRef.current.has(key) && !hasExistingImage) {
-        startedGeneratingRef.current.add(key)
+      if (!globalStartedGenerations.has(key) && !hasExistingImage) {
+        globalStartedGenerations.add(key)
         generateFitImage(fit, index)
       }
     })
-  }, [userData.image, userData.item?.imageUrl, generatedImages, sizeRec, measurements])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isVisible, sizeRec, generationKey])
 
   // All three fit types are always available for image generation
   const availableFits = useMemo<FitType[]>(() => {
@@ -542,11 +531,6 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     isHorizontal.current = null
   }
 
-  // Navigate to a fit card (used by buttons, dots, and flipToFit)
-  const scrollToFit = (fit: FitType) => {
-    setSelectedFit(fit)
-  }
-
   const handleCardClick = (fit: FitType) => {
     if (fit !== selectedFit) {
       track('fit_toggle', { fit: fitLabels[fit] })
@@ -581,7 +565,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
       if (result.success && result.imageDataUrl) {
         setGeneratedImages(prev => ({ ...prev, [currentFit]: result.imageDataUrl }))
         // Notify parent of regenerated image
-        onImageGenerated?.(currentFit, result.imageDataUrl)
+        onImageGenerated?.(currentFit, result.imageDataUrl, userData.item?.id)
       } else {
       }
     } catch (err) {

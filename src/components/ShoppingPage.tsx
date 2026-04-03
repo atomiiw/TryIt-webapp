@@ -4,7 +4,7 @@ import type { UserData } from '../App'
 import PhotoUpload from './PhotoUpload'
 import MeasurementPickers from './MeasurementPickers'
 import BarcodeScanner from './BarcodeScanner'
-import ResultsSection from './ResultsSection'
+import ResultsSection, { clearGenerationTracking } from './ResultsSection'
 import ResultsSectionDemo from './ResultsSectionDemo'
 import { analyzePersonPhoto } from '../utils/personAnalyzer'
 import './ShoppingPage.css'
@@ -218,6 +218,9 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
       console.log(`Size guide for "${item.name}" (brand: ${brand}): ${guide ? `found — ${guide.clothing_type}, ${guide.gender}` : 'NOT FOUND'}`)
     }
 
+    // Clear generation tracking so new generations can start
+    if (userData.item?.imageUrl) clearGenerationTracking(userData.item.imageUrl)
+
     // Update this item's state - clear images and analysis if data changed
     setTryOnState(prev => ({
       ...prev,
@@ -241,7 +244,7 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
 
   // Handlers accept itemId so they always save to the correct item
   const handleImageGenerated = useCallback((fit: FitType, imageDataUrl: string, itemId?: string) => {
-    const targetId = itemId || displayItemId
+    const targetId = itemId
     if (!targetId) return
     console.log(`[ShoppingPage] Saving ${fit} image to item: ${targetId.slice(-8)}`)
     setTryOnState(prev => ({
