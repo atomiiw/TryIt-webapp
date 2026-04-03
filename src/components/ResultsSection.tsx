@@ -288,20 +288,23 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     // Capture current item so we can check if user switched items mid-generation
     const itemUrl = userData.item.imageUrl
 
-    const handleSuccess = (result: { imageDataUrl: string | null; analysisText?: string }) => {
+    // Returns true if image was applied, false if discarded
+    const handleSuccess = (result: { imageDataUrl: string | null; analysisText?: string }): boolean => {
       if (!isMountedRef.current) {
         console.warn(`[TryOn] ${fit} success DISCARDED — component unmounted`)
-        return
+        return false
       }
       if (currentItemUrlRef.current !== itemUrl) {
-        console.warn(`[TryOn] ${fit} success DISCARDED — item changed (was ${itemUrl?.slice(-10)}, now ${currentItemUrlRef.current?.slice(-10)})`)
-        return
+        console.warn(`[TryOn] ${fit} success DISCARDED — item changed`)
+        return false
       }
       console.log(`[TryOn] ${fit} image applied to UI`)
       track('tryon_success', { fit })
       setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))
+      setGeneratingFits(prev => { const next = new Set(prev); next.delete(fit); return next })
       flipToFit(selectedFit, fit)
       onImageGenerated?.(fit, result.imageDataUrl!)
+      return true
     }
 
     setGeneratingFits(prev => new Set(prev).add(fit))
@@ -322,16 +325,17 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         userData.personAnalysis?.gender || 'unknown'
       )
 
-      if (result.success && result.imageDataUrl) {
-        handleSuccess(result)
-        setGeneratingFits(prev => { const next = new Set(prev); next.delete(fit); return next })
-        return
+      if (result.success && result.imageDataUrl && handleSuccess(result)) {
+        return // applied successfully, done
       }
     } catch {
     }
 
     // First 5 attempts failed, give it 5 more
-    if (currentItemUrlRef.current !== itemUrl) return // user switched items, abort
+    if (currentItemUrlRef.current !== itemUrl) {
+      setGeneratingFits(prev => { const next = new Set(prev); next.delete(fit); return next })
+      return
+    }
     try {
       const result = await generateTryOnImage(
         userData.image!,
