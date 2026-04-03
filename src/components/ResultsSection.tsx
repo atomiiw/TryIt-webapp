@@ -287,18 +287,19 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     // Capture current item so we can check if user switched items mid-generation
     const itemUrl = userData.item.imageUrl
 
-    // Returns true if image was applied, false if discarded
     const handleSuccess = (result: { imageDataUrl: string | null; analysisText?: string }): boolean => {
-      if (currentItemUrlRef.current !== itemUrl) {
-        console.warn(`[TryOn] ${fit} success DISCARDED — item changed`)
-        return false
-      }
-      console.log(`[TryOn] ${fit} image applied to UI`)
-      track('tryon_success', { fit })
-      setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))
-      setGeneratingFits(prev => { const next = new Set(prev); next.delete(fit); return next })
-      flipToFit(selectedFit, fit)
+      // Always save to parent state (bound to correct item via onImageGenerated)
       onImageGenerated?.(fit, result.imageDataUrl!)
+      // Only update local UI if still on the same item
+      if (currentItemUrlRef.current === itemUrl) {
+        console.log(`[TryOn] ${fit} image applied to UI`)
+        setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))
+        setGeneratingFits(prev => { const next = new Set(prev); next.delete(fit); return next })
+        flipToFit(selectedFit, fit)
+      } else {
+        console.log(`[TryOn] ${fit} image cached (item switched)`)
+      }
+      track('tryon_success', { fit })
       return true
     }
 
@@ -326,10 +327,6 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     }
 
     // First 5 attempts failed, give it 5 more
-    if (currentItemUrlRef.current !== itemUrl) {
-      setGeneratingFits(prev => { const next = new Set(prev); next.delete(fit); return next })
-      return
-    }
     try {
       const result = await generateTryOnImage(
         userData.image!,
