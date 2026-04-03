@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { track } from '@vercel/analytics'
 import type { UserData } from '../App'
 import PhotoUpload from './PhotoUpload'
@@ -243,45 +243,41 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
   }
 
   // Handlers accept itemId so they always save to the correct item
-  const handleImageGenerated = useCallback((fit: FitType, imageDataUrl: string, itemId?: string) => {
-    const targetId = itemId
-    if (!targetId) return
-    console.log(`[ShoppingPage] Saving ${fit} image to item: ${targetId.slice(-8)}`)
+  const handleImageGenerated = (fit: FitType, imageDataUrl: string) => {
+    if (!currentItemId) return
     setTryOnState(prev => ({
       ...prev,
-      [targetId]: {
-        ...prev[targetId],
+      [currentItemId]: {
+        ...prev[currentItemId],
         generatedImages: {
-          ...prev[targetId]?.generatedImages,
+          ...prev[currentItemId]?.generatedImages,
           [fit]: imageDataUrl
         }
       }
     }))
-  }, [displayItemId])
+  }
 
-  const handleAnalysisComplete = useCallback((analysis: CachedAnalysis) => {
-    const targetId = displayItemId
-    if (!targetId) return
+  const handleAnalysisComplete = (analysis: CachedAnalysis) => {
+    if (!currentItemId) return
     setTryOnState(prev => ({
       ...prev,
-      [targetId]: {
-        ...prev[targetId],
+      [currentItemId]: {
+        ...prev[currentItemId],
         cachedAnalysis: analysis
       }
     }))
-  }, [displayItemId])
+  }
 
-  const handleScrollComplete = useCallback(() => {
-    const targetId = displayItemId
-    if (!targetId) return
+  const handleScrollComplete = () => {
+    if (!currentItemId) return
     setTryOnState(prev => ({
       ...prev,
-      [targetId]: {
-        ...prev[targetId],
+      [currentItemId]: {
+        ...prev[currentItemId],
         shouldAutoScroll: false
       }
     }))
-  }, [displayItemId])
+  }
 
   return (
     <div className="tryit-container">
