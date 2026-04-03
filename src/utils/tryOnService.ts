@@ -18,6 +18,17 @@ const BACKEND_URL = 'https://closai-backend.vercel.app'
 // Fit type for try-on generation
 export type FitType = 'tight' | 'regular' | 'comfortable'
 
+// Per-key queue to prevent concurrent requests on the same API key
+// Key 0 = tight, Key 1 = regular, Key 2 = comfortable
+const keyQueues: Record<number, Promise<unknown>> = { 0: Promise.resolve(), 1: Promise.resolve(), 2: Promise.resolve() }
+
+function enqueueForKey<T>(keyIndex: number, fn: () => Promise<T>): Promise<T> {
+  const prev = keyQueues[keyIndex] || Promise.resolve()
+  const next = prev.then(fn, fn) // run fn even if previous failed
+  keyQueues[keyIndex] = next
+  return next
+}
+
 // Clothing item info
 export interface ClothingInfo {
   name: string
@@ -358,15 +369,15 @@ export async function generateTryOnImage(
   untuckedImage?: string,
   gender: string = 'unknown'
 ): Promise<TryOnResult> {
+  // Prepare images and prompt outside the queue (can run in parallel)
   try {
     const avatar = untuckedImage || userImage
     const { base64: avatarBase64, aspectRatio } = await processUserImage(avatar)
     const clothingBase64 = await imageUrlToBase64(clothingImageUrl)
     const prompt = generateTryOnPrompt(clothingInfo, fitType, gender)
 
-
-    // Call the Duke try-on endpoint with timeout and retry
-    // Retries on network errors, timeouts, AND content blocks (which are random)
+    // Queue the actual API call per key to avoid rate limits
+    return await enqueueForKey(keyIndex, async () => {
     const MAX_RETRIES = 5
     const TIMEOUT_MS = 35_000
 
@@ -436,6 +447,7 @@ export async function generateTryOnImage(
     }
 
     throw new Error('All retries failed')
+    }) // end enqueueForKey
 
   } catch (err) {
     return {
