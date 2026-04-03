@@ -113,9 +113,9 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
   // Per-item try-on state
   const [tryOnState, setTryOnState] = useState<TryOnStateByItem>(initialShoppingState)
 
-  // Cached untucked image — generated when shirt_tucked detected
-  const [untuckedImage, setUntuckedImage] = useState<string | null>(null)
+  // Cached untucked image (not passed to ResultsSection yet — for preview only)
   const untuckedImageRef = useRef<string | null>(null)
+
 
 
 
@@ -138,35 +138,33 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
     const imageToAnalyze = userData.image
     analyzedImageRef.current = imageToAnalyze
 
-    // Clear old analysis and untucked image when image changes
+    // Clear old analysis when image changes
     if (userData.personAnalysis) {
       onUpdate({ personAnalysis: null })
     }
-    setUntuckedImage(null)
     untuckedImageRef.current = null
 
     // Compress image first to avoid 413 errors
     compressImageForAnalysis(imageToAnalyze)
       .then(compressedImage => analyzePersonPhoto(compressedImage, 'unknown'))
       .then(analysis => {
-        // Only update if this is still the current image
         if (analyzedImageRef.current !== imageToAnalyze) return
         onUpdate({ personAnalysis: analysis })
 
-        // If shirt is tucked, generate untucked version
+        // If shirt is tucked, generate untucked version (preview only — not used for try-on yet)
         if (analysis.shirt_tucked) {
-          console.log('[Untuck] Shirt is tucked — generating untucked image...')
-          untuckedImageRef.current = imageToAnalyze
+          console.log('[Untuck] Shirt is tucked — generating untucked image for preview...')
           generateUntuckedImage(imageToAnalyze).then(result => {
-            if (untuckedImageRef.current === imageToAnalyze && result.success && result.imageDataUrl) {
-              setUntuckedImage(result.imageDataUrl)
-              console.log('[Untuck] Untucked image ready')
+            if (analyzedImageRef.current === imageToAnalyze && result.success && result.imageDataUrl) {
+              untuckedImageRef.current = result.imageDataUrl
+              console.log('[Untuck] Untucked image ready. Download it:')
+              console.log(result.imageDataUrl)
             } else {
-              console.warn('[Untuck] Failed, will use original photo')
+              console.warn('[Untuck] Failed')
             }
           })
         } else {
-          console.log('[Untuck] Shirt is not tucked — using original photo')
+          console.log('[Untuck] Shirt is not tucked')
         }
       })
       .catch(_error => {
@@ -395,7 +393,6 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
             initialImages={currentItemState.generatedImages}
             cachedAnalysis={currentItemState.cachedAnalysis}
             shouldAutoScroll={currentItemState.shouldAutoScroll}
-            untuckedImage={untuckedImage}
             onImageGenerated={handleImageGenerated}
             onAnalysisComplete={handleAnalysisComplete}
             onScrollComplete={handleScrollComplete}
