@@ -202,8 +202,6 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     comfortable: initialImages?.comfortable || null
   })
   const [generatingFits, setGeneratingFits] = useState<Set<FitType>>(new Set())
-  const isMountedRef = useRef(true)
-  useEffect(() => { return () => { isMountedRef.current = false } }, [])
   const currentItemUrlRef = useRef(userData.item?.imageUrl)
   currentItemUrlRef.current = userData.item?.imageUrl // always up to date
   const [showShareModal, setShowShareModal] = useState(false)
@@ -291,10 +289,6 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
 
     // Returns true if image was applied, false if discarded
     const handleSuccess = (result: { imageDataUrl: string | null; analysisText?: string }): boolean => {
-      if (!isMountedRef.current) {
-        console.warn(`[TryOn] ${fit} success DISCARDED — component unmounted`)
-        return false
-      }
       if (currentItemUrlRef.current !== itemUrl) {
         console.warn(`[TryOn] ${fit} success DISCARDED — item changed`)
         return false
