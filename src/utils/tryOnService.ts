@@ -260,33 +260,100 @@ async function addWatermark(imageSrc: string): Promise<string> {
 function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType, gender: string = 'unknown'): string {
   const itemType = clothingInfo.type || 'garment'
   const isTop = !isBottomType(itemType)
+  const isMale = gender === 'male'
 
   if (isTop) {
-    const first = `First: completely erase the person's original top — remove its color, its shape, its neckline, its sleeves, its graphics, everything. Imagine the person's bare upper body. Now dress them from scratch in the ${itemType} from Image 2. The new shirt's color, fit, neckline, sleeve style, graphics, and fabric all come exclusively from Image 2. Nothing from the original shirt carries over. The shirt hangs freely over the pants with the full hem visible.`
-    const style = `Style: Photorealistic, natural lighting matching Image 1, background identical to Image 1.`
-    const sleeves = `Sleeves: The sleeves are exactly as shown in Image 2. Completely ignore the sleeve style, sleeve length, and sleeve type from Image 1. If Image 2 shows short sleeves, the person wears short sleeves. If Image 2 shows long sleeves, the person wears long sleeves.`
-    const mandatory = `Mandatory: The sleeve style, sleeve cut, and sleeve length come only from Image 2. Hem hanging freely over and outside the pants waistband. All body parts in correct anatomical proportion. The garment length — measured from shoulder to hem — is exactly as shown in Image 2. 100% garment length accuracy from Image 2.`
+    const base = `The person's original top does not exist. Start from bare torso, dress in the ${itemType} from Image 2.
+
+Virtual try-on. The person in Image 1 wears the ${itemType} from Image 2.
+
+Style: Photorealistic, lighting and background identical to Image 1.
+
+Subject: Same person from Image 1 — identical face, body shape, body size, chest size, belly size, skin tone, hair, pose. Zero body modification. All original upper body clothing fully replaced by ${itemType} from Image 2.
+
+Color: Pixel-accurate to Image 2 — exact hue, saturation, brightness.
+
+Sleeves: Exactly as Image 2. Ignore sleeves from Image 1 entirely.`
+
+    const sharedProhibitions = `original clothing visible, layering, tucked-in shirt, sleeves from Image 1, original shirt blending through, color shift from Image 2, added chest/breast volume, added belly volume, altered body shape, disproportionate body parts`
+
     switch (fitType) {
-      case 'tight':
-        if (gender === 'male') {
-          return `${first} Virtual try-on. The person in Image 1 is wearing the ${itemType} from Image 2. ${style} Subject: The exact same person from Image 1 — identical face, body shape, body size, chest size, belly size, skin tone, hair, pose. The person's chest, belly, and overall body shape are exactly as in Image 1 with zero modification. Completely remove all original upper body clothing and replace with the ${itemType} from Image 2. ${sleeves} Composition: Straight-on mid-body framing. The virtual camera is pulled back far enough to show the person's full head, full torso, and the complete hem of the garment in frame. All body parts scale equally and uniformly. Fit: This man bought a shirt TWO sizes too small. The fabric is painfully tight — deep horizontal tension creases run across the entire chest. The fabric stretches so tight across the shoulders that the seams look like they might rip. The sleeves are like tourniquets around the upper arms, compressing the biceps visibly. The shirt sides are vacuum-sealed to the ribcage and waist with absolutely zero air gap — you can see every rib. The fabric between the buttons (if any) is pulling apart showing gaps. The overall look is someone who seriously outgrew this shirt. The garment length remains exactly as shown in Image 2. Prohibitions: Added chest or breast volume, added belly volume, altered body shape, ANY loose fabric anywhere, any original upper body clothing visible, jacket, hoodie, sweater, layering, disproportionate body parts, cropped or shortened shirt, shorter hemline than Image 2, tucked-in shirt, any part of shirt tucked into pants, sleeves from Image 1, any slack or wrinkle-free smooth fabric — the fabric MUST show strain. ${mandatory} The tightness affects width only.`
-        }
-        return `${first} Virtual try-on. The person in Image 1 is wearing the ${itemType} from Image 2. ${style} Subject: The exact same person from Image 1 — identical face, body shape, body size, chest size, belly size, skin tone, hair, pose. The person's chest, belly, and overall body shape are exactly as in Image 1 with zero modification. Completely remove all original upper body clothing and replace with the ${itemType} from Image 2. ${sleeves} Composition: Straight-on mid-body framing. The virtual camera is pulled back far enough to show the person's full head, full torso, and the complete hem of the garment in frame. All body parts scale equally and uniformly. Fit: Only the width changes — the fabric is stretched taut against the skin with 0mm air gap. The shape of the shoulders and hip bones is visible pressing through the material. Zero wrinkles, zero folds, zero bunching. Chest area lays flat and smooth. The garment is tight in width only. The garment length remains exactly as shown in Image 2. Prohibitions: Added chest or breast volume, added belly volume, altered body shape, loose fabric, any original upper body clothing visible, jacket, hoodie, sweater, layering, disproportionate body parts, cropped or shortened shirt, shorter hemline than Image 2, tucked-in shirt, any part of shirt tucked into pants, sleeves from Image 1, blending original shirt with new garment, original shirt color showing through, original shirt neckline shape, original shirt graphics visible, partial replacement of original shirt. ${mandatory} The tightness affects width only.`
+      case 'tight': {
+        const fitDesc = isMale
+          ? `Fit: One size too small. Visible horizontal tension creases across chest. Sleeves compress biceps like a compression sleeve. Shirt clings to ribcage, 0mm air gap everywhere. Shoulder seams pulled inward past natural shoulder. Looks like he outgrew this shirt.`
+          : `Fit: 0mm air gap everywhere. Fabric taut against skin. Shoulders and hip bones press through material. Zero wrinkles, zero folds. Chest flat and smooth. Tight in width only.`
+
+        return `${base}
+
+Composition: Camera pulled back enough to show full head, torso, and garment hem. All body parts scale uniformly.
+
+${fitDesc}
+
+Prohibitions: Loose or slack fabric, ${sharedProhibitions}, cropped shirt, shorter hemline than Image 2.
+
+Mandatory: Sleeves from Image 2 only. Hem outside pants. Garment length shoulder-to-hem exactly as Image 2. Tightness in width only. 100% length and color accuracy from Image 2.`
+      }
       case 'comfortable':
-        return `${first} Virtual try-on. The person in Image 1 is wearing the ${itemType} from Image 2. ${style} Subject: The exact same person from Image 1 — identical face, body shape, body size, skin tone, hair, pose. The person's chest, belly, and overall body shape are exactly as in Image 1 with zero modification. Completely remove all original upper body clothing and replace with the ${itemType} from Image 2. ${sleeves} Composition: Keep the exact same framing and camera distance as Image 1. The person's head and body remain the exact same size in the frame as in Image 1. If the garment hem extends beyond the bottom of the frame, let it be cropped off. Cutting off the bottom of the shirt is acceptable. Shrinking the person is not acceptable. Fit: Only the width is larger — the shirt is one full size wider than the person's body. 50mm of visible air gap between fabric and torso on each side. Shoulder seams drop 30mm past the natural shoulder bone. Sleeves visibly wider than the arms. 5-7 prominent vertical folds down the front. Body shape hidden by excess width. The shirt is wider, not longer. Prohibitions: Added chest or breast volume, added belly volume, altered body shape, fitted fabric, fabric touching torso sides, any original upper body clothing visible, jacket, hoodie, sweater, layering, shrinking torso independently of head, shrinking the person, disproportionate body parts, dress-like length, shorter hemline than Image 2, longer hemline than Image 2, tucked-in shirt, any part of shirt tucked into pants, sleeves from Image 1, blending original shirt with new garment, original shirt color showing through, original shirt neckline shape, original shirt graphics visible, partial replacement of original shirt. Mandatory: The sleeve style, sleeve cut, and sleeve length come only from Image 2. Hem hanging freely over and outside the pants waistband. All body parts in correct anatomical proportion. The shirt is wider, not longer. Body size in the frame is identical to Image 1. Preserving body proportion is more important than showing the full garment length.`
-      default:
-        return `${first} Virtual try-on. The person in Image 1 is wearing ONLY the ${itemType} from Image 2 on their upper body. Nothing else. ${style} Subject: The exact same person from Image 1 — identical face, body shape, body size, skin tone, hair, pose. The person's chest, belly, and overall body shape are exactly as in Image 1 with zero modification. Every single piece of original upper body clothing is destroyed and gone — the original shirt, jacket, hoodie, sweater, undershirt, everything. The person's upper body has ONLY the ${itemType} from Image 2 directly on skin. No layering. No original clothing peeking through at the collar, sleeves, or hem. ${sleeves} Composition: Straight-on mid-body framing. The virtual camera is pulled back far enough to show the person's full head, full torso, and the complete hem of the garment in frame. All body parts scale equally and uniformly. Fit: Standard retail fit. The fabric skims the body with approximately 10mm of space between skin and fabric. Shoulder seams sit exactly on the shoulder bone. A few natural creases at the waist. Body shape suggested but not defined through the fabric. Prohibitions: Added chest or breast volume, added belly volume, altered body shape, skin-tight fabric, oversized look, ANY trace of original clothing — no collar visible underneath, no sleeve cuff visible underneath, no hem visible underneath, no layering of any kind, jacket, hoodie, sweater, undershirt visible, disproportionate body parts, shorter hemline than Image 2, longer hemline than Image 2, tucked-in shirt, any part of shirt tucked into pants, sleeves from Image 1, blending original shirt with new garment, original shirt color showing through, original shirt neckline shape, original shirt graphics visible, partial replacement of original shirt. ${mandatory}`
+        return `${base}
+
+Composition: Same framing and camera distance as Image 1. Person stays same size in frame. If hem goes below frame, crop the shirt — acceptable. Shrinking the person — not acceptable.
+
+Fit: One full size wider. 60mm air gap between fabric and torso each side. Shoulder seams 35mm past shoulder bone. Sleeves loose around arms. 5-7 vertical folds down front. Body shape hidden. Wider, not longer.
+
+Prohibitions: Fitted fabric, fabric touching torso, shrinking person, shrinking torso independently, dress-like length, ${sharedProhibitions}, shorter hemline than Image 2, longer hemline than Image 2.
+
+Mandatory: Sleeves from Image 2 only. Hem outside pants. Wider not longer. Body size in frame identical to Image 1. Body proportion more important than showing full garment. 100% length and color accuracy from Image 2.`
+      default: // regular
+        return `${base}
+
+Composition: Camera pulled back enough to show full head, torso, and garment hem. All body parts scale uniformly.
+
+Fit: Standard retail. 15mm air gap between skin and fabric. Shoulder seams on the shoulder bone. Few creases at waist. Body shape suggested, not defined. Not clinging, not baggy.
+
+Prohibitions: Skin-tight fabric, oversized look, ${sharedProhibitions}, shorter hemline than Image 2, longer hemline than Image 2.
+
+Mandatory: Sleeves from Image 2 only. Hem outside pants. Garment length shoulder-to-hem exactly as Image 2. 100% length and color accuracy from Image 2.`
     }
   } else {
-    const base = `Virtual try-on. The person in Image 1 is wearing the ${itemType} from Image 2. The person has the exact same face, body shape, body size, skin tone, hair, pose, and top garment as in Image 1. The background and lighting are identical to Image 1. The ${itemType} matches the exact color, pattern, and leg length from Image 2.`
-    const photo = 'Captured with natural soft-box lighting, full-body framing, clean e-commerce product photography style.'
+    const base = `The person's original bottom does not exist. Start from bare legs, dress in the ${itemType} from Image 2.
+
+Virtual try-on. The person in Image 1 wears the ${itemType} from Image 2.
+
+Style: Photorealistic, lighting and background identical to Image 1.
+
+Subject: Same person from Image 1 — identical face, body shape, body size, skin tone, hair, pose, top garment. Zero body modification. All original lower body clothing fully replaced by ${itemType} from Image 2.
+
+Color: Pixel-accurate to Image 2 — exact hue, saturation, brightness.
+
+Composition: Full-body framing, lighting matching Image 1.`
+
+    const sharedProhibitions = `original lower clothing visible, original bottom blending through, color shift from Image 2, altered body shape, added belly volume, disproportionate body parts`
+
     switch (fitType) {
       case 'tight':
-        return `${base} The fabric wraps closely around the hips, thighs, and calves with zero loose material, following the natural contour of the legs. ${photo}`
+        return `${base}
+
+Fit: 0mm air gap. Fabric wraps hips, thighs, calves with zero loose material. Leg shape clearly defined through fabric.
+
+Prohibitions: Loose fabric, ${sharedProhibitions}, shorter leg than Image 2.
+
+Mandatory: Exact color, pattern, leg length from Image 2. 100% length and color accuracy from Image 2.`
       case 'comfortable':
-        return `${base} The fabric drapes with generous room around the hips and legs, creating visible soft folds at the knees and thighs. The pant silhouette is noticeably wider than the legs. ${photo}`
-      default:
-        return `${base} The fabric lightly follows the leg shape with a slight air gap between skin and fabric. A few natural soft creases appear at the knees. ${photo}`
+        return `${base}
+
+Fit: 50mm air gap between fabric and thighs each side. Generous room around hips and legs. Soft folds at knees and thighs. Pant silhouette noticeably wider than legs. Leg shape hidden. Wider, not longer.
+
+Prohibitions: Fitted fabric, fabric touching thighs, ${sharedProhibitions}, shorter leg than Image 2, longer leg than Image 2.
+
+Mandatory: Exact color, pattern, leg length from Image 2. Wider not longer. 100% length and color accuracy from Image 2.`
+      default: // regular
+        return `${base}
+
+Fit: Standard retail. 15mm air gap. Fabric follows leg shape lightly. Few creases at knees. Not clinging, not baggy.
+
+Prohibitions: Skin-tight fabric, oversized look, ${sharedProhibitions}, shorter leg than Image 2, longer leg than Image 2.
+
+Mandatory: Exact color, pattern, leg length from Image 2. 100% length and color accuracy from Image 2.`
     }
   }
 }
@@ -306,7 +373,6 @@ export async function generateTryOnImage(
   clothingInfo: ClothingInfo,
   fitType: FitType = 'regular',
   keyIndex: number = 0,
-  _untuckedImage?: string,
   gender: string = 'unknown'
 ): Promise<TryOnResult> {
   try {
