@@ -470,69 +470,75 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     return ['tight', 'regular', 'comfortable'] as FitType[]
   }, [])
 
-  const GAP = 16
-  const isScrollingProgrammatically = useRef(false)
+  // scrollContainerRef kept for potential future use
 
   // Tracks whether we're in the middle of a programmatic scroll
   // When true, handleScroll won't update selectedFit (avoids flicker)
   // When true, sync useEffect won't fire instant scroll (avoids fighting)
 
-  // Sync carousel scroll position to selectedFit (initial load only)
-  const hasInitialSynced = useRef(false)
-  useEffect(() => {
-    if (hasInitialSynced.current) return
-    if (!scrollContainerRef.current || availableFits.length <= 1) return
-    const index = availableFits.indexOf(selectedFit)
-    if (index < 0) return
+  // Transform-based carousel: no scrollTo, no scroll-snap, just translateX
+  const selectedIndex = availableFits.indexOf(selectedFit)
+  const [dragX, setDragX] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const touchStartX = useRef(0)
+  const touchStartY = useRef(0)
+  const isHorizontal = useRef<boolean | null>(null)
 
-    hasInitialSynced.current = true
-    const cardWidth = scrollContainerRef.current.offsetWidth
-    scrollContainerRef.current.scrollTo({
-      left: index * (cardWidth + GAP),
-      behavior: 'instant'
-    })
-  }, [selectedFit, availableFits])
+  const carouselTransform = `translateX(calc(-${selectedIndex * 100}% + ${dragX}px))`
 
-  // Handle scroll to update selected fit (fires on manual swipe AND after smooth scroll lands)
-  const handleScroll = () => {
-    if (!scrollContainerRef.current || availableFits.length <= 1) return
-    if (isScrollingProgrammatically.current) return
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX
+    touchStartY.current = e.touches[0].clientY
+    isHorizontal.current = null
+    setIsDragging(true)
+  }
 
-    const container = scrollContainerRef.current
-    const cardWidth = container.offsetWidth
-    const scrollPosition = container.scrollLeft
-    const index = Math.round(scrollPosition / (cardWidth + GAP))
-    const newFit = availableFits[Math.max(0, Math.min(index, availableFits.length - 1))]
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isDragging) return
+    const dx = e.touches[0].clientX - touchStartX.current
+    const dy = e.touches[0].clientY - touchStartY.current
 
-    if (newFit && newFit !== selectedFit) {
-      setSelectedFit(newFit)
+    // Determine direction on first significant movement
+    if (isHorizontal.current === null && (Math.abs(dx) > 5 || Math.abs(dy) > 5)) {
+      isHorizontal.current = Math.abs(dx) > Math.abs(dy)
+    }
+
+    if (isHorizontal.current) {
+      e.preventDefault()
+      // Rubber band at edges
+      if ((selectedIndex === 0 && dx > 0) || (selectedIndex === availableFits.length - 1 && dx < 0)) {
+        setDragX(dx * 0.3)
+      } else {
+        setDragX(dx)
+      }
     }
   }
 
-  // Scroll to a fit card.
+  const handleTouchEnd = () => {
+    if (!isDragging) return
+    setIsDragging(false)
+
+    const SWIPE_THRESHOLD = 50
+    if (dragX > SWIPE_THRESHOLD && selectedIndex > 0) {
+      setSelectedFit(availableFits[selectedIndex - 1])
+    } else if (dragX < -SWIPE_THRESHOLD && selectedIndex < availableFits.length - 1) {
+      setSelectedFit(availableFits[selectedIndex + 1])
+    }
+
+    setDragX(0)
+    isHorizontal.current = null
+  }
+
+  // Navigate to a fit card (used by buttons, dots, and flipToFit)
   const scrollToFit = (fit: FitType) => {
-    if (!scrollContainerRef.current || availableFits.length <= 1) return
-    const index = availableFits.indexOf(fit)
-    if (index < 0) return
-
     setSelectedFit(fit)
-
-    const container = scrollContainerRef.current
-    const cardWidth = container.offsetWidth
-    const targetLeft = index * (cardWidth + GAP)
-
-    isScrollingProgrammatically.current = true
-    container.scrollTo({ left: targetLeft, behavior: 'instant' })
-    requestAnimationFrame(() => {
-      isScrollingProgrammatically.current = false
-    })
   }
 
   const handleCardClick = (fit: FitType) => {
     if (fit !== selectedFit) {
       track('fit_toggle', { fit: fitLabels[fit] })
     }
-    scrollToFit(fit)
+    setSelectedFit(fit)
   }
 
   const fitKeyIndex: Record<FitType, number> = { tight: 0, regular: 1, comfortable: 2 }
@@ -676,8 +682,11 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
         <div className="image-carousel-wrapper">
           <div
             ref={scrollContainerRef}
-            className={`image-carousel ${availableFits.length <= 1 ? 'no-scroll' : ''}`}
-            onScroll={handleScroll}
+            className={`image-carousel${isDragging ? ' dragging' : ''}`}
+            style={{ transform: carouselTransform }}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
           >
             {availableFits.map((fit) => {
               const isGenerating = generatingFits.has(fit) || regeneratingFits.has(fit)

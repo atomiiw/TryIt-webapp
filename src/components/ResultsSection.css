@@ -40,22 +40,18 @@
 
 .image-carousel {
   display: flex;
-  gap: 16px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  transition: transform 0.3s ease-out;
   background: transparent;
+  touch-action: pan-y;
+  will-change: transform;
 }
 
-.image-carousel::-webkit-scrollbar {
-  display: none;
+.image-carousel.dragging {
+  transition: none;
 }
 
 .carousel-slide {
   flex: 0 0 100%;
-  scroll-snap-align: start;
   display: flex;
   justify-content: center;
 }
