@@ -185,19 +185,9 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
   // Can only try it on if we have data AND (haven't generated yet OR data changed)
   const canTryIt = hasRequiredData && hasDataChanged
 
-  // Hide results for current item if required data is removed (but keep cached images)
-  useEffect(() => {
-    if (!hasRequiredData && currentItemState.showResults && currentItemId) {
-      setTryOnState(prev => ({
-        ...prev,
-        [currentItemId]: {
-          ...prev[currentItemId],
-          showResults: false,
-          shouldAutoScroll: false
-        }
-      }))
-    }
-  }, [hasRequiredData, currentItemState.showResults, currentItemId])
+  // No cleanup — keep results visible even when photo changes.
+  // The "Try it on" button becomes active when data changes,
+  // letting the user regenerate while still seeing old images.
 
   const handleTryIt = () => {
     if (!canTryIt || !currentItemId) return
