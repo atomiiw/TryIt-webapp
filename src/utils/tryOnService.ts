@@ -244,14 +244,14 @@ async function addWatermark(imageSrc: string): Promise<string> {
 }
 
 /**
- * Generate a clean base image: user photo with upper body clothing replaced by plain grey t-shirt.
+ * Generate a clean base image: user photo with upper body clothing replaced by plain black t-shirt.
  * This is called once per photo and cached. All subsequent try-ons use this as the avatar.
  */
 export async function generateBaseImage(userImage: string): Promise<TryOnResult> {
   try {
     const { base64: avatarBase64, aspectRatio } = await processUserImage(userImage)
 
-    const prompt = `Replace all clothing on this person's upper body with a plain fitted light grey crew-neck t-shirt. The grey t-shirt is a standard retail fit with the hem hanging outside the pants. Preserve the exact face, skin tone, hair, body shape, body size, chest size, belly size, pose, and background with zero modification. Style: Photorealistic, matching the lighting and quality of the original image exactly. Prohibitions: Altered face, altered body shape, altered body size, added chest or breast volume, added belly volume, altered background, altered pose, any original upper body clothing visible.`
+    const prompt = `Replace all clothing on this person's upper body with a plain fitted black crew-neck t-shirt. The black t-shirt is a standard retail fit with the hem hanging outside the pants. Preserve the exact face, skin tone, hair, body shape, body size, chest size, belly size, pose, and background with zero modification. Style: Photorealistic, matching the lighting and quality of the original image exactly. Prohibitions: Altered face, altered body shape, altered body size, added chest or breast volume, added belly volume, altered background, altered pose, any original upper body clothing visible.`
 
     const MAX_RETRIES = 5
     const TIMEOUT_MS = 35_000
@@ -307,15 +307,15 @@ export async function generateBaseImage(userImage: string): Promise<TryOnResult>
 /**
  * Generate fit-specific prompt for try-on
  * When clothingDescription is provided, uses it instead of generic itemType
- * When useBaseImage is true, references "plain grey t-shirt" instead of "original clothing"
+ * When useBaseImage is true, references "plain black t-shirt" instead of "original clothing"
  */
 function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType, useBaseImage?: boolean): string {
   const itemType = clothingInfo.type || 'garment'
   const isTop = !isBottomType(itemType)
 
-  // What to replace — grey t-shirt (base image) or original clothing (fallback)
-  const replaceTarget = useBaseImage ? 'plain grey t-shirt' : 'original clothing on the upper body'
-  const prohibitOriginal = useBaseImage ? 'any trace of grey t-shirt visible' : 'original upper body clothing visible, jacket, hoodie, sweater'
+  // What to replace — black t-shirt (base image) or original clothing (fallback)
+  const replaceTarget = useBaseImage ? 'plain black t-shirt' : 'original clothing on the upper body'
+  const prohibitOriginal = useBaseImage ? 'any trace of black t-shirt visible' : 'original upper body clothing visible, jacket, hoodie, sweater'
 
   if (isTop) {
     const style = `Style: Photorealistic e-commerce product photography, natural soft-box lighting, clean background matching Image 1.`
@@ -379,7 +379,7 @@ export async function generateTryOnImage(
     // Generate fit-specific prompt
     const prompt = generateTryOnPrompt(clothingInfo, fitType, !!baseImage)
 
-    console.log(`[TryOn] ${fitType}: using ${baseImage ? 'BASE IMAGE (grey t-shirt)' : 'ORIGINAL PHOTO (no base image)'}`)
+    console.log(`[TryOn] ${fitType}: using ${baseImage ? 'BASE IMAGE (black t-shirt)' : 'ORIGINAL PHOTO (no base image)'}`)
 
 
     // Call the Duke try-on endpoint with timeout and retry
