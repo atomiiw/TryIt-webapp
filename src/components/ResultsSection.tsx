@@ -203,6 +203,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     comfortable: initialImages?.comfortable || null
   })
   const [generatingFits, setGeneratingFits] = useState<Set<FitType>>(new Set())
+  const currentItemUrlRef = useRef(userData.item?.imageUrl)
+  currentItemUrlRef.current = userData.item?.imageUrl // always up to date
   const [showShareModal, setShowShareModal] = useState(false)
   const [sharingFit, setSharingFit] = useState<FitType | null>(null)
   const [showInfoSheet, setShowInfoSheet] = useState(false)
@@ -285,8 +287,8 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     const itemUrl = userData.item.imageUrl
 
     const handleSuccess = (result: { imageDataUrl: string | null; analysisText?: string }) => {
-      // Only update UI if still on the same item
-      if (userData.item?.imageUrl !== itemUrl) return
+      // Only update UI if still on the same item (use ref for fresh value)
+      if (currentItemUrlRef.current !== itemUrl) return
       track('tryon_success', { fit })
       setGeneratedImages(prev => ({ ...prev, [fit]: result.imageDataUrl }))
       flipToFit(selectedFit, fit)
@@ -320,7 +322,7 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     }
 
     // First 5 attempts failed, give it 5 more
-    if (userData.item?.imageUrl !== itemUrl) return // user switched items, abort
+    if (currentItemUrlRef.current !== itemUrl) return // user switched items, abort
     try {
       const result = await generateTryOnImage(
         userData.image!,
