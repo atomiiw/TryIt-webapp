@@ -185,18 +185,15 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
   // Can only try it on if we have data AND (haven't generated yet OR data changed)
   const canTryIt = hasRequiredData && hasDataChanged
 
-  // Hide results for current item if required data is removed
+  // Hide results for current item if required data is removed (but keep cached images)
   useEffect(() => {
     if (!hasRequiredData && currentItemState.showResults && currentItemId) {
       setTryOnState(prev => ({
         ...prev,
         [currentItemId]: {
+          ...prev[currentItemId],
           showResults: false,
-          resultsKey: prev[currentItemId]?.resultsKey || 0,
-          generatedImages: {},
-          cachedAnalysis: null,
-          shouldAutoScroll: false,
-          generatedData: null
+          shouldAutoScroll: false
         }
       }))
     }
