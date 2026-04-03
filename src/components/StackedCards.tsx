@@ -354,8 +354,7 @@ const StackedCards: React.FC<StackedCardsProps> = ({
   }, [isDragging, dragOffset, currentIndex, items.length]);
 
   // Notify parent when currentIndex changes (from swipe or pagination)
-  // Also fires on mount to sync parent with the displayed card
-  const prevIndexRef = useRef<number | null>(null);
+  const prevIndexRef = useRef(currentIndex);
   useEffect(() => {
     if (currentIndex !== prevIndexRef.current) {
       prevIndexRef.current = currentIndex;
