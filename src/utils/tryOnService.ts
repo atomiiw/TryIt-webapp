@@ -251,7 +251,7 @@ function generateTryOnPrompt(clothingInfo: ClothingInfo, fitType: FitType): stri
   const isTop = !isBottomType(itemType)
 
   if (isTop) {
-    const style = `Style: Photorealistic e-commerce product photography, natural soft-box lighting, clean background matching Image 1.`
+    const style = `Style: Photorealistic, natural lighting matching Image 1, background identical to Image 1.`
     const mandatory = `Mandatory: The sleeve style, sleeve cut, and sleeve length come only from Image 2. Hem hanging freely over and outside the pants waistband. All body parts in correct anatomical proportion. The garment length — measured from shoulder to hem — is exactly as shown in Image 2. 100% garment length accuracy from Image 2.`
     switch (fitType) {
       case 'tight':
