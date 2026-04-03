@@ -324,28 +324,39 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
         </button>
       </div>
 
-      {/* Results Section - appears below when Try it on is clicked for current item */}
-      <div className={`results-transition-wrapper ${isTransitioning ? 'transitioning' : ''}`}>
-        {USE_DEMO_MODE ? (
-          <ResultsSectionDemo
+      {/* Results Sections — one per item, kept alive, only the active one is visible */}
+      {Object.entries(tryOnState).map(([itemId, itemState]) => {
+        if (!itemState.showResults) return null
+        const isActive = itemId === displayItemId
+        const item = userData.items?.find(i => i.id === itemId)
+        if (!item) return null
 
-            userData={userData}
-            isVisible={currentItemState.showResults}
-          />
-        ) : (
-          <ResultsSection
-
-            userData={userData}
-            isVisible={currentItemState.showResults}
-            initialImages={currentItemState.generatedImages}
-            cachedAnalysis={currentItemState.cachedAnalysis}
-            shouldAutoScroll={currentItemState.shouldAutoScroll}
-            onImageGenerated={handleImageGenerated}
-            onAnalysisComplete={handleAnalysisComplete}
-            onScrollComplete={handleScrollComplete}
-          />
-        )}
-      </div>
+        return (
+          <div
+            key={itemId}
+            className={`results-transition-wrapper ${isTransitioning && isActive ? 'transitioning' : ''}`}
+            style={{ display: isActive ? 'block' : 'none' }}
+          >
+            {USE_DEMO_MODE ? (
+              <ResultsSectionDemo
+                userData={{ ...userData, item }}
+                isVisible={isActive}
+              />
+            ) : (
+              <ResultsSection
+                userData={{ ...userData, item }}
+                isVisible={isActive}
+                initialImages={itemState.generatedImages}
+                cachedAnalysis={itemState.cachedAnalysis}
+                shouldAutoScroll={isActive && itemState.shouldAutoScroll}
+                onImageGenerated={handleImageGenerated}
+                onAnalysisComplete={handleAnalysisComplete}
+                onScrollComplete={handleScrollComplete}
+              />
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }
