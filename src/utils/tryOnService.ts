@@ -379,7 +379,7 @@ export async function generateTryOnImage(
     // Generate fit-specific prompt
     const prompt = generateTryOnPrompt(clothingInfo, fitType, !!baseImage)
 
-    // Log the actual prompt for debugging
+    console.log(`[TryOn] ${fitType}: using ${baseImage ? 'BASE IMAGE (grey t-shirt)' : 'ORIGINAL PHOTO (no base image)'}`)
 
 
     // Call the Duke try-on endpoint with timeout and retry
