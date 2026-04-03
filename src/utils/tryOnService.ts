@@ -251,7 +251,7 @@ export async function generateBaseImage(userImage: string): Promise<TryOnResult>
   try {
     const { base64: avatarBase64, aspectRatio } = await processUserImage(userImage)
 
-    const prompt = `Replace all clothing on this person's upper body with a plain fitted black crew-neck t-shirt. The black t-shirt is a standard retail fit with the hem hanging outside the pants. Preserve the exact face, skin tone, hair, body shape, body size, chest size, belly size, pose, and background with zero modification. Style: Photorealistic, matching the lighting and quality of the original image exactly. Prohibitions: Altered face, altered body shape, altered body size, added chest or breast volume, added belly volume, altered background, altered pose, any original upper body clothing visible.`
+    const prompt = `Replace all clothing on this person's upper body with a plain fitted black crew-neck t-shirt. The black t-shirt is a standard retail fit. The shirt length extends well past the waistband — the hem sits at mid-hip level, which is standard t-shirt length. If the hem goes below the frame, that is fine — do NOT shorten the shirt to fit it in the frame. Do NOT zoom out or change the framing. Keep the exact same crop and framing as the original image. Preserve the exact face, skin tone, hair, body shape, body size, chest size, belly size, pose, and background with zero modification. Style: Photorealistic, matching the lighting and quality of the original image exactly. Prohibitions: Altered face, altered body shape, altered body size, added chest or breast volume, added belly volume, altered background, altered pose, any original upper body clothing visible, cropped or shortened shirt, zooming out.`
 
     const MAX_RETRIES = 5
     const TIMEOUT_MS = 35_000
