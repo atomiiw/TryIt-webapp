@@ -221,15 +221,15 @@ function ShoppingPage({ userData, onUpdate }: ShoppingPageProps) {
     // Clear generation tracking so new generations can start
     if (userData.item?.imageUrl) clearGenerationTracking(userData.item.imageUrl)
 
-    // Update this item's state - clear images and analysis if data changed
+    // Keep old images visible while new ones generate
     setTryOnState(prev => ({
       ...prev,
       [currentItemId]: {
         showResults: true,
         resultsKey: (prev[currentItemId]?.resultsKey || 0) + 1,
-        generatedImages: {}, // Clear images when re-trying with new data
-        cachedAnalysis: null, // Clear analysis too
-        shouldAutoScroll: true, // Scroll to results when button is clicked
+        generatedImages: prev[currentItemId]?.generatedImages || {},
+        cachedAnalysis: null,
+        shouldAutoScroll: true,
         generatedData: {
           image: userData.image,
           weight: userData.weight,

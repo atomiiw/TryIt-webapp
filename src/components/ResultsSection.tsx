@@ -454,6 +454,15 @@ function ResultsSection({ userData, isVisible, initialImages, cachedAnalysis, sh
     })
   }, [userData.image, userData.item?.imageUrl, generatedImages, sizeRec, measurements])
 
+  // Reset generation tracking when user photo changes (allows regeneration with new photo)
+  const lastImageRef = useRef(userData.image)
+  useEffect(() => {
+    if (userData.image && userData.image !== lastImageRef.current) {
+      lastImageRef.current = userData.image
+      startedGeneratingRef.current.clear()
+    }
+  }, [userData.image])
+
   // All three fit types are always available for image generation
   const availableFits = useMemo<FitType[]>(() => {
     return ['tight', 'regular', 'comfortable'] as FitType[]
