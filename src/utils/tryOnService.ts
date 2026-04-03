@@ -366,7 +366,7 @@ export async function generateTryOnImage(
 
     // Queue the actual API call per key to avoid rate limits
     return await enqueueForKey(keyIndex, async () => {
-    const MAX_RETRIES = 5
+    const MAX_RETRIES = 10
     const TIMEOUT_MS = 35_000
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
