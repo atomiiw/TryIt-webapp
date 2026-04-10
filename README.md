@@ -2,7 +2,7 @@
 
 Virtual try-on webapp. Scan a clothing barcode in a store, upload a photo of yourself, and see AI-generated images of you wearing the item in three fits (fitted, regular, comfortable) with a size recommendation.
 
-Built Dec 2025 to Apr 2026. Solo project.
+Built Dec 2025 to Apr 2026. Solo build.
 
 ## How it works
 
