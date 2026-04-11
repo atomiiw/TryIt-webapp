@@ -1,6 +1,6 @@
 # TryIt
 
-Virtual try-on webapp. Scan a clothing barcode in a store, upload a photo of yourself, and see AI-generated images of you wearing the item in three fits (fitted, regular, comfortable) with a size recommendation.
+Virtual try-on webapp for gift-shopping. Scan a clothing barcode in a store, upload a photo of the clothes' recipient, and see AI-generated images of them wearing the item in three fits (fitted, regular, comfortable) with a size recommendation.
 
 Built Dec 2025 to Apr 2026. Solo build.
 
